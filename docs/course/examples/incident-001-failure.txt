@@ -1,0 +1,26 @@
+Execução paralela | mock | latência artificial por especialista: 0 ms
+  supervisor: início
+  supervisor: fim
+  logistics: início
+  production: início
+  supply: início
+  production: fim
+  supply: fim
+  logistics: erro
+  consolidation: início
+  consolidation: fim
+  blocked: início
+  blocked: fim
+
+=== INCIDENT-001 | mock | resumo ===
+Supervisor: Investigar material, ordens/clientes e rotas; ramos independentes
+Plano: supply, production, logistics
+Supply: OK
+  SP=300; Campinas=500; transferível sem romper piso=300; Beta=145.00 BRL/unidade
+Production: OK
+  3 ordens relacionadas; demanda=750; impacto ainda não avaliado
+Logistics: ERRO — Falha simulada pelo professor
+Consolidação: não concluída
+BLOQUEADO: logistics: Falha simulada pelo professor
+Estado final: blocked. Nenhuma ação operacional executada.
+Tempo observado do workflow: 0.005s (não é benchmark).

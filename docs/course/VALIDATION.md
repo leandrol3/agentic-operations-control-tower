@@ -1,4 +1,34 @@
-# Validação de lesson-01-start
+# Validação do candidato lesson-01-complete
+
+## Resultado atual
+
+- Suíte completa: 91 testes passaram em macOS ARM64, Python 3.12.3 e LangGraph 1.2.11.
+- Smoke: 12 checks do fixture oficial passaram.
+- Reprodução em cópia limpa sem .venv/.env: uv sync --locked --offline (cache local), suíte de 91 testes,
+  doctor/incident/tools/smoke/graph, run normal/JSON/sequencial/paralelo e falha simulada passaram
+  com os códigos esperados. JSON gravado coincide com o estado de nova execução.
+- Instalação inicial do LangGraph foi feita com rede; reprodução limpa utilizou cache já preparado.
+- E2E `run INCIDENT-001`: saída 0, cenário D, custo incremental 12.500 BRL,
+  multa evitada 16.000 BRL, estado awaiting_approval, solicitação pending, nenhuma ação executada.
+- Falha `--fail-specialist logistics`: saída 1 esperada, demais resultados preservados,
+  join bloqueado, Finance/Challenger/Recommendation/Approval ausentes.
+- Paralelismo: teste com Barrier exige que os três ramos iniciem antes de qualquer um terminar;
+  join executa uma vez, após todos, e antes de Finance. Modo sequencial produz o mesmo estado final.
+- Observação manual com 500 ms artificiais por especialista: 0,515 s paralelo e 1,531 s sequencial
+  em uma execução local. Não é benchmark nem expectativa de tempo em outras máquinas.
+- JSON final determinístico entre invocações; a ordem dos eventos concorrentes/tempos pode variar.
+- Teste bloqueia socket.connect e create_connection; mock funciona mesmo com tracing solicitado
+  por variável de ambiente. O workflow força tracing desabilitado.
+- Regressões cobrem estado/saídas inválidas, routing, especialista ausente/falhando, falta de capacidade,
+  alocação sem dupla contagem, datas/multas A–D, revisão independente, políticas e limites inclusivos,
+  aprovação obrigatória e imutabilidade dos dados operacionais.
+- Exemplos gravados em docs/course/examples e diagrama extraído do grafo real em docs/architecture.
+- Não testado: OpenAI (não implementado), Windows/Linux, infraestrutura de aulas seguintes.
+- Sem tag lesson-01-complete. Tag lesson-01-start preservada em 5dc5fa09782c74dd61fe83b56a6c6dc8b0311afb.
+- Start revisado aprovado registrado em 171c324 para comparação separada.
+
+## Histórico da validação do start
+
 
 - Ambiente observado: macOS ARM64, Python 3.12.3, uv 0.7.6.
 - `uv sync` gerou uv.lock e instalou as dependências.

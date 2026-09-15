@@ -17,7 +17,7 @@ INCIDENT-001 → CLI → Tools → CSV/JSON
                  Pydantic
 ```
 
-**Depois, alvo da progressão da Aula 1 (ainda não implementado):**
+**Depois, candidato complete executável em mock:**
 
 ```text
 Incidente → Supervisor → estado compartilhado
@@ -27,7 +27,7 @@ Incidente → Supervisor → estado compartilhado
                                              recomendação → aprovação humana
 ```
 
-A introdução de LangGraph e seus nós será realizada pelo professor. O start já contém o boilerplate:
+LangGraph e seus nós são demonstrados pelo professor. O start já contém o boilerplate:
 dados, contratos, tools, CLI, configuração, fixtures, testes e modo offline.
 
 ## Demonstrações disponíveis no start
@@ -46,9 +46,12 @@ Leia a [convenção temporal](../../docs/case/NOVACORE.md): material chega no in
 ocorre nesse dia e entrega ao cliente pode ocorrer no dia seguinte. Ordens relacionadas não são
 ordens com atraso confirmado. `not_assessed` não significa ausência de impacto.
 
-## O que observar na progressão posterior
+## Demos 5–8 — o que observar no complete
 
-Esta tabela descreve a demonstração futura, sem atribuir outputs inexistentes ao start.
+No candidato complete, execute `uv run control-tower run INCIDENT-001` e observe os papéis abaixo.
+Use `--json` para inspecionar estado/evidências; `uv run control-tower graph` mostra o grafo real.
+Compare `--demo-delay-ms 500` com `--sequential --demo-delay-ms 500`; a espera é artificial.
+Use `--fail-specialist logistics` para observar o bloqueio no join (saída 1 esperada).
 
 | Conceito | Antes → depois | Evidência a observar | Pergunta | Aprendizado |
 |---|---|---|---|---|
@@ -59,21 +62,26 @@ Esta tabela descreve a demonstração futura, sem atribuir outputs inexistentes 
 | Challenger | Plano candidato → premissas questionadas | Safety stock e evidência insuficiente destacados | O plano é barato porque ignorou um risco? | Questionar agrega uma função distinta. |
 | Recomendação e aprovação | Prosa → contrato validado → decisão humana | Schema válido não implica ação autorizada | Quem assume a decisão? | Recomendação não é execução. |
 
+## Resultado e perguntas finais
+
+Finance compara A=23.500, B=20.250, C=18.000 e D=12.500 BRL incrementais. Challenger rejeita C por
+romper o piso de Campinas. D é recomendado com atraso de três dias para CO-003 e zero para Atlas.
+A solicitação termina pendente de aprovação humana, sem ações. B elimina atrasos a custo maior:
+“Se relacionamento com o cliente tiver outro peso, você escolheria D?”
+
+O cálculo não afirma impacto real ocorrido. Premissas de capacidade, disponibilidade e custos
+continuam exigindo confirmação. `confidence=0.65` não é probabilidade calibrada.
+
 ## Comparação Git para revisão e reprodução
 
-A tag original não foi movida. Nesta revisão local:
+A tag original não foi movida. O start revisado aprovado é o commit `171c324`.
 
 ```bash
 git status --short
-git diff lesson-01-start -- src/control_tower labs docs/course
+git diff 171c324..HEAD -- src/control_tower
+git diff lesson-01-start..HEAD -- src/control_tower labs docs/course
 ```
 
-O comando inclui alterações em arquivos rastreados; arquivos novos aparecem no status e devem ser
-abertos diretamente (como o runbook e smoke.py) até serem commitados.
-Quando o professor aprovar e publicar `lesson-01-complete`, será possível comparar os dois estados:
-
-```bash
-git diff lesson-01-start..lesson-01-complete -- src/control_tower
-```
-
-Essa última comparação ainda não está disponível. Nenhuma implementação é solicitada ao aluno.
+O primeiro diff isola o complete commitado; o segundo inclui correções aprovadas do start.
+A tag lesson-01-complete não existe até a revisão. Alunos observam e reproduzem;
+nenhuma implementação é solicitada durante a aula.

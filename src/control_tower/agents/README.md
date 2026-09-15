@@ -1,8 +1,11 @@
-# Progressão demonstrada pelo professor
+# Papéis em modo mock
 
-Planejado após aprovação do start: Supply, Production e Logistics consomem tools;
-Finance compara cenários; Risk/Challenger questiona premissas, evidências e políticas.
-Supervisor escolhe especialistas e consolida resultados. Agentes não leem CSVs diretamente.
-A infraestrutura está pronta para o professor concentrar a demonstração nessas responsabilidades.
-Não há tarefa de programação para alunos nem implementação de agentes neste checkpoint.
-Consulte o [runbook](../../../docs/course/lesson-01-runbook.md).
+- supervisor.py: plano explícito para INCIDENT-001 e consolidação de evidências.
+- specialists.py: Supply, Production e Logistics, cada um com tools e saída tipada.
+- finance.py: comparação A–D via scenarios.py; propõe menor custo incremental.
+- challenger.py: verifica consistência, políticas, premissas e informação insuficiente;
+  seleciona o menor custo admissível, que pode diferir da proposta de Finance.
+
+São papéis determinísticos do mock, não raciocínio de LLM. Não leem CSVs diretamente nem executam ações.
+O professor demonstra as responsabilidades; alunos observam e reproduzem posteriormente.
+Ver [runbook](../../../docs/course/lesson-01-runbook.md).

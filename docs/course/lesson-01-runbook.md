@@ -3,16 +3,16 @@
 **Duração:** 4 horas de uma disciplina de 16 horas. Professor implementa/demonstra; alunos observam
 e discutem. Não reservar tempo para alunos digitarem código, instalarem dependências ou completarem TODOs.
 
-**Estado deste documento:** demos 1–4 executáveis no start revisado. Demos 5–8 são o roteiro conceitual
-da progressão a preparar somente após aprovação de `lesson-01-complete`; não há implementação nem
-comando de execução de grafo nesta entrega. Não apresentar esse roteiro como aula completa já executável.
+**Estado deste documento:** Demos 1–8 executáveis no candidato local `lesson-01-complete`,
+branch `codex/lesson-01-complete`, em modo mock. O start revisado aprovado está em `171c324`.
+A tag `lesson-01-start` permanece intacta; a tag complete ainda não existe.
 
 ## Preparação antes da aula (fora das 4 horas)
 
-- Use o checkout revisado na branch `codex/lesson-01-start-guided-demo`; a tag publicada ainda é a anterior.
+- Use o checkout candidato na branch `codex/lesson-01-complete`; não faça checkout da tag start para estas demos.
 - Rode `uv sync --locked`, configure `.env` com `LLM_MODE=mock` e execute os comandos abaixo.
 - Deixe abertos este runbook, o guia de observação, o case, main.py, models.py e tools.py.
-- Instalação, parsing, fixtures e boilerplate já vêm prontos. Concentre futuras edições em estado,
+- Instalação, parsing, fixtures e boilerplate já vêm prontos. Concentre a comparação entre os estados em estado,
   responsabilidades, arestas, junção de resultados e limite de aprovação.
 - Para reproduzir depois, alunos seguem README e guia; não precisam reconstruir os agentes.
 
@@ -25,9 +25,10 @@ uv run control-tower smoke
 ```
 
 Antes de mudar de checkpoint, confira `git status --short` e preserve alterações em uma branch.
-Não mova tags aprovadas. Na revisão local, `git diff lesson-01-start -- src/control_tower` compara
-arquivos rastreados; abra os arquivos novos diretamente. Após publicação dos checkpoints, compare
-`git diff lesson-01-start..lesson-01-complete -- src/control_tower` (ainda indisponível).
+Não mova tags aprovadas. Use `git diff 171c324..HEAD -- src/control_tower` para comparar start revisado e candidato commitado.
+Use `git diff lesson-01-start..HEAD` para incluir também os ajustes pedagógicos aprovados.
+Para revisão antes de commit, `git diff 171c324 -- src/control_tower` inclui edições rastreadas locais.
+A comparação entre as duas tags só estará disponível após aprovação e criação de complete.
 
 ## Agenda de 240 minutos
 
@@ -39,14 +40,14 @@ arquivos rastreados; abra os arquivos novos diretamente. Após publicação dos 
 | 00:50–01:15 | Demo 3 — restrições e capabilities | 25 |
 | 01:15–01:30 | Demo 4 — smoke e falha de fixture | 15 |
 | 01:30–01:45 | Intervalo | 15 |
-| 01:45–02:15 | Demo 5 — estado e especialistas (planejada) | 30 |
-| 02:15–02:45 | Demo 6 — Supervisor, LangGraph e paralelismo (planejada) | 30 |
-| 02:45–03:15 | Demo 7 — consolidação, Finance e Challenger (planejada) | 30 |
-| 03:15–03:40 | Demo 8 — recomendação e aprovação (planejada) | 25 |
+| 01:45–02:15 | Demo 5 — estado e especialistas | 30 |
+| 02:15–02:45 | Demo 6 — Supervisor, LangGraph e paralelismo | 30 |
+| 02:45–03:15 | Demo 7 — consolidação, Finance e Challenger | 30 |
+| 03:15–03:40 | Demo 8 — recomendação e aprovação | 25 |
 | 03:40–04:00 | Síntese, comparação de estados e perguntas | 20 |
 
-Os tempos incluem explicação, observação e discussão. Na revisão atual, use as demos planejadas
-apenas para validar a sequência conceitual; a segunda metade depende da entrega complete aprovada.
+Os tempos incluem explicação, observação e discussão. Não reescrever boilerplate ao vivo;
+mostrar pequenas alterações conceituais via Git e executar o candidato já preparado.
 
 ## Demo 1 — A base está pronta para investigar
 
@@ -61,9 +62,9 @@ apenas para validar a sequência conceitual; a segunda metade depende da entrega
   ```
 
 - **Alteração relevante a demonstrar:** nenhuma edição; mostrar o caminho CLI → Tools → contratos/dados.
-  O boilerplate já está presente; apontar onde a futura orquestração será conectada.
+  O boilerplate já está presente; apontar onde a orquestração do complete se conecta.
 - **Resultado esperado:** `status: ok`, `mode: mock`, `related_orders: 3`,
-  `impact_status: not_assessed`, `orchestration: TODO`.
+  `impact_status: not_assessed`, `orchestration: available_via_run`.
 - **Pergunta:** “O que ainda falta para essa aplicação poder recomendar uma decisão?”
 - **Mensagem-chave:** base determinística reduz ruído para discutir coordenação.
 - **Fallback:** mostrar o output esperado acima e o diagrama do guia; se uv falhar mas o ambiente já
@@ -106,8 +107,8 @@ apenas para validar a sequência conceitual; a segunda metade depende da entrega
   uv run control-tower smoke
   ```
 
-- **Alteração relevante a demonstrar:** nenhuma implementação; destacar a fronteira que os futuros
-  especialistas consumirão. Não reescrever leitores de CSV nem fórmulas durante a aula.
+- **Alteração relevante a demonstrar:** nenhuma implementação; destacar a fronteira que os
+  especialistas consomem. Não reescrever leitores de CSV nem fórmulas durante a aula.
 - **Resultado esperado:** demanda 750, disponível SP 300, déficit 450; Campinas tem 500 disponíveis,
   mas apenas 300 preservam safety stock. Beta custa 145 por unidade e oferece 450; expresso custa
   18.000 por viagem. Multa de 140.000 é hipotética para sete dias de atraso de CO-001.
@@ -140,91 +141,114 @@ apenas para validar a sequência conceitual; a segunda metade depende da entrega
 - **Fallback:** ler os casos de teste e o erro esperado `Smoke falhou`/`Fixture incompleto` no editor.
   Não gastar a aula depurando ambiente; registrar o problema para depois.
 
-## Demo 5 — Estado compartilhado e especialistas (planejada)
+## Demo 5 — Estado compartilhado e especialistas
 
 - **Objetivo:** tornar visível quem produz e quem consome cada evidência.
 - **Conceito:** shared state e specialist agents.
 - **Tempo estimado:** 30 min.
-- **Arquivos envolvidos:** src/control_tower/models.py, tools.py, agents/ e graph/ (implementação futura).
-- **Comandos disponíveis para preparar a discussão:**
+- **Arquivos envolvidos:** src/control_tower/graph/state.py, agents/specialists.py, tools.py.
+- **Comandos:**
 
   ```bash
-  uv run control-tower tools
+  uv run control-tower run INCIDENT-001
+  uv run control-tower run INCIDENT-001 --json
+  git diff 171c324..HEAD -- src/control_tower/graph/state.py src/control_tower/agents/specialists.py
   ```
 
-  Comando de execução dos especialistas: pendente da implementação/revisão de complete.
-- **Alteração relevante a demonstrar depois:** professor acrescenta estado e saídas de Supply,
-  Production e Logistics, reutilizando as capabilities prontas; mostrar só o contrato e a escrita no estado.
-- **Resultado esperado futuro:** evidências separadas por especialista, com campos e responsabilidades
-  claros. Neste start o comando mostra apenas dados das tools, não agentes executados.
-- **Pergunta:** “Se dois especialistas escrevem no mesmo campo, qual resultado prevalece?”
-- **Mensagem-chave:** estado compartilhado precisa de regras de escrita e consolidação.
-- **Fallback:** desenhar o estado no quadro com três áreas, usando os dados reais da demo 3.
+- **Alteração relevante:** Supply, Production e Logistics recebem o mesmo incidente e escrevem
+  somente seu canal no estado. Pydantic valida evidência ou erro; não misturar dados em um texto global.
+- **Resultado esperado:** Supply mostra 300 locais/500 Campinas; Production retorna três ordens e
+  demanda 750; Logistics mostra rotas de 3 e 1 dia. No JSON, `supply`, `production` e `logistics`
+  contêm `data` e `error: null`; `investigation` contém a junção validada.
+- **Pergunta:** “Se dois especialistas escrevessem no mesmo campo, quem prevaleceria?”
+- **Mensagem-chave:** estado compartilhado tem responsabilidade de escrita explícita.
+- **Fallback:** abrir docs/course/examples/incident-001-mock.json e percorrer os três canais;
+  marcar como resultado gravado. Não atribuir raciocínio de LLM às funções mock.
 
-## Demo 6 — Supervisor, LangGraph e investigação paralela (planejada)
+## Demo 6 — Supervisor, LangGraph e investigação paralela
 
-- **Objetivo:** revelar as decisões de coordenação e dependência.
-- **Conceito:** Supervisor, LangGraph, parallel execution e junção.
+- **Objetivo:** revelar coordenação, independência e barreira de sincronização.
+- **Conceito:** Supervisor, LangGraph, parallel execution e join.
 - **Tempo estimado:** 30 min.
-- **Arquivos envolvidos:** src/control_tower/graph/ e agents/ (futuros nós/arestas).
-- **Comandos:** nesta revisão, apenas `git status --short` para situar o checkpoint;
-  execução do grafo e comparação start..complete ficam pendentes até existir complete.
-- **Alteração relevante a demonstrar depois:** professor conecta Supervisor ao estado e aos ramos
-  independentes, mostra passagem sequencial → paralela e a barreira anterior à consolidação.
-- **Resultado esperado futuro:** três ramos com evidências reunidas antes do passo seguinte.
-  Comparar tempos observados quando houver implementação; não prometer ganho de 3×.
-- **Pergunta:** “Finance pode começar se Logistics ainda não respondeu?”
-- **Mensagem-chave:** paralelismo reduz espera quando as dependências permitem, mas exige coordenação.
-- **Fallback:** usar o diagrama do guia e percorrer cartões de estado em sequência/paralelo,
-  explicitando que é simulação conceitual, não trace real.
+- **Arquivos envolvidos:** agents/supervisor.py, graph/workflow.py, tests/test_workflow.py.
+- **Comandos:**
 
-## Demo 7 — Consolidar, calcular e desafiar (planejada)
+  ```bash
+  uv run control-tower graph
+  uv run control-tower run INCIDENT-001 --demo-delay-ms 500
+  uv run control-tower run INCIDENT-001 --sequential --demo-delay-ms 500
+  uv run pytest -q tests/test_workflow.py -k parallel_branches
+  ```
+
+- **Alteração relevante:** mostrar fan-out após Supervisor e
+  `add_edge(list(SPECIALISTS), 'consolidation')`. O modo sequencial muda apenas as arestas.
+- **Resultado esperado:** no paralelo, três inícios antes dos finais graças à espera didática;
+  consolidação inicia após todos terminarem. No sequencial, cada início segue o final anterior.
+  Ambas execuções produzem a mesma recomendação. A espera de 500 ms é artificial e explicitamente
+  rotulada; os tempos observados não são benchmark de LLM ou promessa de aceleração.
+- **Pergunta:** “Finance pode começar se Logistics não respondeu?”
+- **Mensagem-chave:** paralelismo exige independência e um ponto explícito de junção.
+- **Fallback:** abrir docs/architecture/lesson-01-graph.mmd e o teste com Barrier, que comprova
+  sobreposição dos três ramos sem comparar tempos frágeis. Mostrar o trace gravado como exemplo.
+
+## Demo 7 — Consolidação, Finance e Challenger
 
 - **Objetivo:** distinguir evidências, custo de cenário e crítica do plano.
-- **Conceito:** consolidation, Finance e Challenger.
+- **Conceito:** consolidation, Finance e Challenger com funções distintas.
 - **Tempo estimado:** 30 min.
-- **Arquivos envolvidos:** tools.py, models.py, data/policies.json e agents/ (futuros Finance/Risk).
-- **Comandos de apoio existentes:**
+- **Arquivos envolvidos:** scenarios.py, agents/finance.py, agents/challenger.py,
+  data/policies.json, docs/case/NOVACORE.md.
+- **Comandos:**
 
   ```bash
-  uv run control-tower smoke
+  uv run control-tower run INCIDENT-001
+  uv run control-tower run INCIDENT-001 --fail-specialist logistics
+  uv run pytest -q tests/test_workflow.py -k challenger
   ```
 
-  Execução de comparação de cenários/Challenger: pendente de complete.
-- **Alteração relevante a demonstrar depois:** professor liga consolidação à avaliação determinística
-  de cenários e à crítica de premissas. Mostrar alocação e datas que sustentam cada custo.
-- **Resultado esperado futuro:** comparação A–D com evidências e Challenger apontando safety stock,
-  restrições ou informação insuficiente. Hoje smoke só valida dados e multa hipotética.
-- **Pergunta:** “O plano é melhor ou apenas deixou uma restrição de fora?”
-- **Mensagem-chave:** Finance calcula sob premissas; Challenger testa essas premissas.
-- **Fallback:** comparar verbalmente transferir 300 versus 450 de Campinas e destacar o piso de 200;
-  não inventar ranking nem output de agente.
+- **Alteração relevante:** consolidar antes de simular alocação/datas/custos; Finance propõe menor
+  custo e Challenger revisa consistência, políticas, premissas e informação insuficiente.
+- **Resultado esperado normal:** A=23.500; B=20.250; C=18.000; D=12.500 BRL de custo incremental.
+  D preserva Campinas e aceita atraso de 3 dias em CO-003; B evita todos os atrasos por custo maior.
+  Challenger bloqueia C (piso rompido em 150 unidades) e pede confirmação de capacidades/prazos.
+- **Resultado esperado com falha:** saída 1, Logistics com erro, Supply/Production preservados;
+  consolidação bloqueia; Finance, Challenger e Recommendation não executam. É demonstração de
+  dependência/resultado ausente, sem retry, circuit breaker ou mecanismo de caos da Aula 4.
+- **Pergunta:** “O plano é melhor ou apenas deixou um custo/risco de fora?”
+- **Mensagem-chave:** cálculos são determinísticos sob premissas; Challenger expõe os limites.
+- **Fallback:** abrir examples/incident-001-failure.txt e a tabela A–D do case; não afirmar que houve
+  execução ao vivo. Mostrar que a multa evitada (16.000) difere da economia total (11.000).
 
-## Demo 8 — Recomendação estruturada e aprovação (planejada)
+## Demo 8 — Recomendação estruturada e aprovação humana
 
 - **Objetivo:** separar saída válida de decisão autorizada.
 - **Conceito:** structured recommendation e human approval.
 - **Tempo estimado:** 25 min.
-- **Arquivos envolvidos:** src/control_tower/models.py (Recommendation), tests/test_lab.py,
-  graph/ (futura transição para aprovação).
-- **Comandos de apoio existentes:**
+- **Arquivos envolvidos:** models.py (Recommendation), graph/state.py (Approval),
+  graph/workflow.py (recommendation/human_approval), tests/test_workflow.py.
+- **Comandos:**
 
   ```bash
+  uv run control-tower run INCIDENT-001 --json
+  uv run pytest -q tests/test_workflow.py -k approval
   uv run pytest -q tests/test_lab.py -k invalid_recommendation
   ```
 
-  Execução do fluxo com pausa para aprovação: pendente de complete.
-- **Alteração relevante a demonstrar depois:** conectar resultado do grafo ao contrato existente e
-  explicitar a parada para decisão humana. Schema e testes já estão preparados, não serão reescritos.
-- **Resultado esperado atual:** quatro casos inválidos rejeitados, incluindo `approval_required=False`.
-  Resultado futuro: recomendação validada aguardando decisão; nenhuma compra/transferência automática.
+- **Alteração relevante:** conectar resultado a Recommendation existente e terminar em
+  `awaiting_approval`. O nó human_approval cria uma solicitação pendente; não aprova automaticamente.
+- **Resultado esperado:** cenário D, `estimated_cost_brl: "12500.00"`,
+  `avoided_penalty_brl: "16000.00"`, `customer_delay_days: 3`, `approval_required: true`;
+  `approval.status: pending`, `actions_executed: false`, responsável `operations_manager`.
+  Confiança 0.65 é marcador didático, não probabilidade calibrada. Dados do JSON são determinísticos.
 - **Pergunta:** “Passar no Pydantic significa que o plano está correto e autorizado?”
-- **Mensagem-chave:** validação estrutural, qualidade da decisão e autorização são responsabilidades distintas.
-- **Fallback:** abrir Recommendation e os quatro testes; discutir o limite do schema usando o plano do quadro.
+- **Mensagem-chave:** estrutura, qualidade e autorização são responsabilidades distintas.
+- **Fallback:** abrir examples/incident-001-mock.json e os testes. Esta aula termina na solicitação:
+  não há comando de aprovar, persistência/retomada, compra, transporte ou transferência automática.
 
 ## Encerramento — 20 minutos
 
 Retomar quem decide, onde está o estado, como falha, como observar, custo e quando usar código
-em vez de agente. Mostrar quais módulos foram acrescentados pelo professor e quais capabilities
-permaneceram estáveis. Orientar reprodução pelo guia, sem tarefa de programação.
-A comparação Git entre start e complete só será realizada após os dois estados existirem e serem validados.
+em vez de agente. Comparar `git diff 171c324..HEAD -- src/control_tower` e apontar capabilities preservadas.
+Alunos reproduzem com o guia; não há tarefa de programação. O workflow termina antes da decisão humana:
+a duração da CLI não mede Time-to-Decision completo. A aprovação do candidato e criação da tag
+lesson-01-complete continuam pendentes da revisão do professor.

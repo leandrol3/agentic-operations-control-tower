@@ -1,0 +1,74 @@
+Execução paralela | mock | latência artificial por especialista: 0 ms
+  supervisor: início
+  supervisor: fim
+  logistics: início
+  production: início
+  supply: início
+  production: fim
+  supply: fim
+  logistics: fim
+  consolidation: início
+  consolidation: fim
+  finance: início
+  finance: fim
+  challenger: início
+  challenger: fim
+  recommendation: início
+  recommendation: fim
+  human_approval: início
+  human_approval: fim
+
+=== INCIDENT-001 | mock | resumo ===
+Supervisor: Investigar material, ordens/clientes e rotas; ramos independentes
+Plano: supply, production, logistics
+Supply: OK
+  SP=300; Campinas=500; transferível sem romper piso=300; Beta=145.00 BRL/unidade
+Production: OK
+  3 ordens relacionadas; demanda=750; impacto ainda não avaliado
+Logistics: OK
+  padrão=3 dias/5000.00 BRL; expresso=1 dia/18000.00 BRL
+Consolidação: 3/3 evidências reunidas
+Finance: cenário | material extra | frete | multa | total incremental BRL
+  A | 0.00 | 0.00 | 23500.00 | 23500.00
+    PO-001: entrega 2026-10-03, atraso 0 dia(s), multa 0.00 BRL
+    PO-002: entrega 2026-10-09, atraso 4 dia(s), multa 16000.00 BRL
+    PO-003: entrega 2026-10-09, atraso 3 dia(s), multa 7500.00 BRL
+  B | 20250.00 | 0.00 | 0.00 | 20250.00
+    PO-001: entrega 2026-10-03, atraso 0 dia(s), multa 0.00 BRL
+    PO-002: entrega 2026-10-04, atraso 0 dia(s), multa 0.00 BRL
+    PO-003: entrega 2026-10-05, atraso 0 dia(s), multa 0.00 BRL
+  C | 0.00 | 18000.00 | 0.00 | 18000.00
+    PO-001: entrega 2026-10-03, atraso 0 dia(s), multa 0.00 BRL
+    PO-002: entrega 2026-10-04, atraso 0 dia(s), multa 0.00 BRL
+    PO-003: entrega 2026-10-05, atraso 0 dia(s), multa 0.00 BRL
+  D | 0.00 | 5000.00 | 7500.00 | 12500.00
+    PO-001: entrega 2026-10-03, atraso 0 dia(s), multa 0.00 BRL
+    PO-002: entrega 2026-10-05, atraso 0 dia(s), multa 0.00 BRL
+    PO-003: entrega 2026-10-09, atraso 3 dia(s), multa 7500.00 BRL
+Finance propõe: D
+Challenger:
+  [C] BLOQUEIA: Transferência rompe safety stock de Campinas em 150 unidades
+  [all] REVISAR: Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora antes da decisão.
+  [all] REVISAR: Capacidade produtiva simplificada e reposição do safety stock local precisam de validação humana.
+  [all] REVISAR: Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de Alpha.
+Cenário admissível selecionado: D
+Recomendação estruturada:
+{
+  "incident_id": "INCIDENT-001",
+  "severity": "high",
+  "recommended_action": "Cenário D: Transferir até o piso de Campinas por rota padrão e replanejar; residual via Alpha",
+  "estimated_cost_brl": "12500.00",
+  "avoided_penalty_brl": "16000.00",
+  "customer_delay_days": 3,
+  "confidence": 0.65,
+  "risks": [
+    "Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora antes da decisão.",
+    "Capacidade produtiva simplificada e reposição do safety stock local precisam de validação humana.",
+    "Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de Alpha."
+  ],
+  "approval_required": true
+}
+Confiança 0.65: valor didático conservador, não probabilidade calibrada.
+APROVAÇÃO HUMANA NECESSÁRIA | pending | responsável=operations_manager
+Estado final: awaiting_approval. Nenhuma ação operacional executada.
+Tempo observado do workflow: 0.008s (não é benchmark).

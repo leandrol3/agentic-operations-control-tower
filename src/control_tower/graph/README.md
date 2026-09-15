@@ -1,8 +1,11 @@
-# Progressão demonstrada pelo professor
+# Grafo explícito da Aula 1
 
-Planejado após aprovação do start: estado compartilhado tipado, Supervisor, investigação paralela
-em LangGraph e consolidação antes de Finance → Challenger → Recommendation → aprovação humana.
-Mostrar quem escreve cada resultado, quando a consolidação pode começar e o que fazer com saída inválida.
-O professor demonstra as alterações; alunos observam decisões e trade-offs.
-Este checkpoint não implementa grafo nem decisão pronta.
-Consulte o [runbook](../../../docs/course/lesson-01-runbook.md).
+state.py define estado compartilhado Pydantic. Supply, Production e Logistics escrevem em canais
+separados; não é preciso um reducer que mescle resultados concorrentes no mesmo campo.
+workflow.py define fan-out e `add_edge(list(SPECIALISTS), 'consolidation')` para esperar todos.
+Consolidação valida presença/sucesso; Finance só é chamado com evidências completas.
+Challenger → Recommendation → Human Approval termina com solicitação pendente, sem executar ações.
+
+`uv run control-tower graph` gera Mermaid a partir do grafo real.
+`uv run control-tower run INCIDENT-001 --sequential` usa as mesmas funções com arestas sequenciais
+para comparação didática. Não há checkpoint persistente, retomada ou execução operacional.

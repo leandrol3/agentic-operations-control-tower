@@ -57,3 +57,48 @@ alocação e calendário de produção/entrega. O start não realiza essa simula
   não um plano: pressupõe material suficiente e desconsidera competição entre ordens.
 - Sete dias de atraso de Alpha não equivalem a sete dias de atraso de cada cliente.
   `calculate_penalty('CO-001', 7)` recebe atraso hipotético já calculado, não o atraso do fornecedor.
+
+## Simulação implementada no candidato complete
+
+As tools de consulta continuam retornando relações. Somente `run INCIDENT-001` simula impacto **por
+cenário**, ainda sem afirmar impacto ocorrido no mundo real. Nenhum dado de estoque é alterado.
+
+### Alocação e custos
+
+- Em todos os cenários: ordenar por prioridade estratégica, prazo do cliente e ID; material por
+  data de disponibilidade. Cada unidade é consumida uma única vez; reservas externas são excluídas.
+- Lotes produtivos indivisíveis; sem produção antecipada ou entrega parcial. A mesma fábrica pode
+  processar mais de uma ordem no mesmo dia: capacidade horária ainda não modelada.
+- A usa 300 locais e espera 450 de Alpha; B substitui essas 450 por Beta;
+  C transfere 450 por expresso; D transfere 300 por rota padrão (piso de Campinas preservado),
+  replaneja PO-002 para 04/10 e espera 150 de Alpha para completar PO-003.
+- A quantidade da compra original de Alpha não consta dos dados. Assume-se disponibilidade para
+  o residual no novo prazo, limitada pela capacidade cadastrada. Challenger exige confirmação humana.
+- Custo total **incremental** = prêmio de material alternativo + frete de transferência + multas.
+  O material base já comprometido, custo de reposição de Campinas e eventual cancelamento de Alpha
+  não entram. B cobra `(145 − 100) × 450`, não `145 × 450`; frete de Beta já está no lead time/preço.
+- Capacidade de transporte vale para uma viagem. O simulador bloqueia se a transferência exceder
+  estoque ou capacidade; não inventa viagens extras. Se não consegue avaliar A–D, bloqueia a recomendação.
+- Regra conservadora do case: não recomendar transferência que rompa o piso de Campinas. Consumo
+  do safety stock local é permitido sob hipótese de reposição a revisar. Essa assimetria é explícita;
+  não é uma regra universal de gestão de estoque. Challenger mostra a violação de C (150 unidades).
+- Entre cenários admissíveis, minimizar custo incremental total; empate por ID. Atraso estratégico
+  deve respeitar a política. Frete expresso acima do limite bloqueia o cenário. Custo acima do limiar
+  exige gerente; abaixo dele também há aprovação por responsável de operações.
+
+| Cenário | Prêmio material | Frete | Multas | Total BRL | Atrasos CO-001/002/003 |
+|---|---:|---:|---:|---:|---|
+| A | 0 | 0 | 23.500 | 23.500 | 0 / 4 / 3 dias |
+| B | 20.250 | 0 | 0 | 20.250 | 0 / 0 / 0 dias |
+| C | 0 | 18.000 | 0 | 18.000 | 0 / 0 / 0 dias; piso violado |
+| D | 0 | 5.000 | 7.500 | 12.500 | 0 / 0 / 3 dias |
+
+D é recomendado **sob essas premissas e esse objetivo econômico**. B evita todo atraso com custo maior;
+essa diferença sustenta a discussão. Não existe alegação de plano ótimo fora dos quatro cenários.
+`avoided_penalty_brl = 23.500 − 7.500 = 16.000`; economia total versus A é 11.000, um conceito diferente.
+`customer_delay_days` é o maior atraso entre os clientes no cenário selecionado (3), não o atraso
+estratégico (0). `confidence=0.65` é marcador conservador do mock, não probabilidade calibrada.
+
+A recomendação termina em `awaiting_approval`, com solicitações de confirmação humana. Não existe
+comando de aprovar, integração de aprovação, retomada ou ação operacional nesta aula. A duração da CLI
+mede o workflow até a recomendação, não o Time-to-Decision completo, pois a decisão humana está pendente.

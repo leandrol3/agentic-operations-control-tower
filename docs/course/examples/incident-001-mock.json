@@ -1,0 +1,626 @@
+{
+  "incident": {
+    "incident_id": "INCIDENT-001",
+    "event_date": "2026-10-01",
+    "supplier_id": "SUP-ALPHA",
+    "material": "M42",
+    "plant": "São Paulo",
+    "delay_days": 7,
+    "description": "Alpha informou atraso de sete dias na entrega de M42 prevista para 1 de outubro na planta São Paulo. Qual é o melhor plano operacional?"
+  },
+  "plan": [
+    "supply",
+    "production",
+    "logistics"
+  ],
+  "supervisor_reason": "Investigar material, ordens/clientes e rotas; ramos independentes",
+  "supply": {
+    "data": {
+      "local": {
+        "plant": "São Paulo",
+        "material": "M42",
+        "available_units": 300,
+        "transferable_without_safety_stock_units": 200
+      },
+      "origin": {
+        "plant": "Campinas",
+        "material": "M42",
+        "available_units": 500,
+        "transferable_without_safety_stock_units": 300
+      },
+      "baseline": {
+        "supplier_id": "SUP-ALPHA",
+        "name": "Alpha",
+        "material": "M42",
+        "lead_time_days": 7,
+        "reliability_score": 0.94,
+        "unit_cost_brl": "100.00",
+        "capacity_units": 1000,
+        "region": "São Paulo"
+      },
+      "alternative": {
+        "supplier_id": "SUP-BETA",
+        "name": "Beta",
+        "material": "M42",
+        "lead_time_days": 2,
+        "reliability_score": 0.87,
+        "unit_cost_brl": "145.00",
+        "capacity_units": 450,
+        "region": "Campinas"
+      }
+    },
+    "error": null
+  },
+  "production": {
+    "data": {
+      "orders": [
+        {
+          "order_id": "PO-001",
+          "plant": "São Paulo",
+          "product": "PUMP-A",
+          "quantity": 300,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-02",
+          "customer_order": "CO-001",
+          "priority": "strategic"
+        },
+        {
+          "order_id": "PO-002",
+          "plant": "São Paulo",
+          "product": "PUMP-B",
+          "quantity": 250,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-03",
+          "customer_order": "CO-002",
+          "priority": "standard"
+        },
+        {
+          "order_id": "PO-003",
+          "plant": "São Paulo",
+          "product": "PUMP-C",
+          "quantity": 200,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-04",
+          "customer_order": "CO-003",
+          "priority": "standard"
+        }
+      ],
+      "customers": [
+        {
+          "order_id": "CO-001",
+          "customer": "Atlas Energy",
+          "product": "PUMP-A",
+          "quantity": 300,
+          "delivery_date": "2026-10-03",
+          "sla_penalty_brl_per_day": "20000.00",
+          "priority": "strategic",
+          "margin_brl": "90000.00"
+        },
+        {
+          "order_id": "CO-002",
+          "customer": "Orion Manufacturing",
+          "product": "PUMP-B",
+          "quantity": 250,
+          "delivery_date": "2026-10-05",
+          "sla_penalty_brl_per_day": "4000.00",
+          "priority": "standard",
+          "margin_brl": "60000.00"
+        },
+        {
+          "order_id": "CO-003",
+          "customer": "Vega Systems",
+          "product": "PUMP-C",
+          "quantity": 200,
+          "delivery_date": "2026-10-06",
+          "sla_penalty_brl_per_day": "2500.00",
+          "priority": "standard",
+          "margin_brl": "40000.00"
+        }
+      ],
+      "demand_units": 750
+    },
+    "error": null
+  },
+  "logistics": {
+    "data": {
+      "standard": {
+        "carrier": "RoadCo",
+        "origin": "Campinas",
+        "destination": "São Paulo",
+        "service": "standard",
+        "lead_time_days": 3,
+        "capacity_units": 500,
+        "cost_brl_per_trip": "5000.00",
+        "reliability": 0.95
+      },
+      "express": {
+        "carrier": "ExpressCo",
+        "origin": "Campinas",
+        "destination": "São Paulo",
+        "service": "express",
+        "lead_time_days": 1,
+        "capacity_units": 500,
+        "cost_brl_per_trip": "18000.00",
+        "reliability": 0.91
+      }
+    },
+    "error": null
+  },
+  "investigation": {
+    "supply": {
+      "local": {
+        "plant": "São Paulo",
+        "material": "M42",
+        "available_units": 300,
+        "transferable_without_safety_stock_units": 200
+      },
+      "origin": {
+        "plant": "Campinas",
+        "material": "M42",
+        "available_units": 500,
+        "transferable_without_safety_stock_units": 300
+      },
+      "baseline": {
+        "supplier_id": "SUP-ALPHA",
+        "name": "Alpha",
+        "material": "M42",
+        "lead_time_days": 7,
+        "reliability_score": 0.94,
+        "unit_cost_brl": "100.00",
+        "capacity_units": 1000,
+        "region": "São Paulo"
+      },
+      "alternative": {
+        "supplier_id": "SUP-BETA",
+        "name": "Beta",
+        "material": "M42",
+        "lead_time_days": 2,
+        "reliability_score": 0.87,
+        "unit_cost_brl": "145.00",
+        "capacity_units": 450,
+        "region": "Campinas"
+      }
+    },
+    "production": {
+      "orders": [
+        {
+          "order_id": "PO-001",
+          "plant": "São Paulo",
+          "product": "PUMP-A",
+          "quantity": 300,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-02",
+          "customer_order": "CO-001",
+          "priority": "strategic"
+        },
+        {
+          "order_id": "PO-002",
+          "plant": "São Paulo",
+          "product": "PUMP-B",
+          "quantity": 250,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-03",
+          "customer_order": "CO-002",
+          "priority": "standard"
+        },
+        {
+          "order_id": "PO-003",
+          "plant": "São Paulo",
+          "product": "PUMP-C",
+          "quantity": 200,
+          "material": "M42",
+          "material_units_per_product": 1,
+          "production_date": "2026-10-04",
+          "customer_order": "CO-003",
+          "priority": "standard"
+        }
+      ],
+      "customers": [
+        {
+          "order_id": "CO-001",
+          "customer": "Atlas Energy",
+          "product": "PUMP-A",
+          "quantity": 300,
+          "delivery_date": "2026-10-03",
+          "sla_penalty_brl_per_day": "20000.00",
+          "priority": "strategic",
+          "margin_brl": "90000.00"
+        },
+        {
+          "order_id": "CO-002",
+          "customer": "Orion Manufacturing",
+          "product": "PUMP-B",
+          "quantity": 250,
+          "delivery_date": "2026-10-05",
+          "sla_penalty_brl_per_day": "4000.00",
+          "priority": "standard",
+          "margin_brl": "60000.00"
+        },
+        {
+          "order_id": "CO-003",
+          "customer": "Vega Systems",
+          "product": "PUMP-C",
+          "quantity": 200,
+          "delivery_date": "2026-10-06",
+          "sla_penalty_brl_per_day": "2500.00",
+          "priority": "standard",
+          "margin_brl": "40000.00"
+        }
+      ],
+      "demand_units": 750
+    },
+    "logistics": {
+      "standard": {
+        "carrier": "RoadCo",
+        "origin": "Campinas",
+        "destination": "São Paulo",
+        "service": "standard",
+        "lead_time_days": 3,
+        "capacity_units": 500,
+        "cost_brl_per_trip": "5000.00",
+        "reliability": 0.95
+      },
+      "express": {
+        "carrier": "ExpressCo",
+        "origin": "Campinas",
+        "destination": "São Paulo",
+        "service": "express",
+        "lead_time_days": 1,
+        "capacity_units": 500,
+        "cost_brl_per_trip": "18000.00",
+        "reliability": 0.91
+      }
+    }
+  },
+  "finance": {
+    "scenarios": [
+      {
+        "scenario_id": "A",
+        "description": "Esperar Alpha; alocar estoque local ao cliente estratégico",
+        "deliveries": [
+          {
+            "order_id": "PO-001",
+            "customer_order": "CO-001",
+            "strategic": true,
+            "allocations": [
+              {
+                "source": "local",
+                "units": 300,
+                "available_date": "2026-10-01"
+              }
+            ],
+            "production_date": "2026-10-02",
+            "delivery_date": "2026-10-03",
+            "due_date": "2026-10-03",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-002",
+            "customer_order": "CO-002",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "SUP-ALPHA",
+                "units": 250,
+                "available_date": "2026-10-08"
+              }
+            ],
+            "production_date": "2026-10-08",
+            "delivery_date": "2026-10-09",
+            "due_date": "2026-10-05",
+            "delay_days": 4,
+            "penalty_brl": "16000.00"
+          },
+          {
+            "order_id": "PO-003",
+            "customer_order": "CO-003",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "SUP-ALPHA",
+                "units": 200,
+                "available_date": "2026-10-08"
+              }
+            ],
+            "production_date": "2026-10-08",
+            "delivery_date": "2026-10-09",
+            "due_date": "2026-10-06",
+            "delay_days": 3,
+            "penalty_brl": "7500.00"
+          }
+        ],
+        "material_premium_brl": "0.00",
+        "freight_brl": "0",
+        "penalty_brl": "23500.00",
+        "total_cost_brl": "23500.00",
+        "transferred_units": 0,
+        "origin_remaining_units": 500,
+        "origin_safety_breach_units": 0,
+        "expedited": false,
+        "assumptions": [
+          "Alpha entrega o déficit residual em event_date + delay_days; quantidade da compra original não cadastrada.",
+          "Capacidade produtiva sem limite horário; lotes indivisíveis, sem antecipação nem entregas parciais.",
+          "Consumo do safety stock local permitido nesta simulação; reposição de SP requer revisão humana.",
+          "Pedidos alternativos substituem quantidade de Alpha sem multa de cancelamento; confirmar comercialmente."
+        ]
+      },
+      {
+        "scenario_id": "B",
+        "description": "Comprar déficit de Beta, substituindo Alpha",
+        "deliveries": [
+          {
+            "order_id": "PO-001",
+            "customer_order": "CO-001",
+            "strategic": true,
+            "allocations": [
+              {
+                "source": "local",
+                "units": 300,
+                "available_date": "2026-10-01"
+              }
+            ],
+            "production_date": "2026-10-02",
+            "delivery_date": "2026-10-03",
+            "due_date": "2026-10-03",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-002",
+            "customer_order": "CO-002",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "SUP-BETA",
+                "units": 250,
+                "available_date": "2026-10-03"
+              }
+            ],
+            "production_date": "2026-10-03",
+            "delivery_date": "2026-10-04",
+            "due_date": "2026-10-05",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-003",
+            "customer_order": "CO-003",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "SUP-BETA",
+                "units": 200,
+                "available_date": "2026-10-03"
+              }
+            ],
+            "production_date": "2026-10-04",
+            "delivery_date": "2026-10-05",
+            "due_date": "2026-10-06",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          }
+        ],
+        "material_premium_brl": "20250.00",
+        "freight_brl": "0",
+        "penalty_brl": "0.00",
+        "total_cost_brl": "20250.00",
+        "transferred_units": 0,
+        "origin_remaining_units": 500,
+        "origin_safety_breach_units": 0,
+        "expedited": false,
+        "assumptions": [
+          "Alpha entrega o déficit residual em event_date + delay_days; quantidade da compra original não cadastrada.",
+          "Capacidade produtiva sem limite horário; lotes indivisíveis, sem antecipação nem entregas parciais.",
+          "Consumo do safety stock local permitido nesta simulação; reposição de SP requer revisão humana.",
+          "Pedidos alternativos substituem quantidade de Alpha sem multa de cancelamento; confirmar comercialmente."
+        ]
+      },
+      {
+        "scenario_id": "C",
+        "description": "Transferir déficit por expresso de Campinas",
+        "deliveries": [
+          {
+            "order_id": "PO-001",
+            "customer_order": "CO-001",
+            "strategic": true,
+            "allocations": [
+              {
+                "source": "local",
+                "units": 300,
+                "available_date": "2026-10-01"
+              }
+            ],
+            "production_date": "2026-10-02",
+            "delivery_date": "2026-10-03",
+            "due_date": "2026-10-03",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-002",
+            "customer_order": "CO-002",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "Campinas",
+                "units": 250,
+                "available_date": "2026-10-02"
+              }
+            ],
+            "production_date": "2026-10-03",
+            "delivery_date": "2026-10-04",
+            "due_date": "2026-10-05",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-003",
+            "customer_order": "CO-003",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "Campinas",
+                "units": 200,
+                "available_date": "2026-10-02"
+              }
+            ],
+            "production_date": "2026-10-04",
+            "delivery_date": "2026-10-05",
+            "due_date": "2026-10-06",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          }
+        ],
+        "material_premium_brl": "0.00",
+        "freight_brl": "18000.00",
+        "penalty_brl": "0.00",
+        "total_cost_brl": "18000.00",
+        "transferred_units": 450,
+        "origin_remaining_units": 50,
+        "origin_safety_breach_units": 150,
+        "expedited": true,
+        "assumptions": [
+          "Alpha entrega o déficit residual em event_date + delay_days; quantidade da compra original não cadastrada.",
+          "Capacidade produtiva sem limite horário; lotes indivisíveis, sem antecipação nem entregas parciais.",
+          "Consumo do safety stock local permitido nesta simulação; reposição de SP requer revisão humana.",
+          "Pedidos alternativos substituem quantidade de Alpha sem multa de cancelamento; confirmar comercialmente."
+        ]
+      },
+      {
+        "scenario_id": "D",
+        "description": "Transferir até o piso de Campinas por rota padrão e replanejar; residual via Alpha",
+        "deliveries": [
+          {
+            "order_id": "PO-001",
+            "customer_order": "CO-001",
+            "strategic": true,
+            "allocations": [
+              {
+                "source": "local",
+                "units": 300,
+                "available_date": "2026-10-01"
+              }
+            ],
+            "production_date": "2026-10-02",
+            "delivery_date": "2026-10-03",
+            "due_date": "2026-10-03",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-002",
+            "customer_order": "CO-002",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "Campinas",
+                "units": 250,
+                "available_date": "2026-10-04"
+              }
+            ],
+            "production_date": "2026-10-04",
+            "delivery_date": "2026-10-05",
+            "due_date": "2026-10-05",
+            "delay_days": 0,
+            "penalty_brl": "0.00"
+          },
+          {
+            "order_id": "PO-003",
+            "customer_order": "CO-003",
+            "strategic": false,
+            "allocations": [
+              {
+                "source": "Campinas",
+                "units": 50,
+                "available_date": "2026-10-04"
+              },
+              {
+                "source": "SUP-ALPHA",
+                "units": 150,
+                "available_date": "2026-10-08"
+              }
+            ],
+            "production_date": "2026-10-08",
+            "delivery_date": "2026-10-09",
+            "due_date": "2026-10-06",
+            "delay_days": 3,
+            "penalty_brl": "7500.00"
+          }
+        ],
+        "material_premium_brl": "0.00",
+        "freight_brl": "5000.00",
+        "penalty_brl": "7500.00",
+        "total_cost_brl": "12500.00",
+        "transferred_units": 300,
+        "origin_remaining_units": 200,
+        "origin_safety_breach_units": 0,
+        "expedited": false,
+        "assumptions": [
+          "Alpha entrega o déficit residual em event_date + delay_days; quantidade da compra original não cadastrada.",
+          "Capacidade produtiva sem limite horário; lotes indivisíveis, sem antecipação nem entregas parciais.",
+          "Consumo do safety stock local permitido nesta simulação; reposição de SP requer revisão humana.",
+          "Pedidos alternativos substituem quantidade de Alpha sem multa de cancelamento; confirmar comercialmente."
+        ]
+      }
+    ],
+    "proposed_scenario": "D"
+  },
+  "review": {
+    "findings": [
+      {
+        "scenario_id": "C",
+        "category": "policy",
+        "blocking": true,
+        "message": "Transferência rompe safety stock de Campinas em 150 unidades"
+      },
+      {
+        "scenario_id": "all",
+        "category": "missing_information",
+        "blocking": false,
+        "message": "Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora antes da decisão."
+      },
+      {
+        "scenario_id": "all",
+        "category": "assumption",
+        "blocking": false,
+        "message": "Capacidade produtiva simplificada e reposição do safety stock local precisam de validação humana."
+      },
+      {
+        "scenario_id": "all",
+        "category": "assumption",
+        "blocking": false,
+        "message": "Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de Alpha."
+      }
+    ],
+    "selected_scenario": "D"
+  },
+  "recommendation": {
+    "incident_id": "INCIDENT-001",
+    "severity": "high",
+    "recommended_action": "Cenário D: Transferir até o piso de Campinas por rota padrão e replanejar; residual via Alpha",
+    "estimated_cost_brl": "12500.00",
+    "avoided_penalty_brl": "16000.00",
+    "customer_delay_days": 3,
+    "confidence": 0.65,
+    "risks": [
+      "Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora antes da decisão.",
+      "Capacidade produtiva simplificada e reposição do safety stock local precisam de validação humana.",
+      "Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de Alpha."
+    ],
+    "approval_required": true
+  },
+  "approval": {
+    "required": true,
+    "status": "pending",
+    "authority": "operations_manager",
+    "actions_executed": false
+  },
+  "status": "awaiting_approval",
+  "blockers": []
+}

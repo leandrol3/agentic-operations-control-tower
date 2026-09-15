@@ -1,0 +1,38 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	supervisor(supervisor)
+	supply(supply)
+	production(production)
+	logistics(logistics)
+	consolidation(consolidation)
+	finance(finance)
+	challenger(challenger)
+	recommendation(recommendation)
+	human_approval(human_approval)
+	blocked(blocked)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> supervisor;
+	challenger -.-> blocked;
+	challenger -.-> recommendation;
+	consolidation -.-> blocked;
+	consolidation -.-> finance;
+	finance -.-> blocked;
+	finance -.-> challenger;
+	logistics --> consolidation;
+	production --> consolidation;
+	recommendation --> human_approval;
+	supervisor -.-> blocked;
+	supervisor -.-> logistics;
+	supervisor -.-> production;
+	supervisor -.-> supply;
+	supply --> consolidation;
+	blocked --> __end__;
+	human_approval --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

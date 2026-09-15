@@ -1,154 +1,179 @@
 # Agentic Operations Control Tower
 
-Laboratório oficial da disciplina **Multi-Agent Systems, Deployment, and Scaling**, MBA em
-AI Engineering & Multi-Agents — professor Leandro Lopes.
+Laboratório oficial de **Multi-Agent Systems, Deployment, and Scaling**, MBA em AI Engineering &
+Multi-Agents — professor Leandro Lopes. Disciplina de 16 horas, em quatro aulas de quatro horas.
+O professor implementa e demonstra; alunos observam decisões, comportamento e trade-offs.
+Os comandos permitem reprodução posterior, sem exercícios de programação durante a aula.
 
-**Checkpoint atual: `lesson-01-start`.** Base executável para demonstração conduzida pelo professor.
-**Revisão em análise:** branch `codex/lesson-01-start-guided-demo`; a tag publicada permanece na versão anterior.
-A disciplina tem 16 horas (4 × 4h). Os alunos observam e discutem; não programam durante as aulas.
-Os comandos permitem reprodução posterior, sem necessidade de implementar código.
-O objetivo da disciplina é arquitetar, fazer deploy e escalar sistemas multiagente com robustez
-operacional e eficiência de custo. Um único sistema evolui ao longo das quatro aulas.
+**Estado atual: candidato `lesson-01-complete`, em revisão local.** Não há tag complete.
+A tag publicada `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
+o candidato está na branch local `codex/lesson-01-complete`, ainda não publicada.
 
-## O case
+## Proposta de valor e case
 
-A NovaCore Industries coordena fábricas, fornecedores e clientes B2B. Alpha atrasou M42 em sete dias;
-três ordens estão relacionadas ao material/planta, incluindo um cliente estratégico; o impacto ainda não foi confirmado. Investigue estoque, alternativas e multas.
+A NovaCore coordena fábricas, fornecedores e clientes B2B. Alpha atrasa M42 sete dias; três ordens
+estão relacionadas ao material/planta. O sistema reúne evidências, compara cenários e prepara uma
+recomendação rastreável para decisão humana. Relação não confirma atraso de cliente.
 
 Antes: evento → pessoas → emails/planilhas → reuniões → decisão.
-Depois: evento → especialistas em paralelo → cenários → revisão de risco → recomendação → decisão humana.
-Proposta de valor: decisões coordenadas, contextualizadas e rastreáveis, com capacidade operacional ampliada.
-**Time-to-Decision** é a métrica central. Horas para minutos é uma ilustração pedagógica, não benchmark.
+Depois: evento → investigação paralela → cenários → Challenger → recomendação → decisão humana.
+A métrica de negócio é **Time-to-Decision**. Horas para minutos é objetivo ilustrativo, não benchmark.
+A CLI mede apenas execução até a recomendação; a decisão humana permanece pendente.
 
-## Arquitetura deste checkpoint
-
-```text
-CLI → Tools determinísticas → dados CSV/JSON
-             ↓
-       contratos Pydantic
-```
-
-Mock aqui significa execução offline determinística das capabilities. Ainda não há agentes, chamadas
-LLM, escolha automática do plano ou ações operacionais. Os pontos de progressão que o professor demonstrará estão em
-`src/control_tower/agents/` e `graph/`. A aprovação humana é obrigatória no contrato de recomendação.
+## Arquitetura
 
 ```text
-├── AGENTS.md
-├── README.md
-├── pyproject.toml / uv.lock / .python-version / .env.example
-├── docs/
-│   ├── architecture/README.md
-│   ├── case/NOVACORE.md
-│   └── course/             # contexto, validação e lesson-01-runbook.md
-├── data/                 # cinco CSVs e políticas
-├── incidents/incident_001.json
-├── src/control_tower/
-│   ├── main.py / models.py / tools.py / smoke.py
-│   ├── agents/README.md   # progressão do professor
-│   └── graph/README.md    # progressão do professor
-├── labs/01_orchestration/README.md
-└── tests/test_lab.py
+                       ┌─ Supply ──────┐
+Incidente → Supervisor ├─ Production ──┼→ Consolidação → Finance → Challenger
+                       └─ Logistics ───┘                             ↓
+                                       Aprovação pendente ← Recommendation
 ```
+
+Estado Pydantic compartilhado, canais separados por especialista, join explícito no LangGraph.
+Tools acessam CSV/JSON; Finance usa cálculos determinísticos. Mock executa o grafo real sem LLM,
+chave ou rede. Human Approval encerra em `awaiting_approval`; não há execução de ações.
+Veja [arquitetura e diagrama](docs/architecture/README.md) e [premissas do case](docs/case/NOVACORE.md).
 
 ## Pré-requisitos e instalação
 
-Git, Python 3.12 e uv. Instale uv pelas instruções oficiais:
-[instalação do uv](https://docs.astral.sh/uv/getting-started/installation/).
-A instalação inicial precisa de internet; os comandos do laboratório depois funcionam offline.
+Git, Python 3.12 e [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Primeira instalação requer internet; depois o workflow mock funciona offline.
+
+Para esta revisão, use o checkout local existente:
+
+```bash
+cd "/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower"
+git switch codex/lesson-01-complete
+uv python install 3.12
+uv sync --locked
+cp .env.example .env
+uv run pytest -q
+uv run control-tower smoke
+uv run control-tower run INCIDENT-001
+```
+
+Copie `.env.example` apenas se ainda não tiver `.env`; preserve sua configuração existente.
+PowerShell: `Copy-Item .env.example .env`. Não precisa ativar o ambiente virtual.
+Para alunos em outra máquina, após publicação da branch candidata:
 
 ```bash
 git clone https://github.com/leandrol3/agentic-operations-control-tower.git
 cd agentic-operations-control-tower
-git switch codex/lesson-01-start-guided-demo
-uv python install 3.12
+git switch codex/lesson-01-complete
 uv sync --locked
-cp .env.example .env
-uv run pytest
+```
+
+A branch não estará no clone remoto até ser publicada. Para a versão start já publicada, use
+`git checkout lesson-01-start`; nessa versão ainda não existe `run`.
+
+## Demonstração — comandos prontos
+
+```bash
 uv run control-tower doctor
 uv run control-tower incident
 uv run control-tower tools
 uv run control-tower smoke
+uv run control-tower graph
+uv run control-tower run INCIDENT-001
+uv run control-tower run INCIDENT-001 --json
+uv run control-tower run INCIDENT-001 --demo-delay-ms 500
+uv run control-tower run INCIDENT-001 --sequential --demo-delay-ms 500
+uv run control-tower run INCIDENT-001 --fail-specialist logistics
 ```
 
-A revisão está local e ainda não foi publicada: o clone remoto não contém esta branch até a publicação.
-Para revisar agora, use o checkout local existente e execute a partir de `uv sync --locked`.
-Para reproduzir a versão original publicada, substitua a linha `git switch` por
-`git checkout lesson-01-start`; ela ainda exibe `affected_orders` e tem o smoke anterior.
-Não movemos a tag para misturar as duas versões.
+- `doctor`: carregamento, schemas e referências; três `related_orders`, `impact_status: not_assessed`.
+- `tools`: evidencia relações e restrições; não simula cronograma.
+- `smoke`: 12 verificações do fixture oficial; demanda 750, disponível 300, déficit 450;
+  multa **hipotética** de CO-001 com sete dias de atraso = 140.000 BRL. Não é a multa do cenário A.
+- `graph`: Mermaid derivado do grafo real, sem renderização ou rede.
+- `run`: eventos de início/fim reais (ordem dos especialistas pode variar), resumo estável por papel,
+  comparação A–D, Challenger, JSON de Recommendation e solicitação humana.
+- `--json`: todo o estado validado em JSON, sem eventos ou tempos; resultado determinístico.
+- `--demo-delay-ms`: espera artificial limitada a 0–2000 ms por especialista. Não simula desempenho real de LLM.
+- `--sequential`: as mesmas funções com arestas sequenciais; mesma recomendação.
+- `--fail-specialist`: Supply/Production/Logistics podem falhar deliberadamente; a junção bloqueia Finance.
+  Saída **1** é esperada nessa demo. Erro de configuração/fixture: saída **2**. Sucesso: saída **0**.
 
-No Windows PowerShell, substitua `cp .env.example .env` por `Copy-Item .env.example .env`.
-Execute tudo na raiz do checkout; não precisa ativar ambiente virtual.
-Doctor e smoke devem informar `status: ok`, `related_orders: 3`, `impact_status: not_assessed`, `mode: mock` e `orchestration: TODO`.
-Doctor valida carregamento, schemas e referências; smoke também verifica 12 condições do fixture
-oficial e exercita estoque, alternativas, rotas, multas e políticas. Falha retorna código de saída 2.
-O smoke exige os valores do case oficial; fixtures experimentais válidos podem passar no doctor e
-falhar no smoke. Ele não confirma impacto nem resolve o incidente.
-O comando tools exibe estoque, ordens relacionadas, fornecedores alternativos e rotas.
+### Resultado esperado de `run INCIDENT-001`
 
-`.env.example` usa `LLM_MODE=mock`. A CLI lê `.env`; variável do ambiente tem precedência.
-`LLM_MODE=openai` é rejeitado explicitamente neste checkpoint. Não precisa fornecer chave.
+| Cenário | Total incremental BRL | Atrasos CO-001/002/003 | Revisão |
+|---|---:|---|---|
+| A — esperar Alpha | 23.500 | 0 / 4 / 3 | Admissível |
+| B — Beta | 20.250 | 0 / 0 / 0 | Admissível |
+| C — transferência expressa | 18.000 | 0 / 0 / 0 | Bloqueado: safety stock Campinas |
+| D — transferência padrão + replanejamento | 12.500 | 0 / 0 / 3 | Menor custo admissível |
 
-## Guided Demo e reprodução posterior
+D é recomendado sob as premissas documentadas. Multa evitada versus A: 16.000 BRL; economia total:
+11.000 BRL. `customer_delay_days=3` é o máximo entre clientes; Atlas tem atraso zero.
+Challenger pede confirmação de disponibilidade, capacidade e custos ausentes. `confidence=0.65`
+é marcador didático, não probabilidade calibrada. `approval_required=true`, status `pending`,
+`actions_executed=false`. Não existe comando para aprovar ou executar compra/transferência.
 
-Leia [o case e as premissas](docs/case/NOVACORE.md), depois siga
-[o guia de observação da Aula 1](labs/01_orchestration/README.md).
-O professor usa o [runbook da Aula 1](docs/course/lesson-01-runbook.md).
-Para reproduzir uma consulta pronta:
+[Exemplo completo gravado](docs/course/examples/incident-001-mock.txt) ·
+[Estado JSON](docs/course/examples/incident-001-mock.json) ·
+[Exemplo com falha](docs/course/examples/incident-001-failure.txt).
 
-```bash
-uv run python -c "from pathlib import Path; from control_tower.tools import Tools; t=Tools(Path('.')); print(t.get_stock('M42', 'Campinas')); print(t.calculate_penalty('CO-001', 7))"
+## Guias e organização
+
+[Observation Guide](labs/01_orchestration/README.md) para alunos e
+[runbook de quatro horas](docs/course/lesson-01-runbook.md) para o professor.
+[Contexto permanente](docs/course/PROJECT_CONTEXT.md) e [validação](docs/course/VALIDATION.md).
+
+```text
+src/control_tower/
+├── main.py / models.py / tools.py / smoke.py
+├── scenarios.py / presentation.py
+├── agents/{specialists,supervisor,finance,challenger}.py
+└── graph/{state,workflow}.py
+data/ / incidents/ / tests/ / docs/ / labs/
 ```
 
-Esperado: 500 unidades disponíveis, 300 transferíveis preservando safety stock, multa de R$140.000.
-Isso é multa hipotética de sete dias do cliente, não uma conclusão sobre o impacto do incidente.
-Money usa Decimal; multas não usam LLM. Dados completos e premissas ficam documentados no case.
+## Configuração e recursos
 
-## Recursos, iniciar, parar e limpar
+`.env` usa `LLM_MODE=mock`; variável de ambiente tem precedência. `LLM_MODE=openai` é rejeitado
+explicitamente: provider real foi adiado nesta etapa. Nenhuma chave é necessária.
+Python local, sem GPU, modelo local ou Docker. Planejamento conservador: 4 GB de RAM na máquina e
+1 GB de disco livre; não são mínimos medidos. Testado em macOS ARM64/Apple Silicon; Windows/Linux
+seguem comandos equivalentes, mas ainda não foram testados nesta entrega.
 
-Start/Lite: Python local, sem Docker, sem GPU, sem modelo local. Planejamento conservador: 4 GB RAM
-na máquina e 1 GB de disco livre; não são mínimos medidos. Validado em macOS ARM64/Apple Silicon.
-Windows e Linux usam o mesmo fluxo, mas ainda não foram testados nesta entrega.
-Cada comando termina sozinho; Ctrl+C interrompe. Saídas e erros aparecem no terminal.
-Não há serviços persistentes, banco, API ou logs distribuídos neste checkpoint.
+As dependências transitivas de LangGraph não ativam serviços. Tracing é desabilitado no workflow mock.
+Estado só em memória; não há checkpoints persistentes ou retomada. Cada comando termina sozinho;
+Ctrl+C interrompe. Eventos e erros ficam no terminal. Para guardar a execução: acrescente `> demo.txt`.
 
-Para reinstalar, remova **somente o ambiente gerado**, na raiz do projeto:
+Para reinstalar, remova apenas o ambiente gerado na raiz do checkout:
 
 ```bash
 rm -rf .venv
 uv sync --locked
 ```
 
-PowerShell: `Remove-Item -Recurse -Force .venv`, depois `uv sync --locked`.
-Não use `git clean -fdx`: isso apagaria também sua configuração local.
+PowerShell: `Remove-Item -Recurse -Force .venv`. Não use `git clean -fdx` para evitar apagar `.env`.
+Full Lab com Docker Desktop, API, Redis, PostgreSQL e workers chega nas aulas seguintes. Observabilidade,
+load test k6 e simulador de falhas da Aula 4 ainda não existem. Não há endpoints para acessar agora.
 
-Full Lab é a evolução da Aula 3: Docker Desktop, API, Redis, PostgreSQL e workers;
-observabilidade chega na Aula 4. Quantidade de workers e memória serão documentadas e medidas nessas etapas.
-Compose, endpoints de API, habilitação Langfuse, load test k6 e simulador de falhas **ainda não existem**.
-Não é necessário instalar Docker Desktop agora. A evolução deve usar imagens multiarch para Apple Silicon.
-
-## Checkpoints e progressão
-
-| Checkpoint | Conteúdo | Situação |
-|---|---|---|
-| lesson-01-start | Dados, contratos, tools e demonstrações | Esta entrega |
-| lesson-01-complete | LangGraph, especialistas, Supervisor, Challenger, aprovação | Após validação do professor |
-| lesson-02-start / complete | Execução distribuída, Redis/Celery | Planejado |
-| lesson-03-start / complete | FastAPI, PostgreSQL, Docker Compose | Planejado |
-| lesson-04-start / complete | OpenTelemetry, Langfuse, chaos, k6, FinOps | Planejado |
-
-`git tag --list 'lesson-*'` mostra somente checkpoints existentes.
-Trocar para uma tag deixa o Git em detached HEAD; para trabalhar: `git switch -c minha-aula-01`.
-Salve suas alterações antes de mudar de checkpoint. Após publicar checkpoints futuros, será possível:
+## Comparar estados com Git
 
 ```bash
-git fetch --tags
-git checkout lesson-02-start
-git diff lesson-02-start..lesson-02-complete
-uv sync --locked
+git status --short
+git diff lesson-01-start..HEAD
+git diff 171c324..HEAD -- src/control_tower
 ```
 
-Esses comandos da Aula 2 não funcionam enquanto as tags não existirem.
-Veja [a estrutura final proposta](docs/architecture/README.md) e [o contexto completo](docs/course/PROJECT_CONTEXT.md).
+A primeira comparação inclui a correção pedagógica do start; a segunda isola a progressão complete.
+Salve suas alterações antes de trocar de checkout. Tags deixam o Git em detached HEAD; use uma branch
+própria caso queira experimentar depois. Não movemos tags aprovadas.
+
+| Checkpoint | Estado |
+|---|---|
+| lesson-01-start | Tag original publicada e preservada |
+| Start revisado (171c324) | Aprovado, commit local |
+| lesson-01-complete | Candidato local em revisão, sem tag |
+| lesson-02-start / complete | Redis/Celery: futuro |
+| lesson-03-start / complete | FastAPI/PostgreSQL/Docker: futuro |
+| lesson-04-start / complete | Observabilidade/chaos/escala/FinOps: futuro |
+
+Após criação/publicação das tags futuras: `git fetch --tags`, `git checkout lesson-02-start`,
+`git diff lesson-02-start..lesson-02-complete`. Essas tags ainda não existem.
 
 ## Seis perguntas de engenharia
 
@@ -161,14 +186,15 @@ Veja [a estrutura final proposta](docs/architecture/README.md) e [o contexto com
 
 ## Troubleshooting
 
-- `uv` não encontrado: reinicie o terminal após instalar e confira o PATH.
-- Python incompatível: execute `uv python install 3.12` e `uv sync --locked`.
-- Arquivo data ausente: execute na raiz do checkout ou use `control-tower doctor --root CAMINHO` via uv.
-- Erro de provider: ajuste `.env` e a variável de ambiente para `LLM_MODE=mock`.
-- Erro de rede ao instalar: confira proxy e conectividade com o índice de pacotes; não desabilite TLS.
-- Erro de validação: restaure o dado editado ou confira tipos, IDs, reservas e datas no case.
-- Tag não encontrada após clone: o responsável ainda precisa publicar o commit e a tag no GitHub.
-- Teste falhou: preserve a mensagem completa, rode `uv run control-tower doctor` e confira `git status`.
+- `uv` não encontrado: reinicie o terminal e confira PATH após instalar.
+- Python incompatível: `uv python install 3.12`, depois `uv sync --locked`.
+- Dados ausentes: execute na raiz ou use `--root CAMINHO`.
+- OpenAI rejeitado: ajuste `.env` e variável de ambiente para `LLM_MODE=mock`.
+- Erro de instalação: confira conexão/proxy; não desabilite TLS.
+- Smoke falha: confira o fixture oficial. Doctor pode aceitar um subconjunto válido que não atende à demo.
+- `run` bloqueia: leia o especialista/erro ou o relatório do Challenger; não existe fallback de decisão inventada.
+- Mais lento no primeiro comando: importação de dependências também custa tempo; não comparar partida fria com quente.
+- Branch/tag não encontrada: diferencie candidato local de versão publicada.
+- Teste falha: preserve a saída completa, rode doctor e confira `git status`.
 
-Não comite `.env`, tokens ou chaves. Aprovação de gerente e recomendação serão demonstradas na progressão futura;
-o start não aplica políticas nem executa compras ou transferências.
+Nunca comite `.env`, tokens ou chaves.
