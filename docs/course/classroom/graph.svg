@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810" role="img" aria-labelledby="title desc">
+<title id="title">Coordenação NovaCore — LangGraph</title>
+<desc id="desc">Supervisor distribui três especialistas; join aguarda todos; Finance, Challenger, Recommendation e aprovação humana. Erros podem bloquear.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#526880"/></marker></defs>
+<rect width="1440" height="810" fill="#f5f7fb"/>
+<text x="55" y="62" font-family="sans-serif" font-size="30" fill="#17314b">Uma organização de responsabilidades explícitas</text>
+<path data-source="__start__" data-target="supervisor" d="M200 165 C232.5 165, 232.5 165, 265 165" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="challenger" data-target="recommendation" d="M660 420 C600.0 420, 600.0 420, 540 420" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="consolidation" data-target="finance" d="M1125.0 195 C1125.0 195, 1125.0 390, 1125.0 390" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="finance" data-target="challenger" d="M1000 420 C940.0 420, 940.0 420, 880 420" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="logistics" data-target="consolidation" d="M795 265 C897.5 265, 897.5 165, 1000 165" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="production" data-target="consolidation" d="M795 165 C897.5 165, 897.5 165, 1000 165" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="recommendation" data-target="human_approval" d="M425.0 450 C425.0 450, 425.0 590, 425.0 590" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="supervisor" data-target="logistics" d="M475 165 C535.0 165, 535.0 265, 595 265" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="supervisor" data-target="production" d="M475 165 C535.0 165, 535.0 165, 595 165" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="supervisor" data-target="supply" d="M475 165 C535.0 165, 535.0 65, 595 65" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="supply" data-target="consolidation" d="M795 65 C897.5 65, 897.5 165, 1000 165" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<path data-source="human_approval" data-target="__end__" d="M540 620 C600.0 620, 600.0 620, 660 620" fill="none" stroke="#526880" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="55" y="135" width="145" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="127.5" y="172" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Incidente</text>
+<rect x="265" y="135" width="210" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="370.0" y="172" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Supervisor</text>
+<rect x="595" y="35" width="200" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="695.0" y="72" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Supply</text>
+<rect x="595" y="135" width="200" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="695.0" y="172" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Production</text>
+<rect x="595" y="235" width="200" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="695.0" y="272" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Logistics</text>
+<rect x="1000" y="135" width="250" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="1125.0" y="172" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Join / consolidação</text>
+<rect x="1000" y="390" width="250" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="1125.0" y="427" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Finance</text>
+<rect x="660" y="390" width="220" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="770.0" y="427" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Challenger</text>
+<rect x="310" y="390" width="230" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="425.0" y="427" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Recommendation</text>
+<rect x="310" y="590" width="230" height="60" rx="12" fill="#dcefeb" stroke="#c8d4df" stroke-width="2"/>
+<text x="425.0" y="627" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Aprovação pendente</text>
+<rect x="660" y="590" width="220" height="60" rx="12" fill="#ffffff" stroke="#c8d4df" stroke-width="2"/>
+<text x="770.0" y="627" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">Fim: sem ações</text>
+<text x="870" y="276" font-family="sans-serif" font-size="20" fill="#526880">aguarda os 3</text>
+<rect x="55" y="712" width="1330" height="58" rx="10" fill="#f8e9dc"/>
+<text x="77" y="748" font-family="sans-serif" font-size="21" fill="#703c20">Saídas de bloqueio: Supervisor, Join, Finance ou Challenger → blocked → fim.</text>
+<text x="55" y="797" font-family="sans-serif" font-size="17" fill="#526880">Caminho principal extraído do grafo real. Mock: coordenação real, especialistas determinísticos; sem raciocínio de LLM.</text>
+</svg>

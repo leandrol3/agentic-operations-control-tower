@@ -1,6 +1,19 @@
 # Validação de lesson-01-complete
 
-## Resultado atual
+## Revisão de experiência de aula — 15/09/2026
+
+- Suíte completa: **120 testes passaram** em 7,05 s.
+- Smoke: 12 verificações passaram; fluxo completo em mock terminou em awaiting_approval.
+- Cenário D: custo incremental R$ 12.500; multa evitada R$ 16.000; nenhuma ação executada.
+- Sete views testadas: summary, state, specialists, coordination, scenarios, challenger e recommendation.
+- Testes verificam limite de 20 linhas por 96 colunas e ausência de conclusão antecipada nas views iniciais.
+- Arquitetura central, agentes, cálculos financeiros e contratos permanecem iguais à tag aprovada.
+- Materiais offline incluem SVG, trechos de código e representações textuais de fallback.
+- HTML/SVG não tiveram inspeção visual no navegador integrado: acesso a arquivo local foi bloqueado.
+  As dimensões das saídas de terminal foram verificadas pelos testes.
+- Publicação na main autorizada pelo professor; nenhuma tag criada ou movida.
+
+## Validação anterior do checkpoint técnico
 
 - Suíte completa: 91 testes passaram em macOS ARM64, Python 3.12.3 e LangGraph 1.2.11.
 - Smoke: 12 checks do fixture oficial passaram.

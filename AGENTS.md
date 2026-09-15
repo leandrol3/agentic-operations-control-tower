@@ -2,7 +2,8 @@
 Leia completamente docs/course/ antes de alterar código. PROJECT_CONTEXT.md é a fonte de requisitos.
 Preserve decisões e checkpoints existentes; não mova tags aprovadas silenciosamente.
 Escopo atual: lesson-01-complete aprovado, Demos 5–8. Não avançar à Aula 2.
-Revisão concluída pelo professor e publicação autorizada. Preserve as tags aprovadas.
+Rodada atual: experiência de aula e apresentação didática. Preserve arquitetura central e tags.
+Não publicar esta revisão sem solicitação. Não transformar a aula em live coding.
 Tag lesson-01-start permanece intacta; revisão aprovada do start está no commit 171c324.
 Um único sistema evolui nas quatro aulas; não criar quatro aplicações.
 Python 3.12, uv, Pydantic e LangGraph. Nesta entrega apenas mock; OpenAI foi adiado.
@@ -11,7 +12,8 @@ Agentes acessam capabilities em tools, nunca CSVs diretamente. Aprovação human
 Modo mock deve funcionar offline após instalação, sem chave e sem chamadas pagas.
 Não adicione infraestrutura futura antes de surgir a necessidade didática.
 Disciplina: 16 horas, quatro aulas de quatro horas. Alunos NÃO programam durante as aulas.
-Método: teoria → problema → demonstração/implementação pelo professor → observação → discussão → reflexão.
+Método: contexto → teoria → problema → demonstração selecionada → discussão → reflexão.
+Reservar 60–80 min para contexto e teoria. Código só quando esclarece decisão arquitetural.
 Otimize demonstração ao vivo, comparação visual/Git entre checkpoints e reprodução posterior.
 Preserve datasets, models, tools, CLI, fixtures, configuração, testes e mock prontos; evite boilerplate ao vivo.
 Labs são Guided Demo / Observation Guides; docs/course/lesson-01-runbook.md orienta o professor.

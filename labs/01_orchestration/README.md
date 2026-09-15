@@ -1,87 +1,59 @@
 # Aula 1 — Guided Demo / Observation Guide
 
-Durante a aula, o professor implementa e demonstra. Os alunos acompanham, formulam hipóteses e
-comparam comportamentos; não há programação pelos alunos. Após a aula, os comandos permitem
-reproduzir o que já está disponível. O [runbook do professor](../../docs/course/lesson-01-runbook.md)
-organiza a condução e os fallbacks.
+## O que vamos compreender
 
-## Arquitetura antes e depois
+Como um problema empresarial de coordenação pode ser decomposto em responsabilidades, estado,
+coordenação, paralelismo, crítica e aprovação humana. O professor explica e demonstra; alunos
+observam e discutem. Não há programação durante a aula.
 
-**Antes do start:** incidente → consultas dispersas → planilhas → discussão sem contrato comum.
+> Um agente é uma unidade de inteligência. Um sistema multiagente é uma organização.
+> Colocar essa organização em produção é um problema de engenharia.
 
-**Start executável:**
+As seis perguntas: Who decides? Where is the state? What happens when it fails? Can I observe it?
+What does it cost? Should this even be an agent?
 
-```text
-INCIDENT-001 → CLI → Tools → CSV/JSON
-                     ↕
-                 Pydantic
-```
+## Antes e depois
 
-**Depois, complete aprovado executável em mock:**
+Antes: evento → pessoas → planilhas → reuniões → decisão.
+Depois: evento → evidências → coordenação → cenários → crítica → recomendação → decisão humana.
 
-```text
-Incidente → Supervisor → estado compartilhado
-                         ├─ Supply ──────┐
-                         ├─ Production ──┼→ consolidação → Finance → Challenger
-                         └─ Logistics ───┘                            ↓
-                                             recomendação → aprovação humana
-```
+Veja o [material visual](../../docs/course/classroom/index.html), que abre localmente sem rede.
+O professor seleciona a tela correspondente ao conceito. Mock executa o grafo real com especialistas
+ determinísticos: não há raciocínio de LLM nem ação operacional automática.
 
-LangGraph e seus nós são demonstrados pelo professor. O start já contém o boilerplate:
-dados, contratos, tools, CLI, configuração, fixtures, testes e modo offline.
+## O que observar — e como reproduzir depois
 
-## Demonstrações disponíveis no start
+Na branch de revisão `codex/lesson-01-classroom`, após instalação indicada no README:
 
-Na raiz do checkout revisado, com dependências instaladas conforme README:
+| Conceito | Comando | Output esperado | Discussão / aprendizado |
+|---|---|---|---|
+| Evento e tempo | `uv run control-tower incident` | Alpha atrasa 7 dias; data fixa | Atraso do fornecedor não é atraso de todos os clientes |
+| Capabilities | `uv run control-tower show INCIDENT-001 summary` | SP 300/750/450; Campinas 500/piso 200/transferível 300 | Disponível não significa transferível sem risco |
+| Estado | `uv run control-tower show INCIDENT-001 state` | Canais separados por responsável | Quem escreve qual evidência? |
+| Especialistas | `uv run control-tower show INCIDENT-001 specialists` | Supply, Production e Logistics | Papéis se justificam por responsabilidade |
+| Coordenação | `uv run control-tower show INCIDENT-001 coordination --demo-delay-ms 500` | Ramos independentes e join após todos | Espera artificial serve para visualizar, não medir LLM |
+| Controle sequencial | `uv run control-tower show INCIDENT-001 coordination --sequential --demo-delay-ms 500` | Mesmos papéis, em sequência | O que é dependência e o que pode ser paralelo? |
+| Finance | `uv run control-tower show INCIDENT-001 scenarios` | Tabela A–D e restrições | Conta correta depende de premissas |
+| Crítica | `uv run control-tower show INCIDENT-001 challenger` | Plano → premissas → desafios → riscos | Crítica é distinta de gerar outra análise |
+| Recomendação | `uv run control-tower show INCIDENT-001 recommendation` | awaiting_approval, actions_executed=false | Validação não autoriza execução |
 
-| Conceito demonstrado | Comando | Output esperado | Pergunta para discussão | Aprendizado |
-|---|---|---|---|---|
-| Prontidão da base | `uv run control-tower doctor` | `status: ok`, `related_orders: 3`, `impact_status: not_assessed` | Carregar dados significa resolver um incidente? | Prontidão e resultado são coisas distintas. |
-| Evento e tempo | `uv run control-tower incident` | `event_date: 2026-10-01`, `delay_days: 7` | Qual cliente atrasará e por quantos dias? | O evento não contém essa resposta. |
-| Capabilities e restrições | `uv run control-tower tools` | SP: 300 disponíveis; três ordens; Beta: 450 unidades a 145 BRL; duas rotas | Transferência resolve tudo? | Estoque livre, safety stock, custo e prazo competem. |
-| Evidência reproduzível | `uv run control-tower smoke` | 12 checks; demanda 750; déficit 450; multa hipotética `140000.00` | Essa multa foi realmente incorrida? | Smoke valida o case, não confirma impacto. |
-| Falha explícita | `uv run pytest -q tests/test_lab.py -k incomplete` | Testes passam ao comprovar rejeição dos fixtures incompletos | Devemos mostrar sucesso se Beta sumiu? | Ausência de evidência deve ficar visível. |
+As primeiras views não executam Finance, Challenger ou recomendação. A tabela de cenários usa a
+revisão de regras existente para admissibilidade, mas não anuncia a escolha final. Cada comando
+reexecuta o case até a etapa necessária; não retoma uma sessão anterior.
 
-Leia a [convenção temporal](../../docs/case/NOVACORE.md): material chega no início do dia, produção
-ocorre nesse dia e entrega ao cliente pode ocorrer no dia seguinte. Ordens relacionadas não são
-ordens com atraso confirmado. `not_assessed` não significa ausência de impacto.
+## Quatro distinções para levar da aula
 
-## Demos 5–8 — o que observar no complete
+- `customer_delay_days=3` é o maior atraso entre clientes, não o atraso do cliente estratégico.
+- O cliente estratégico pode ter atraso zero.
+- `avoided_penalty` é diferente de economia líquida incremental.
+- `confidence=0.65` é didático/fixo neste estágio, não probabilidade calibrada.
 
-No complete aprovado, execute `uv run control-tower run INCIDENT-001` e observe os papéis abaixo.
-Use `--json` para inspecionar estado/evidências; `uv run control-tower graph` mostra o grafo real.
-Compare `--demo-delay-ms 500` com `--sequential --demo-delay-ms 500`; a espera é artificial.
-Use `--fail-specialist logistics` para observar o bloqueio no join (saída 1 esperada).
+Leia as [premissas completas](../../docs/case/NOVACORE.md) depois da aula. Capacidade, prazo de Alpha,
+reposição de estoque e custos de cancelamento ainda exigem confirmação humana.
 
-| Conceito | Antes → depois | Evidência a observar | Pergunta | Aprendizado |
-|---|---|---|---|---|
-| Shared state e especialistas | Saídas isoladas → evidências por responsabilidade | Cada especialista escreve sua parte do estado | Quem pode sobrescrever qual informação? | Estado é contrato de coordenação. |
-| Supervisor e LangGraph | Chamadas manuais → plano e transições explícitas | Especialistas selecionados e transições visíveis | Quem decide e como encerra? | Coordenação precisa de limites. |
-| Paralelismo e consolidação | Investigação sequencial → ramos independentes e junção | Resultados reunidos antes de Finance | O que acontece se um ramo faltar? | Concorrência exige sincronização. |
-| Finance | Evidências → comparação determinística de cenários | Custo com premissas de datas e alocação | Onde nasce o atraso do cliente? | LLM não substitui cálculo econômico. |
-| Challenger | Plano candidato → premissas questionadas | Safety stock e evidência insuficiente destacados | O plano é barato porque ignorou um risco? | Questionar agrega uma função distinta. |
-| Recomendação e aprovação | Prosa → contrato validado → decisão humana | Schema válido não implica ação autorizada | Quem assume a decisão? | Recomendação não é execução. |
+Ausência de evidência precisa aparecer como erro e não como conclusão. Os testes continuam no
+repositório; a aula usa apenas uma nota curta, sem antecipar resiliência operacional.
 
-## Resultado e perguntas finais
-
-Finance compara A=23.500, B=20.250, C=18.000 e D=12.500 BRL incrementais. Challenger rejeita C por
-romper o piso de Campinas. D é recomendado com atraso de três dias para CO-003 e zero para Atlas.
-A solicitação termina pendente de aprovação humana, sem ações. B elimina atrasos a custo maior:
-“Se relacionamento com o cliente tiver outro peso, você escolheria D?”
-
-O cálculo não afirma impacto real ocorrido. Premissas de capacidade, disponibilidade e custos
-continuam exigindo confirmação. `confidence=0.65` não é probabilidade calibrada.
-
-## Comparação Git para revisão e reprodução
-
-A tag original não foi movida. O start revisado aprovado é o commit `171c324`.
-
-```bash
-git status --short
-git diff 171c324..HEAD -- src/control_tower
-git diff lesson-01-start..HEAD -- src/control_tower labs docs/course
-```
-
-O primeiro diff isola o complete commitado; o segundo inclui correções aprovadas do start.
-Use a tag lesson-01-complete para reproduzir esta entrega. Alunos observam e reproduzem;
-nenhuma implementação é solicitada durante a aula.
+Para estudo posterior: `uv run control-tower run INCIDENT-001 --json` e comparação Git entre versões.
+O professor usa [o runbook](../../docs/course/lesson-01-runbook.md); não precisa percorrer grandes diffs.
+Tags existentes permanecem intactas e ainda não contêm estas novas views.

@@ -1,0 +1,3 @@
+INVESTIGAÇÃO INCOMPLETA
+logistics: Falha simulada pelo professor
+Ausência de evidência precisa aparecer como erro, não como conclusão.

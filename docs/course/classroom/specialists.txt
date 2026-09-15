@@ -1,0 +1,10 @@
+SPECIALISTS | papéis determinísticos em mock
+
+Supply      estoque + fornecedores: SP 300, Campinas 500
+            transferência preservando piso: 300
+Production  ordens + clientes: demanda 750
+            PO-001, PO-002, PO-003
+Logistics   rotas: normal 3 dias / expressa 1 dia
+
+Tools controlam o acesso; agentes não leem CSV diretamente.
+Resultado = evidência tipada OU erro. Ainda não há avaliação de cenários.

@@ -1,0 +1,15 @@
+RECOMMENDATION → awaiting_approval
+
+Cenário D | custo incremental: R$ 12.500
+Multa evitada vs A: R$ 16.000
+Economia líquida incremental vs A: R$ 11.000
+Maior atraso: 3 dias | cliente estratégico: 0 dias
+confidence = 0.65 (didático/fixo, não calibrado)
+Riscos pendentes: 3; confirmar premissas antes da decisão.
+
+approval_required = true
+status = awaiting_approval
+approval = pending | responsável: operations_manager
+actions_executed = false
+
+Uma recomendação válida não é uma decisão autorizada.

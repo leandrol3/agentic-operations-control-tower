@@ -1,0 +1,236 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NovaCore · Aula 1</title><style>body{margin:0;background:#f5f7fb;color:#17314b;font-family:Arial,sans-serif}header{padding:16px 32px;border-bottom:1px solid #c8d4df;display:flex;gap:22px;align-items:center}select,button{font:inherit;padding:8px;background:white;border:1px solid #b9c9d8;border-radius:6px}main{padding:24px 38px}section{display:none}section.active{display:block}h1{font-size:32px;margin:0 0 20px}p,li{font-size:25px;line-height:1.45}pre{font-family:ui-monospace,Menlo,monospace;font-size:clamp(14px,1.55vw,22px);line-height:1.55;white-space:pre-wrap;margin:0}code{font-family:inherit}.subtitle{font-size:17px;color:#53667b;margin-top:16px}.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:50px}.card{background:white;padding:26px;border:1px solid #c8d4df;border-radius:16px}.date{font-size:32px;font-weight:bold;color:#197c70}.code pre{font-size:clamp(13px,1.16vw,18px);line-height:1.4}.code h1{font-size:26px}.code p{font-size:16px}img{width:100%;max-height:calc(100vh - 130px)}</style>
+<header><strong>NovaCore · Aula 1</strong><label>Conceito <select id="choose">
+<option value="context">Contexto</option>
+<option value="theory">Teoria</option>
+<option value="timeline">Timeline</option>
+<option value="graph">Arquitetura</option>
+<option value="summary">SP / Campinas</option>
+<option value="state">Shared state</option>
+<option value="specialists">Especialistas</option>
+<option value="coordination">Coordenação</option>
+<option value="scenarios">Cenários A–D</option>
+<option value="challenger">Challenger</option>
+<option value="recommendation">Recomendação</option>
+<option value="shared-state">Código · Shared state: canais de evidência</option>
+<option value="specialist-output">Código · Specialist output: Supply</option>
+<option value="supervisor">Código · Supervisor: plano explícito</option>
+<option value="langgraph-edges">Código · LangGraph: nós e transições</option>
+<option value="parallel-join">Código · Paralelismo: esperar todos antes de consolidar</option>
+<option value="finance">Código · Finance: composição determinística de custo</option>
+<option value="challenger">Código · Challenger: saldo, piso e política de frete</option>
+<option value="recommendation">Código · Recommendation: contrato existente</option>
+</select></label><button id="back">←</button><button id="next">→</button></header><main>
+<section id="context" class="active"><h1>NovaCore: o problema é coordenação</h1><p>Um atraso de M42 conecta fornecedores, estoque, produção, logística e clientes.</p><p>Antes: evento → pessoas → planilhas → reuniões → decisão.</p><p>Objetivo: reduzir o tempo entre evento, investigação e decisão humana.</p><p><strong>Quem precisa saber o quê — e em que momento?</strong></p><p class="subtitle">Empresa e números fictícios; horas para minutos é ilustração, não benchmark.</p></section>
+<section id="theory" class=""><h1>Do agente à organização</h1><p>Um agente é uma unidade de inteligência.<br>Um sistema multiagente é uma organização.<br>Colocar essa organização em produção é um problema de engenharia.</p><ul><li>Who decides? · Where is the state?</li><li>What happens when it fails? · Can I observe it?</li><li>What does it cost? · Should this even be an agent?</li></ul><p class="subtitle">Mock demonstra state, roles, graph, orchestration, parallelism, consolidation e contracts — sem raciocínio de LLM.</p></section>
+<section id="timeline" class=""><h1>O evento não confirma atraso do cliente</h1><div class="timeline"><div class="card"><div class="date">01/10</div><p>Evento; estoque inicial.<br>Alpha era esperado.</p></div><div class="card"><div class="date">02/10</div><p>Expresso chega se sair dia 1.<br>Produção usa material de manhã.</p></div><div class="card"><div class="date">03/10</div><p>Beta chega se pedido dia 1.<br>Prazo de CO-001.</p></div><div class="card"><div class="date">08/10</div><p>Novo prazo Alpha.<br>Produzir dia 8 permite entregar dia 9.</p></div></div><p>Produção durante D → entrega até o fim de D+1. Dias corridos, datas fixas.</p><p class="subtitle">Time-to-Decision inclui a decisão humana, ainda pendente; a duração da CLI mede só o workflow.</p></section>
+<section id="graph" class=""><img src="graph.svg" alt="Grafo real de coordenação com join e aprovação humana"/></section>
+<section id="summary" class=""><pre>EVIDÊNCIAS | INCIDENT-001 | unidades de M42; valores em BRL
+
+São Paulo  disponível 300 | demanda 750 | déficit 450
+Campinas   disponível 500 | safety stock 200
+           transferível sem romper o piso: 300
+Beta       capacidade 450 | custo/un. 145
+           prêmio/un. 45 sobre Alpha
+Logística  normal: 3 dias, 5.000 / viagem
+           expressa: 1 dia, 18.000 / viagem
+
+3 ordens relacionadas; impacto por cliente ainda não avaliado.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 summary</p></section>
+<section id="state" class=""><pre>SHARED STATE | retrato após a investigação
+
+incident_id    INCIDENT-001
+plan           supply + production + logistics
+canal          responsável       evidência
+supply         Supply            SP 300; Campinas 500
+production     Production        3 ordens; demanda 750
+logistics      Logistics         rotas normal e expressa
+investigation  Consolidação      3 resultados reunidos
+status         investigating
+
+Cada especialista escreve somente em seu canal tipado.
+Mesmo incidente; responsabilidades distintas; nenhuma alocação executada.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 state</p></section>
+<section id="specialists" class=""><pre>SPECIALISTS | papéis determinísticos em mock
+
+Supply      estoque + fornecedores: SP 300, Campinas 500
+            transferência preservando piso: 300
+Production  ordens + clientes: demanda 750
+            PO-001, PO-002, PO-003
+Logistics   rotas: normal 3 dias / expressa 1 dia
+
+Tools controlam o acesso; agentes não leem CSV diretamente.
+Resultado = evidência tipada OU erro. Ainda não há avaliação de cenários.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 specialists</p></section>
+<section id="coordination" class=""><pre>COORDINATION | paralelo | espera artificial: 0 ms/especialista
+
+supervisor     início
+supervisor     fim
+logistics      início
+logistics      fim
+production     início
+production     fim
+supply         início
+supply         fim
+consolidation  início
+consolidation  fim
+
+Join: só depois dos três resultados. Fluxo interrompido aqui.
+Ordem dos ramos pode variar; compare ao vivo com espera artificial.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 coordination</p></section>
+<section id="scenarios" class=""><pre>CENÁRIOS | BRL incrementais | atrasos CO-001/002/003 (dias)
+
+ID Ação                    Custo   Atrasos  Multas  Restrição        Admissível
+A  Esperar Alpha          23.500     0/4/3  23.500  sem violação*    sim*
+B  Comprar Beta           20.250     0/0/0       0  sem violação*    sim*
+C  Transferir expresso    18.000     0/0/0       0  piso -150        não
+D  Transferir/replanejar  12.500     0/0/3   7.500  sem violação*    sim*
+
+* Sob as regras do case; premissas ainda exigem confirmação.
+Custo = prêmio de material + frete + multas; não é custo total do pedido.
+customer_delay_days=3: maior atraso entre clientes, não o estratégico.
+O cliente estratégico pode ter atraso zero (neste case: CO-001).
+avoided_penalty é multa evitada; difere de economia líquida incremental.
+confidence=0.65 é didático/fixo; não é probabilidade calibrada.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 scenarios</p></section>
+<section id="challenger" class=""><pre>CHALLENGER | revisão crítica
+
+Candidate Plan  Finance propõe cenário D
+      ↓
+Assumptions     prazo Alpha; capacidade; custos de reposição/cancelamento
+      ↓
+Challenges
+  C: Transferência rompe safety stock de Campinas em 150 unidades
+      ↓
+Remaining Risks 3 pontos: prazo/capacidade, reposição e custos ausentes.
+                Confirmações humanas continuam pendentes.
+
+O Challenger não recalcula o cenário.
+Ele testa se a conclusão ignora premissas, riscos ou evidências.
+No código, também verifica consistência aritmética e temporal.
+Revisar consistência não é construir uma nova simulação.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 challenger</p></section>
+<section id="recommendation" class=""><pre>RECOMMENDATION → awaiting_approval
+
+Cenário D | custo incremental: R$ 12.500
+Multa evitada vs A: R$ 16.000
+Economia líquida incremental vs A: R$ 11.000
+Maior atraso: 3 dias | cliente estratégico: 0 dias
+confidence = 0.65 (didático/fixo, não calibrado)
+Riscos pendentes: 3; confirmar premissas antes da decisão.
+
+approval_required = true
+status = awaiting_approval
+approval = pending | responsável: operations_manager
+actions_executed = false
+
+Uma recomendação válida não é uma decisão autorizada.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 recommendation</p></section>
+<section id="shared-state" class=""><div class="code"><h1>Shared state: canais de evidência</h1><p>src/control_tower/graph/state.py:120–129</p><pre>
+
+class WorkflowState(Contract):
+    incident: Incident
+    plan: tuple[Specialist, ...] = ()
+    supervisor_reason: str = &#x27;&#x27;
+    supply: Result[SupplyEvidence] | None = None
+    production: Result[ProductionEvidence] | None = None
+    logistics: Result[LogisticsEvidence] | None = None
+    investigation: Investigation | None = None</pre></div></section>
+<section id="specialist-output" class=""><div class="code"><h1>Specialist output: Supply</h1><p>src/control_tower/agents/specialists.py:7–20</p><pre>def supply(tools: Tools, incident: Incident) -&gt; SupplyEvidence:
+    alternatives = tools.get_alternative_suppliers(incident.material, incident.supplier_id)
+    beta = next((s for s in alternatives if s.supplier_id == &#x27;SUP-BETA&#x27;), None)
+    if beta is None:
+        raise ValueError(&#x27;Fornecedor alternativo SUP-BETA ausente; investigação incompleta&#x27;)
+    return SupplyEvidence(
+        local=tools.get_stock(incident.material, incident.plant),
+        origin=tools.get_stock(incident.material, &#x27;Campinas&#x27;),
+        baseline=tools.get_supplier(incident.supplier_id), alternative=beta,
+    )
+
+
+def production(tools: Tools, incident: Incident) -&gt; ProductionEvidence:
+    orders = tools.get_orders(incident.material, incident.plant)</pre></div></section>
+<section id="supervisor" class=""><div class="code"><h1>Supervisor: plano explícito</h1><p>src/control_tower/agents/supervisor.py:6–17</p><pre>    incident = state.incident
+    if (incident.incident_id, incident.material, incident.plant, incident.supplier_id) != (
+        &#x27;INCIDENT-001&#x27;, &#x27;M42&#x27;, &#x27;São Paulo&#x27;, &#x27;SUP-ALPHA&#x27;
+    ):
+        return {&#x27;blockers&#x27;: (&#x27;Tipo de incidente fora do escopo desta demonstração&#x27;,),
+                &#x27;supervisor_reason&#x27;: &#x27;Sem plano conhecido; requer investigação humana&#x27;}
+    return {&#x27;plan&#x27;: (&#x27;supply&#x27;, &#x27;production&#x27;, &#x27;logistics&#x27;),
+            &#x27;supervisor_reason&#x27;: &#x27;Investigar material, ordens/clientes e rotas; ramos independentes&#x27;}
+
+
+def consolidate(state: WorkflowState) -&gt; dict:
+    &quot;&quot;&quot;Join semântico após a barreira do grafo: ausência/erro impede Finance.&quot;&quot;&quot;</pre></div></section>
+<section id="langgraph-edges" class=""><div class="code"><h1>LangGraph: nós e transições</h1><p>src/control_tower/graph/workflow.py:98–120</p><pre>    builder = StateGraph(WorkflowState)
+    builder.add_node(&#x27;supervisor&#x27;, visible(&#x27;supervisor&#x27;, supervisor.supervise))
+    for name in SPECIALISTS:
+        builder.add_node(name, specialist_node(name))
+    builder.add_node(&#x27;consolidation&#x27;, visible(&#x27;consolidation&#x27;, supervisor.consolidate))
+    builder.add_node(&#x27;finance&#x27;, visible(&#x27;finance&#x27;, finance_node))
+    builder.add_node(&#x27;challenger&#x27;, visible(&#x27;challenger&#x27;, lambda s: {
+        &#x27;review&#x27;: challenger.challenge(tools, s.investigation, s.finance)}))
+    builder.add_node(&#x27;recommendation&#x27;, visible(&#x27;recommendation&#x27;, recommendation_node))
+    builder.add_node(&#x27;human_approval&#x27;, visible(&#x27;human_approval&#x27;, human_approval))
+    builder.add_node(&#x27;blocked&#x27;, visible(&#x27;blocked&#x27;, blocked))
+    builder.add_edge(START, &#x27;supervisor&#x27;)
+    if sequential:
+        builder.add_conditional_edges(&#x27;supervisor&#x27;, lambda s: &#x27;blocked&#x27; if s.blockers else &#x27;supply&#x27;,
+                                      {&#x27;blocked&#x27;: &#x27;blocked&#x27;, &#x27;supply&#x27;: &#x27;supply&#x27;})
+        builder.add_edge(&#x27;supply&#x27;, &#x27;production&#x27;)
+        builder.add_edge(&#x27;production&#x27;, &#x27;logistics&#x27;)
+        builder.add_edge(&#x27;logistics&#x27;, &#x27;consolidation&#x27;)
+    else:
+        builder.add_conditional_edges(&#x27;supervisor&#x27;, route_supervisor,
+                                      {n: n for n in (*SPECIALISTS, &#x27;blocked&#x27;)})
+        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.
+        builder.add_edge(list(SPECIALISTS), &#x27;consolidation&#x27;)</pre></div></section>
+<section id="parallel-join" class=""><div class="code"><h1>Paralelismo: esperar todos antes de consolidar</h1><p>src/control_tower/graph/workflow.py:109–123</p><pre>    builder.add_edge(START, &#x27;supervisor&#x27;)
+    if sequential:
+        builder.add_conditional_edges(&#x27;supervisor&#x27;, lambda s: &#x27;blocked&#x27; if s.blockers else &#x27;supply&#x27;,
+                                      {&#x27;blocked&#x27;: &#x27;blocked&#x27;, &#x27;supply&#x27;: &#x27;supply&#x27;})
+        builder.add_edge(&#x27;supply&#x27;, &#x27;production&#x27;)
+        builder.add_edge(&#x27;production&#x27;, &#x27;logistics&#x27;)
+        builder.add_edge(&#x27;logistics&#x27;, &#x27;consolidation&#x27;)
+    else:
+        builder.add_conditional_edges(&#x27;supervisor&#x27;, route_supervisor,
+                                      {n: n for n in (*SPECIALISTS, &#x27;blocked&#x27;)})
+        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.
+        builder.add_edge(list(SPECIALISTS), &#x27;consolidation&#x27;)
+    builder.add_conditional_edges(&#x27;consolidation&#x27;, route_consolidation, [&#x27;finance&#x27;, &#x27;blocked&#x27;])
+    builder.add_conditional_edges(&#x27;finance&#x27;, route_finance, [&#x27;challenger&#x27;, &#x27;blocked&#x27;])
+    builder.add_conditional_edges(&#x27;challenger&#x27;, route_review, [&#x27;recommendation&#x27;, &#x27;blocked&#x27;])</pre></div></section>
+<section id="finance" class=""><div class="code"><h1>Finance: composição determinística de custo</h1><p>src/control_tower/scenarios.py:82–93</p><pre>    premium = bought * (supply.alternative.unit_cost_brl - supply.baseline.unit_cost_brl)
+    freight = carrier.cost_brl_per_trip if transferred else Decimal(&#x27;0&#x27;)
+    penalty = sum((d.penalty_brl for d in deliveries), Decimal(&#x27;0&#x27;))
+    breach = max(0, transferred - supply.origin.transferable_without_safety_stock_units)
+    return Scenario(
+        scenario_id=scenario_id, description=descriptions[scenario_id], deliveries=tuple(deliveries),
+        material_premium_brl=premium, freight_brl=freight, penalty_brl=penalty,
+        total_cost_brl=premium + freight + penalty, transferred_units=transferred,
+        origin_remaining_units=supply.origin.available_units-transferred,
+        origin_safety_breach_units=breach, expedited=bool(transferred and carrier.service == &#x27;express&#x27;),
+        assumptions=ASSUMPTIONS,
+    )</pre></div></section>
+<section id="challenger" class=""><div class="code"><h1>Challenger: saldo, piso e política de frete</h1><p>src/control_tower/agents/challenger.py:55–70</p><pre>        local_used = sum(a.units for d in scenario.deliveries for a in d.allocations if a.source == &#x27;local&#x27;)
+        origin_used = sum(a.units for d in scenario.deliveries for a in d.allocations if a.source == &#x27;Campinas&#x27;)
+        if local_used &gt; evidence.supply.local.available_units or origin_used != scenario.transferred_units:
+            flag(&#x27;inconsistency&#x27;, &#x27;Material contado em duplicidade ou transferência inconsistente&#x27;)
+        breach = max(0, scenario.transferred_units - evidence.supply.origin.transferable_without_safety_stock_units)
+        if (scenario.origin_remaining_units != evidence.supply.origin.available_units - scenario.transferred_units
+                or scenario.origin_safety_breach_units != breach):
+            flag(&#x27;inconsistency&#x27;, &#x27;Saldo de Campinas inconsistente&#x27;)
+        if breach:
+            flag(&#x27;policy&#x27;, f&#x27;Transferência rompe safety stock de Campinas em {breach} unidades&#x27;)
+        if scenario.expedited and scenario.freight_brl &gt; tools.policies.max_expedited_freight_brl:
+            flag(&#x27;policy&#x27;, &#x27;Frete expresso excede o limite&#x27;)
+        if scenario.total_cost_brl &gt; tools.policies.manager_approval_threshold_brl:
+            flag(&#x27;policy&#x27;, &#x27;Custo requer escalonamento ao gerente&#x27;, blocking=False)
+        if not rejected:
+            eligible.append(scenario)</pre></div></section>
+<section id="recommendation" class=""><div class="code"><h1>Recommendation: contrato existente</h1><p>src/control_tower/graph/workflow.py:67–79</p><pre>    def recommendation_node(state: WorkflowState):
+        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)
+        baseline = next(s for s in state.finance.scenarios if s.scenario_id == &#x27;A&#x27;)
+        risks = [f.message for f in state.review.findings if f.scenario_id in (&#x27;all&#x27;, selected.scenario_id)]
+        result = Recommendation(
+            incident_id=state.incident.incident_id, severity=&#x27;high&#x27;,
+            recommended_action=f&#x27;Cenário {selected.scenario_id}: {selected.description}&#x27;,
+            estimated_cost_brl=selected.total_cost_brl,
+            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
+            customer_delay_days=max(d.delay_days for d in selected.deliveries),
+            confidence=0.65, risks=risks, approval_required=True,
+        )
+        return {&#x27;recommendation&#x27;: result}</pre></div></section>
+</main><script>const s=document.querySelector("select");function show(){document.querySelectorAll("section").forEach(x=>x.classList.toggle("active",x.id===s.value));}s.onchange=show;document.querySelector("#next").onclick=()=>{s.selectedIndex=Math.min(s.length-1,s.selectedIndex+1);show()};document.querySelector("#back").onclick=()=>{s.selectedIndex=Math.max(0,s.selectedIndex-1);show()};</script></html>

@@ -1,0 +1,13 @@
+SHARED STATE | retrato após a investigação
+
+incident_id    INCIDENT-001
+plan           supply + production + logistics
+canal          responsável       evidência
+supply         Supply            SP 300; Campinas 500
+production     Production        3 ordens; demanda 750
+logistics      Logistics         rotas normal e expressa
+investigation  Consolidação      3 resultados reunidos
+status         investigating
+
+Cada especialista escreve somente em seu canal tipado.
+Mesmo incidente; responsabilidades distintas; nenhuma alocação executada.

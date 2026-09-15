@@ -9,20 +9,29 @@ from .smoke import check_demo
 
 def main():
     parser = argparse.ArgumentParser(description="NovaCore — lesson-01-complete")
-    parser.add_argument("command", choices=["doctor", "incident", "tools", "smoke", "run", "graph"])
+    parser.add_argument("command", choices=["doctor", "incident", "tools", "smoke", "run", "graph", "show"])
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Raiz do checkout (padrão: diretório atual)")
     parser.add_argument("incident_id", nargs="?", help="Obrigatório para run: INCIDENT-001")
+    parser.add_argument("view", nargs="?", choices=["summary", "state", "specialists", "coordination", "scenarios", "challenger", "recommendation"])
     parser.add_argument("--json", action="store_true", help="Estado completo em JSON, sem eventos")
     parser.add_argument("--sequential", action="store_true", help="Controle sequencial para comparar com o paralelismo")
     parser.add_argument("--demo-delay-ms", type=int, default=0, help="Espera artificial por especialista, 0–2000 ms")
     parser.add_argument("--fail-specialist", choices=["supply", "production", "logistics"])
     args = parser.parse_args()
-    if args.command == "run" and args.incident_id != "INCIDENT-001":
-        parser.error("Use run INCIDENT-001; nenhum outro incidente está cadastrado nesta aula")
-    if args.command != "run" and (args.incident_id or args.json or args.fail_specialist or args.demo_delay_ms):
-        parser.error("incident_id, --json, --fail-specialist e --demo-delay-ms são opções de run")
-    if args.sequential and args.command not in {"run", "graph"}:
-        parser.error("--sequential é opção de run ou graph")
+    if args.command in {"run", "show"} and args.incident_id != "INCIDENT-001":
+        parser.error("Use run/show INCIDENT-001; nenhum outro incidente está cadastrado nesta aula")
+    if args.command == "show" and not args.view:
+        parser.error("Use show INCIDENT-001 seguido de uma view")
+    if args.command != "show" and args.view:
+        parser.error("View é argumento exclusivo de show")
+    if args.command not in {"run", "show"} and args.incident_id:
+        parser.error("incident_id é argumento de run/show")
+    if args.json and args.command != "run":
+        parser.error("--json é opção de run; show é uma apresentação compacta")
+    if args.command != "run" and (args.fail_specialist or args.demo_delay_ms or args.sequential):
+        if not (args.command == "show" and args.view == "coordination") and not (
+            args.command == "graph" and not args.fail_specialist and not args.demo_delay_ms):
+            parser.error("Opções de execução são de run, show coordination ou graph --sequential")
     root = args.root.resolve()
     mode = "mock"
     env_file = root / ".env"
@@ -37,7 +46,14 @@ def main():
     try:
         tools = Tools(root)
         incident = tools.load_incident(root / "incidents/incident_001.json")
-        if args.command == "graph":
+        if args.command == "show":
+            from .views import show
+            text, blocked = show(tools, incident, args.view, sequential=args.sequential,
+                                 demo_delay_ms=args.demo_delay_ms, fail_specialist=args.fail_specialist)
+            print(text)
+            if blocked:
+                raise SystemExit(1)
+        elif args.command == "graph":
             from .graph.workflow import build_graph
             print(build_graph(tools, sequential=args.sequential).get_graph().draw_mermaid())
         elif args.command == "run":

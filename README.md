@@ -2,12 +2,48 @@
 
 Laboratório oficial de **Multi-Agent Systems, Deployment, and Scaling**, MBA em AI Engineering &
 Multi-Agents — professor Leandro Lopes. Disciplina de 16 horas, em quatro aulas de quatro horas.
-O professor implementa e demonstra; alunos observam decisões, comportamento e trade-offs.
+O professor contextualiza, explica teoria e demonstra partes selecionadas; alunos observam decisões,
+comportamento e trade-offs. Não há live coding nem aula de sintaxe LangGraph.
 Os comandos permitem reprodução posterior, sem exercícios de programação durante a aula.
 
 **Estado atual: `lesson-01-complete`, aprovado pelo professor.**
 A tag `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
 a tag `lesson-01-complete` identifica a conclusão da Aula 1.
+
+## Para o professor — revisão de experiência de aula
+
+**Novas views e materiais disponíveis na `main`.** As tags existentes permanecem intactas.
+Os comandos de instalação na tag abaixo reproduzem a entrega técnica anterior;
+para usar os materiais novos, atualize seu checkout da `main`.
+
+```bash
+git switch main
+git pull --ff-only
+uv sync --locked
+uv run control-tower show INCIDENT-001 summary
+uv run control-tower show INCIDENT-001 state
+uv run control-tower show INCIDENT-001 specialists
+uv run control-tower show INCIDENT-001 coordination --demo-delay-ms 500
+uv run control-tower show INCIDENT-001 coordination --sequential --demo-delay-ms 500
+uv run control-tower show INCIDENT-001 scenarios
+uv run control-tower show INCIDENT-001 challenger
+uv run control-tower show INCIDENT-001 recommendation
+```
+
+Abrir [o material visual offline](docs/course/classroom/index.html) por duplo clique no arquivo local.
+Ele reúne contexto, teoria, timeline, [diagrama SVG pronto](docs/course/classroom/graph.svg), quadros e
+[snippets de 10–23 linhas](docs/course/classroom/snippets.md). Uma tela por conceito, sem serviços novos.
+As telas HTML são fallbacks gravados, não uma execução da aplicação. Use CLI para a demonstração ao vivo.
+
+Views cabem em até 20 linhas × 96 colunas. Summary/state/specialists/coordination param antes de Finance;
+scenarios/challenger param antes de Recommendation. Scenarios usa a revisão existente para mostrar
+admissibilidade, sem revelar sua seleção. Cada view executa o fixture novamente; não há sessão persistente.
+O [runbook de 240 minutos](docs/course/lesson-01-runbook.md) reserva os primeiros 70 minutos para contexto
+e teoria. A nota de fixture incompleto dura até 3 minutos dentro de capabilities; não é bloco próprio.
+
+`run`, JSON integral e Git diff permanecem disponíveis para preparação e estudo posterior.
+Não projetar a saída completa nas primeiras demos. `mock` usa coordenação real e papéis determinísticos;
+não existe raciocínio de LLM. Uma recomendação válida não é uma decisão autorizada.
 
 ## Proposta de valor e case
 

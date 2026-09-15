@@ -1,0 +1,11 @@
+EVIDÊNCIAS | INCIDENT-001 | unidades de M42; valores em BRL
+
+São Paulo  disponível 300 | demanda 750 | déficit 450
+Campinas   disponível 500 | safety stock 200
+           transferível sem romper o piso: 300
+Beta       capacidade 450 | custo/un. 145
+           prêmio/un. 45 sobre Alpha
+Logística  normal: 3 dias, 5.000 / viagem
+           expressa: 1 dia, 18.000 / viagem
+
+3 ordens relacionadas; impacto por cliente ainda não avaliado.

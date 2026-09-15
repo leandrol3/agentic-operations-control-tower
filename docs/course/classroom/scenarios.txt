@@ -1,0 +1,14 @@
+CENÁRIOS | BRL incrementais | atrasos CO-001/002/003 (dias)
+
+ID Ação                    Custo   Atrasos  Multas  Restrição        Admissível
+A  Esperar Alpha          23.500     0/4/3  23.500  sem violação*    sim*
+B  Comprar Beta           20.250     0/0/0       0  sem violação*    sim*
+C  Transferir expresso    18.000     0/0/0       0  piso -150        não
+D  Transferir/replanejar  12.500     0/0/3   7.500  sem violação*    sim*
+
+* Sob as regras do case; premissas ainda exigem confirmação.
+Custo = prêmio de material + frete + multas; não é custo total do pedido.
+customer_delay_days=3: maior atraso entre clientes, não o estratégico.
+O cliente estratégico pode ter atraso zero (neste case: CO-001).
+avoided_penalty é multa evitada; difere de economia líquida incremental.
+confidence=0.65 é didático/fixo; não é probabilidade calibrada.

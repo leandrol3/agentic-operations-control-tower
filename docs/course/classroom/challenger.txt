@@ -1,0 +1,16 @@
+CHALLENGER | revisão crítica
+
+Candidate Plan  Finance propõe cenário D
+      ↓
+Assumptions     prazo Alpha; capacidade; custos de reposição/cancelamento
+      ↓
+Challenges
+  C: Transferência rompe safety stock de Campinas em 150 unidades
+      ↓
+Remaining Risks 3 pontos: prazo/capacidade, reposição e custos ausentes.
+                Confirmações humanas continuam pendentes.
+
+O Challenger não recalcula o cenário.
+Ele testa se a conclusão ignora premissas, riscos ou evidências.
+No código, também verifica consistência aritmética e temporal.
+Revisar consistência não é construir uma nova simulação.

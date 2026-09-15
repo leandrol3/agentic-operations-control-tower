@@ -1,0 +1,66 @@
+[
+  {
+    "id": "shared-state",
+    "title": "Shared state: canais de evidência",
+    "path": "src/control_tower/graph/state.py",
+    "start": 120,
+    "end": 129,
+    "code": "\n\nclass WorkflowState(Contract):\n    incident: Incident\n    plan: tuple[Specialist, ...] = ()\n    supervisor_reason: str = ''\n    supply: Result[SupplyEvidence] | None = None\n    production: Result[ProductionEvidence] | None = None\n    logistics: Result[LogisticsEvidence] | None = None\n    investigation: Investigation | None = None"
+  },
+  {
+    "id": "specialist-output",
+    "title": "Specialist output: Supply",
+    "path": "src/control_tower/agents/specialists.py",
+    "start": 7,
+    "end": 20,
+    "code": "def supply(tools: Tools, incident: Incident) -> SupplyEvidence:\n    alternatives = tools.get_alternative_suppliers(incident.material, incident.supplier_id)\n    beta = next((s for s in alternatives if s.supplier_id == 'SUP-BETA'), None)\n    if beta is None:\n        raise ValueError('Fornecedor alternativo SUP-BETA ausente; investigação incompleta')\n    return SupplyEvidence(\n        local=tools.get_stock(incident.material, incident.plant),\n        origin=tools.get_stock(incident.material, 'Campinas'),\n        baseline=tools.get_supplier(incident.supplier_id), alternative=beta,\n    )\n\n\ndef production(tools: Tools, incident: Incident) -> ProductionEvidence:\n    orders = tools.get_orders(incident.material, incident.plant)"
+  },
+  {
+    "id": "supervisor",
+    "title": "Supervisor: plano explícito",
+    "path": "src/control_tower/agents/supervisor.py",
+    "start": 6,
+    "end": 17,
+    "code": "    incident = state.incident\n    if (incident.incident_id, incident.material, incident.plant, incident.supplier_id) != (\n        'INCIDENT-001', 'M42', 'São Paulo', 'SUP-ALPHA'\n    ):\n        return {'blockers': ('Tipo de incidente fora do escopo desta demonstração',),\n                'supervisor_reason': 'Sem plano conhecido; requer investigação humana'}\n    return {'plan': ('supply', 'production', 'logistics'),\n            'supervisor_reason': 'Investigar material, ordens/clientes e rotas; ramos independentes'}\n\n\ndef consolidate(state: WorkflowState) -> dict:\n    \"\"\"Join semântico após a barreira do grafo: ausência/erro impede Finance.\"\"\""
+  },
+  {
+    "id": "langgraph-edges",
+    "title": "LangGraph: nós e transições",
+    "path": "src/control_tower/graph/workflow.py",
+    "start": 98,
+    "end": 120,
+    "code": "    builder = StateGraph(WorkflowState)\n    builder.add_node('supervisor', visible('supervisor', supervisor.supervise))\n    for name in SPECIALISTS:\n        builder.add_node(name, specialist_node(name))\n    builder.add_node('consolidation', visible('consolidation', supervisor.consolidate))\n    builder.add_node('finance', visible('finance', finance_node))\n    builder.add_node('challenger', visible('challenger', lambda s: {\n        'review': challenger.challenge(tools, s.investigation, s.finance)}))\n    builder.add_node('recommendation', visible('recommendation', recommendation_node))\n    builder.add_node('human_approval', visible('human_approval', human_approval))\n    builder.add_node('blocked', visible('blocked', blocked))\n    builder.add_edge(START, 'supervisor')\n    if sequential:\n        builder.add_conditional_edges('supervisor', lambda s: 'blocked' if s.blockers else 'supply',\n                                      {'blocked': 'blocked', 'supply': 'supply'})\n        builder.add_edge('supply', 'production')\n        builder.add_edge('production', 'logistics')\n        builder.add_edge('logistics', 'consolidation')\n    else:\n        builder.add_conditional_edges('supervisor', route_supervisor,\n                                      {n: n for n in (*SPECIALISTS, 'blocked')})\n        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.\n        builder.add_edge(list(SPECIALISTS), 'consolidation')"
+  },
+  {
+    "id": "parallel-join",
+    "title": "Paralelismo: esperar todos antes de consolidar",
+    "path": "src/control_tower/graph/workflow.py",
+    "start": 109,
+    "end": 123,
+    "code": "    builder.add_edge(START, 'supervisor')\n    if sequential:\n        builder.add_conditional_edges('supervisor', lambda s: 'blocked' if s.blockers else 'supply',\n                                      {'blocked': 'blocked', 'supply': 'supply'})\n        builder.add_edge('supply', 'production')\n        builder.add_edge('production', 'logistics')\n        builder.add_edge('logistics', 'consolidation')\n    else:\n        builder.add_conditional_edges('supervisor', route_supervisor,\n                                      {n: n for n in (*SPECIALISTS, 'blocked')})\n        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.\n        builder.add_edge(list(SPECIALISTS), 'consolidation')\n    builder.add_conditional_edges('consolidation', route_consolidation, ['finance', 'blocked'])\n    builder.add_conditional_edges('finance', route_finance, ['challenger', 'blocked'])\n    builder.add_conditional_edges('challenger', route_review, ['recommendation', 'blocked'])"
+  },
+  {
+    "id": "finance",
+    "title": "Finance: composição determinística de custo",
+    "path": "src/control_tower/scenarios.py",
+    "start": 82,
+    "end": 93,
+    "code": "    premium = bought * (supply.alternative.unit_cost_brl - supply.baseline.unit_cost_brl)\n    freight = carrier.cost_brl_per_trip if transferred else Decimal('0')\n    penalty = sum((d.penalty_brl for d in deliveries), Decimal('0'))\n    breach = max(0, transferred - supply.origin.transferable_without_safety_stock_units)\n    return Scenario(\n        scenario_id=scenario_id, description=descriptions[scenario_id], deliveries=tuple(deliveries),\n        material_premium_brl=premium, freight_brl=freight, penalty_brl=penalty,\n        total_cost_brl=premium + freight + penalty, transferred_units=transferred,\n        origin_remaining_units=supply.origin.available_units-transferred,\n        origin_safety_breach_units=breach, expedited=bool(transferred and carrier.service == 'express'),\n        assumptions=ASSUMPTIONS,\n    )"
+  },
+  {
+    "id": "challenger",
+    "title": "Challenger: saldo, piso e política de frete",
+    "path": "src/control_tower/agents/challenger.py",
+    "start": 55,
+    "end": 70,
+    "code": "        local_used = sum(a.units for d in scenario.deliveries for a in d.allocations if a.source == 'local')\n        origin_used = sum(a.units for d in scenario.deliveries for a in d.allocations if a.source == 'Campinas')\n        if local_used > evidence.supply.local.available_units or origin_used != scenario.transferred_units:\n            flag('inconsistency', 'Material contado em duplicidade ou transferência inconsistente')\n        breach = max(0, scenario.transferred_units - evidence.supply.origin.transferable_without_safety_stock_units)\n        if (scenario.origin_remaining_units != evidence.supply.origin.available_units - scenario.transferred_units\n                or scenario.origin_safety_breach_units != breach):\n            flag('inconsistency', 'Saldo de Campinas inconsistente')\n        if breach:\n            flag('policy', f'Transferência rompe safety stock de Campinas em {breach} unidades')\n        if scenario.expedited and scenario.freight_brl > tools.policies.max_expedited_freight_brl:\n            flag('policy', 'Frete expresso excede o limite')\n        if scenario.total_cost_brl > tools.policies.manager_approval_threshold_brl:\n            flag('policy', 'Custo requer escalonamento ao gerente', blocking=False)\n        if not rejected:\n            eligible.append(scenario)"
+  },
+  {
+    "id": "recommendation",
+    "title": "Recommendation: contrato existente",
+    "path": "src/control_tower/graph/workflow.py",
+    "start": 67,
+    "end": 79,
+    "code": "    def recommendation_node(state: WorkflowState):\n        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)\n        baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')\n        risks = [f.message for f in state.review.findings if f.scenario_id in ('all', selected.scenario_id)]\n        result = Recommendation(\n            incident_id=state.incident.incident_id, severity='high',\n            recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',\n            estimated_cost_brl=selected.total_cost_brl,\n            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),\n            customer_delay_days=max(d.delay_days for d in selected.deliveries),\n            confidence=0.65, risks=risks, approval_required=True,\n        )\n        return {'recommendation': result}"
+  }
+]

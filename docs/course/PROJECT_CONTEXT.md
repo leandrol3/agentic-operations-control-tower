@@ -1,5 +1,16 @@
 # Contexto permanente do projeto
 
+## Rodada atual — experiência de aula
+
+A implementação técnica foi aprovada. A revisão atual ajusta somente apresentação, views e materiais,
+sem modificar a arquitetura central, as regras financeiras ou as tags publicadas. Aula 1 não é live
+coding nem aula de sintaxe LangGraph. Os primeiros 70 minutos são contexto/teoria, com cerca de 68
+minutos de discussão. Alunos não programam. JSON integral e grandes diffs ficam para estudo posterior.
+Sequência visual: Evidence → Coordination → Scenarios → Challenge → Recommendation.
+Runbook em `lesson-01-runbook.md`; materiais offline em `classroom/index.html`.
+Revisão desenvolvida em codex/lesson-01-classroom; publicação na main autorizada pelo professor.
+As tags existentes permanecem intactas. Não avançar para Aula 2.
+
 ## Correção pedagógica vigente — prevalece sobre o briefing histórico
 
 A disciplina tem 16 horas, em quatro aulas de quatro horas. Os alunos NÃO programam durante

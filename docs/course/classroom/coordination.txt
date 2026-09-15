@@ -1,0 +1,15 @@
+COORDINATION | paralelo | espera artificial: 0 ms/especialista
+
+supervisor     início
+supervisor     fim
+logistics      início
+logistics      fim
+production     início
+production     fim
+supply         início
+supply         fim
+consolidation  início
+consolidation  fim
+
+Join: só depois dos três resultados. Fluxo interrompido aqui.
+Ordem dos ramos pode variar; compare ao vivo com espera artificial.

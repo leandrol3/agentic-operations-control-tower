@@ -47,6 +47,13 @@ class Tools:
         return Stock(plant=plant, material=material, available_units=available,
                      transferable_without_safety_stock_units=max(0, available-row.safety_stock))
 
+    def get_safety_stock(self, material: str, plant: str) -> int:
+        """Expõe o piso cadastrado para apresentação, sem recalculá-lo pelo disponível."""
+        row = next((r for r in self.inventory if (r.material, r.plant) == (material, plant)), None)
+        if row is None:
+            raise ValueError(f"Estoque não cadastrado: {material}/{plant}")
+        return row.safety_stock
+
     def get_supplier(self, supplier_id: str) -> Supplier:
         return self._one(self.suppliers, "supplier_id", supplier_id)
 
