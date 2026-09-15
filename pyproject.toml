@@ -3,7 +3,10 @@ name = "agentic-operations-control-tower"
 version = "0.1.0"
 description = "NovaCore — laboratório progressivo de engenharia multiagente"
 requires-python = ">=3.12,<3.13"
-dependencies = ["pydantic>=2.11,<3"]
+dependencies = [
+    "langgraph>=1.0,<2",
+    "pydantic>=2.11,<3",
+]
 
 [project.scripts]
 control-tower = "control_tower.main:main"
