@@ -1,0 +1,5 @@
+order_id,plant,product,quantity,material,material_units_per_product,production_date,customer_order,priority
+PO-001,São Paulo,PUMP-A,300,M42,1,2026-10-02,CO-001,strategic
+PO-002,São Paulo,PUMP-B,250,M42,1,2026-10-03,CO-002,standard
+PO-003,São Paulo,PUMP-C,200,M42,1,2026-10-04,CO-003,standard
+PO-004,Curitiba,VALVE-A,100,M17,2,2026-10-03,CO-004,standard

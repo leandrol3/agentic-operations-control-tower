@@ -1,0 +1,9 @@
+{
+  "incident_id": "INCIDENT-001",
+  "event_date": "2026-10-01",
+  "supplier_id": "SUP-ALPHA",
+  "material": "M42",
+  "plant": "São Paulo",
+  "delay_days": 7,
+  "description": "Alpha informou atraso de sete dias na entrega de M42 prevista para 1 de outubro na planta São Paulo. Qual é o melhor plano operacional?"
+}

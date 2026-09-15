@@ -1,0 +1,4 @@
+carrier,origin,destination,service,lead_time_days,capacity_units,cost_brl_per_trip,reliability
+RoadCo,Campinas,São Paulo,standard,3,500,5000.00,0.95
+ExpressCo,Campinas,São Paulo,express,1,500,18000.00,0.91
+CoastalCo,Recife,São Paulo,standard,6,300,25000.00,0.93

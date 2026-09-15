@@ -1,0 +1,5 @@
+order_id,customer,product,quantity,delivery_date,sla_penalty_brl_per_day,priority,margin_brl
+CO-001,Atlas Energy,PUMP-A,300,2026-10-03,20000.00,strategic,90000.00
+CO-002,Orion Manufacturing,PUMP-B,250,2026-10-05,4000.00,standard,60000.00
+CO-003,Vega Systems,PUMP-C,200,2026-10-06,2500.00,standard,40000.00
+CO-004,Lumen Industrial,VALVE-A,100,2026-10-05,1000.00,standard,12000.00

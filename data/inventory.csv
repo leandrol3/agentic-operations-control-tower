@@ -1,0 +1,5 @@
+plant,material,quantity,reserved_quantity,safety_stock
+São Paulo,M42,400,100,100
+Campinas,M42,650,150,200
+Curitiba,M17,1200,300,200
+Recife,M42,100,80,20

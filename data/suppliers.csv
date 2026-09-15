@@ -1,0 +1,4 @@
+supplier_id,name,material,lead_time_days,reliability_score,unit_cost_brl,capacity_units,region
+SUP-ALPHA,Alpha,M42,7,0.94,100.00,1000,São Paulo
+SUP-BETA,Beta,M42,2,0.87,145.00,450,Campinas
+SUP-GAMMA,Gamma,M17,3,0.97,35.00,1500,Curitiba
