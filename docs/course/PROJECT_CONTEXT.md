@@ -1,5 +1,22 @@
 # Contexto permanente do projeto
 
+## Correção pedagógica vigente — prevalece sobre o briefing histórico
+
+A disciplina tem 16 horas, em quatro aulas de quatro horas. Os alunos NÃO programam durante
+as aulas. O professor implementa e demonstra; alunos acompanham decisões, comportamento e trade-offs.
+O repositório prioriza demonstração ao vivo, progressão visual/conceitual, reprodução posterior,
+comparação Git e redução de boilerplate. Labs são Guided Demo / Observation Guides.
+Método vigente: teoria → problema → demonstração pelo professor → observação → discussão → reflexão.
+Menções abaixo a “codificação conjunta”, exercícios de implementação pelo aluno ou construção durante
+a aula são históricas e substituídas por esta correção. Reprodução posterior é opcional e não requer
+implementar o sistema. O professor usa `lesson-01-runbook.md`.
+
+Start preserva datasets, models, tools determinísticas, CLI, fixtures, configuração, testes e mock.
+A progressão posterior demonstra shared state, especialistas, Supervisor, LangGraph, paralelismo,
+consolidação, Finance, Challenger, recomendação estruturada e aprovação humana.
+Não implementar lesson-01-complete nesta revisão. A tag publicada lesson-01-start permanece intacta;
+ajustes são preparados na branch codex/lesson-01-start-guided-demo para revisão.
+
 ## Status e limite de escopo
 Fase atual: `lesson-01-start`. Repositório remoto inspecionado: vazio, sem histórico,
 tags, código ou documentos de curso anteriores. Abaixo está o briefing integral do professor,

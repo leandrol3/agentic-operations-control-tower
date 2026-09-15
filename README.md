@@ -3,14 +3,17 @@
 Laboratório oficial da disciplina **Multi-Agent Systems, Deployment, and Scaling**, MBA em
 AI Engineering & Multi-Agents — professor Leandro Lopes.
 
-**Checkpoint atual: `lesson-01-start`.** Base executável para construir a orquestração durante a aula.
+**Checkpoint atual: `lesson-01-start`.** Base executável para demonstração conduzida pelo professor.
+**Revisão em análise:** branch `codex/lesson-01-start-guided-demo`; a tag publicada permanece na versão anterior.
+A disciplina tem 16 horas (4 × 4h). Os alunos observam e discutem; não programam durante as aulas.
+Os comandos permitem reprodução posterior, sem necessidade de implementar código.
 O objetivo da disciplina é arquitetar, fazer deploy e escalar sistemas multiagente com robustez
 operacional e eficiência de custo. Um único sistema evolui ao longo das quatro aulas.
 
 ## O case
 
 A NovaCore Industries coordena fábricas, fornecedores e clientes B2B. Alpha atrasou M42 em sete dias;
-três ordens estão afetadas, incluindo um cliente estratégico. Investigue estoque, alternativas e multas.
+três ordens estão relacionadas ao material/planta, incluindo um cliente estratégico; o impacto ainda não foi confirmado. Investigue estoque, alternativas e multas.
 
 Antes: evento → pessoas → emails/planilhas → reuniões → decisão.
 Depois: evento → especialistas em paralelo → cenários → revisão de risco → recomendação → decisão humana.
@@ -26,7 +29,7 @@ CLI → Tools determinísticas → dados CSV/JSON
 ```
 
 Mock aqui significa execução offline determinística das capabilities. Ainda não há agentes, chamadas
-LLM, escolha automática do plano ou ações operacionais. Os exercícios de agentes e grafo estão em
+LLM, escolha automática do plano ou ações operacionais. Os pontos de progressão que o professor demonstrará estão em
 `src/control_tower/agents/` e `graph/`. A aprovação humana é obrigatória no contrato de recomendação.
 
 ```text
@@ -36,13 +39,13 @@ LLM, escolha automática do plano ou ações operacionais. Os exercícios de age
 ├── docs/
 │   ├── architecture/README.md
 │   ├── case/NOVACORE.md
-│   └── course/PROJECT_CONTEXT.md
+│   └── course/             # contexto, validação e lesson-01-runbook.md
 ├── data/                 # cinco CSVs e políticas
 ├── incidents/incident_001.json
 ├── src/control_tower/
-│   ├── main.py / models.py / tools.py
-│   ├── agents/README.md   # TODOs didáticos
-│   └── graph/README.md    # TODOs didáticos
+│   ├── main.py / models.py / tools.py / smoke.py
+│   ├── agents/README.md   # progressão do professor
+│   └── graph/README.md    # progressão do professor
 ├── labs/01_orchestration/README.md
 └── tests/test_lab.py
 ```
@@ -56,7 +59,7 @@ A instalação inicial precisa de internet; os comandos do laboratório depois f
 ```bash
 git clone https://github.com/leandrol3/agentic-operations-control-tower.git
 cd agentic-operations-control-tower
-git checkout lesson-01-start
+git switch codex/lesson-01-start-guided-demo
 uv python install 3.12
 uv sync --locked
 cp .env.example .env
@@ -67,19 +70,30 @@ uv run control-tower tools
 uv run control-tower smoke
 ```
 
+A revisão está local e ainda não foi publicada: o clone remoto não contém esta branch até a publicação.
+Para revisar agora, use o checkout local existente e execute a partir de `uv sync --locked`.
+Para reproduzir a versão original publicada, substitua a linha `git switch` por
+`git checkout lesson-01-start`; ela ainda exibe `affected_orders` e tem o smoke anterior.
+Não movemos a tag para misturar as duas versões.
+
 No Windows PowerShell, substitua `cp .env.example .env` por `Copy-Item .env.example .env`.
 Execute tudo na raiz do checkout; não precisa ativar ambiente virtual.
-Doctor e smoke devem informar `status: ok`, `affected_orders: 3`, `mode: mock` e `orchestration: TODO`.
-O comando tools exibe estoque, ordens, fornecedores alternativos e rotas, sem recomendar um cenário.
+Doctor e smoke devem informar `status: ok`, `related_orders: 3`, `impact_status: not_assessed`, `mode: mock` e `orchestration: TODO`.
+Doctor valida carregamento, schemas e referências; smoke também verifica 12 condições do fixture
+oficial e exercita estoque, alternativas, rotas, multas e políticas. Falha retorna código de saída 2.
+O smoke exige os valores do case oficial; fixtures experimentais válidos podem passar no doctor e
+falhar no smoke. Ele não confirma impacto nem resolve o incidente.
+O comando tools exibe estoque, ordens relacionadas, fornecedores alternativos e rotas.
 
 `.env.example` usa `LLM_MODE=mock`. A CLI lê `.env`; variável do ambiente tem precedência.
 `LLM_MODE=openai` é rejeitado explicitamente neste checkpoint. Não precisa fornecer chave.
 
-## Primeiro laboratório
+## Guided Demo e reprodução posterior
 
 Leia [o case e as premissas](docs/case/NOVACORE.md), depois siga
-[o roteiro da Aula 1](labs/01_orchestration/README.md).
-Para explorar uma capability em Python:
+[o guia de observação da Aula 1](labs/01_orchestration/README.md).
+O professor usa o [runbook da Aula 1](docs/course/lesson-01-runbook.md).
+Para reproduzir uma consulta pronta:
 
 ```bash
 uv run python -c "from pathlib import Path; from control_tower.tools import Tools; t=Tools(Path('.')); print(t.get_stock('M42', 'Campinas')); print(t.calculate_penalty('CO-001', 7))"
@@ -116,7 +130,7 @@ Não é necessário instalar Docker Desktop agora. A evolução deve usar imagen
 
 | Checkpoint | Conteúdo | Situação |
 |---|---|---|
-| lesson-01-start | Dados, contratos, tools e exercícios | Esta entrega |
+| lesson-01-start | Dados, contratos, tools e demonstrações | Esta entrega |
 | lesson-01-complete | LangGraph, especialistas, Supervisor, Challenger, aprovação | Após validação do professor |
 | lesson-02-start / complete | Execução distribuída, Redis/Celery | Planejado |
 | lesson-03-start / complete | FastAPI, PostgreSQL, Docker Compose | Planejado |
@@ -156,5 +170,5 @@ Veja [a estrutura final proposta](docs/architecture/README.md) e [o contexto com
 - Tag não encontrada após clone: o responsável ainda precisa publicar o commit e a tag no GitHub.
 - Teste falhou: preserve a mensagem completa, rode `uv run control-tower doctor` e confira `git status`.
 
-Não comite `.env`, tokens ou chaves. Aprovação de gerente e recomendação são exercícios futuros;
+Não comite `.env`, tokens ou chaves. Aprovação de gerente e recomendação serão demonstradas na progressão futura;
 o start não aplica políticas nem executa compras ou transferências.

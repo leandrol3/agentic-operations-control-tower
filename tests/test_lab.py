@@ -104,3 +104,95 @@ def test_policy_values(tools):
     assert tools.policies.priority_customer_max_delay_days == 1
     assert tools.policies.max_expedited_freight_brl == Decimal('50000')
     assert tools.policies.manager_approval_threshold_brl == Decimal('100000')
+
+@pytest.fixture
+def demo_copy(tmp_path):
+    """Cópia descartável: falhas da demo nunca alteram o fixture oficial."""
+    shutil.copytree(ROOT / 'data', tmp_path / 'data')
+    shutil.copytree(ROOT / 'incidents', tmp_path / 'incidents')
+    return tmp_path
+
+
+def run_demo(command, root):
+    return subprocess.run(
+        [sys.executable, '-m', 'control_tower.main', command, '--root', str(root)],
+        env=dict(os.environ, LLM_MODE='mock'), text=True, capture_output=True,
+    )
+
+
+def test_smoke_reports_evidence_not_confirmed_impact():
+    result = run_demo('smoke', ROOT)
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report['related_orders'] == 3
+    assert report['impact_status'] == 'not_assessed'
+    assert 'affected_orders' not in report
+    assert report['demand_units'] == 750
+    assert report['shortfall_units'] == 450
+    assert report['hypothetical_penalty_brl_7_days'] == '140000.00'
+    assert len(report['checks_passed']) == 12
+    assert {'express_route', 'alternative_supplier', 'transfer_stock', 'policies'} <= set(report['checks_passed'])
+
+
+@pytest.mark.parametrize('table,marker', [
+    ('suppliers', 'SUP-BETA'),
+    ('inventory', 'Campinas'),
+    ('carriers', 'ExpressCo'),
+    ('carriers', 'RoadCo'),
+    ('production_orders', 'PO-003'),
+])
+def test_incomplete_demo_rejected_by_smoke(demo_copy, table, marker):
+    path = demo_copy / f'data/{table}.csv'
+    lines = path.read_text(encoding='utf-8').splitlines()
+    path.write_text('\n'.join(line for line in lines if marker not in line) + '\n', encoding='utf-8')
+    # Estes subconjuntos ainda satisfazem schemas/referências, mas não a demo oficial.
+    assert run_demo('doctor', demo_copy).returncode == 0
+    result = run_demo('smoke', demo_copy)
+    assert result.returncode == 2
+    assert not result.stdout
+    assert 'Smoke falhou' in result.stderr or 'Estoque não cadastrado' in result.stderr
+
+
+@pytest.mark.parametrize('table', ['suppliers', 'inventory', 'production_orders', 'customer_orders', 'carriers'])
+def test_incomplete_empty_table(demo_copy, table):
+    path = demo_copy / f'data/{table}.csv'
+    path.write_text(path.read_text(encoding='utf-8').splitlines()[0] + '\n', encoding='utf-8')
+    result = run_demo('smoke', demo_copy)
+    assert result.returncode == 2
+    assert 'Fixture incompleto' in result.stderr
+    assert not result.stdout
+
+
+@pytest.mark.parametrize('file', [
+    'data/suppliers.csv', 'data/inventory.csv', 'data/production_orders.csv',
+    'data/customer_orders.csv', 'data/carriers.csv', 'data/policies.json',
+    'incidents/incident_001.json',
+])
+def test_incomplete_missing_file(demo_copy, file):
+    (demo_copy / file).unlink()
+    result = run_demo('smoke', demo_copy)
+    assert result.returncode == 2
+    assert not result.stdout
+    assert 'error:' in result.stderr
+
+
+def test_incomplete_header(demo_copy):
+    path = demo_copy / 'data/carriers.csv'
+    path.write_text('carrier,origin\n', encoding='utf-8')
+    result = run_demo('smoke', demo_copy)
+    assert result.returncode == 2
+    assert 'Cabeçalho inválido' in result.stderr
+
+
+def test_temporal_convention_requires_day_after_production(demo_copy):
+    path = demo_copy / 'data/customer_orders.csv'
+    path.write_text(path.read_text(encoding='utf-8').replace('2026-10-03', '2026-10-02'), encoding='utf-8')
+    with pytest.raises(ValueError, match='um dia de transporte'):
+        Tools(demo_copy)
+
+
+def test_tools_labels_related_orders():
+    report = json.loads(run_demo('tools', ROOT).stdout)
+    assert len(report['related_orders']) == 3
+    assert report['impact_status'] == 'not_assessed'
+    assert 'orders' not in report

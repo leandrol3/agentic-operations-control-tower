@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from .tools import Tools
+from .smoke import check_demo
 
 def main():
     parser = argparse.ArgumentParser(description="NovaCore — lesson-01-start")
@@ -25,14 +26,17 @@ def main():
         tools = Tools(root)
         incident = tools.load_incident(root / "incidents/incident_001.json")
         if args.command in {"doctor", "smoke"}:
+            details = check_demo(tools, incident) if args.command == "smoke" else {}
             print(json.dumps({"status": "ok", "mode": mode, "incident_id": incident.incident_id,
-                              "affected_orders": len(tools.get_orders(incident.material, incident.plant)),
-                              "checkpoint": "lesson-01-start", "orchestration": "TODO"}, indent=2))
+                              "related_orders": len(tools.get_orders(incident.material, incident.plant)),
+                              "impact_status": "not_assessed",
+                              "checkpoint": "lesson-01-start", "orchestration": "TODO", **details}, indent=2))
         elif args.command == "incident":
             print(incident.model_dump_json(indent=2))
         else:
             print(json.dumps({"stock": tools.get_stock(incident.material, incident.plant).model_dump(),
-                              "orders": [r.model_dump(mode="json") for r in tools.get_orders(incident.material, incident.plant)],
+                              "related_orders": [r.model_dump(mode="json") for r in tools.get_orders(incident.material, incident.plant)],
+                              "impact_status": "not_assessed",
                               "alternatives": [r.model_dump(mode="json") for r in tools.get_alternative_suppliers(incident.material, incident.supplier_id)],
                               "routes": [r.model_dump(mode="json") for r in tools.get_routes("Campinas", incident.plant)]}, indent=2, ensure_ascii=False))
     except (ValueError, OSError) as error:

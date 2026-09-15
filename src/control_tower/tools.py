@@ -1,5 +1,6 @@
 """Capabilities de leitura. Não executam compras, transferências ou decisões."""
 import csv
+from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
 from .models import Carrier, CustomerOrder, Incident, Inventory, Policies, ProductionOrder, Stock, Supplier
@@ -21,15 +22,22 @@ class Tools:
         if len(stock_keys) != len(set(stock_keys)):
             raise ValueError("Estoque duplicado por planta/material")
         for order in self.production:
+            self.get_stock(order.material, order.plant)
             customer = self.get_customer_order(order.customer_order)
             if (order.product, order.quantity, order.priority) != (customer.product, customer.quantity, customer.priority):
                 raise ValueError(f"Pedido inconsistente: {order.order_id}")
-            if order.production_date > customer.delivery_date:
-                raise ValueError("Produção posterior à entrega planejada")
+            if order.production_date + timedelta(days=1) > customer.delivery_date:
+                raise ValueError("Entrega planejada não comporta um dia de transporte após produção")
 
     def _rows(self, name, model):
         with (self.root / f"data/{name}.csv").open(newline="", encoding="utf-8") as source:
-            return tuple(model.model_validate(row) for row in csv.DictReader(source))
+            reader = csv.DictReader(source)
+            if set(reader.fieldnames or []) != set(model.model_fields):
+                raise ValueError(f"Cabeçalho inválido: {name}.csv")
+            rows = tuple(model.model_validate(row) for row in reader)
+            if not rows:
+                raise ValueError(f"Fixture incompleto: {name}.csv está vazio")
+            return rows
 
     def get_stock(self, material: str, plant: str) -> Stock:
         row = next((r for r in self.inventory if (r.material, r.plant) == (material, plant)), None)
@@ -53,6 +61,7 @@ class Tools:
         return row
 
     def get_orders(self, material: str, plant: str) -> tuple[ProductionOrder, ...]:
+        """Ordens relacionadas por material/planta; não confirma atraso ou impacto."""
         return tuple(r for r in self.production if r.material == material and r.plant == plant)
 
     def get_alternative_suppliers(self, material: str, exclude_supplier_id: str) -> tuple[Supplier, ...]:
@@ -73,5 +82,5 @@ class Tools:
             raise ValueError("Material incompatível com fornecedor")
         self.get_stock(incident.material, incident.plant)
         if not self.get_orders(incident.material, incident.plant):
-            raise ValueError("Incidente sem ordens afetadas")
+            raise ValueError("Incidente sem ordens relacionadas")
         return incident

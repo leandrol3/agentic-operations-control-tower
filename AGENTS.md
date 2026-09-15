@@ -8,7 +8,11 @@ Use contratos tipados, módulos pequenos, Decimal para dinheiro e cálculos dete
 Agentes acessam capabilities em tools, nunca CSVs diretamente. Aprovação humana permanece obrigatória.
 Modo mock deve funcionar offline após instalação, sem chave e sem chamadas pagas.
 Não adicione infraestrutura futura antes de surgir a necessidade didática.
-Método: teoria → problema → demonstração → codificação conjunta → experimento → reflexão.
+Disciplina: 16 horas, quatro aulas de quatro horas. Alunos NÃO programam durante as aulas.
+Método: teoria → problema → demonstração/implementação pelo professor → observação → discussão → reflexão.
+Otimize demonstração ao vivo, comparação visual/Git entre checkpoints e reprodução posterior.
+Preserve datasets, models, tools, CLI, fixtures, configuração, testes e mock prontos; evite boilerplate ao vivo.
+Labs são Guided Demo / Observation Guides; docs/course/lesson-01-runbook.md orienta o professor.
 Execute uv run pytest e uv run control-tower smoke; confira README em ambiente limpo antes de tags.
 Use commits pequenos e significativos. Nunca commite .env ou credenciais; se encontrar segredo,
 pare e informe antes de publicar. Não publique mudanças sem solicitação.
