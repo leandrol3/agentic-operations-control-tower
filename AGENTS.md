@@ -1,8 +1,8 @@
 # Instruções de engenharia
 Leia completamente docs/course/ antes de alterar código. PROJECT_CONTEXT.md é a fonte de requisitos.
 Preserve decisões e checkpoints existentes; não mova tags aprovadas silenciosamente.
-Escopo atual autorizado: candidato lesson-01-complete, Demos 5–8. Não avançar à Aula 2.
-Não criar nem mover lesson-01-complete antes de apresentar os resultados e obter revisão.
+Escopo atual: lesson-01-complete aprovado, Demos 5–8. Não avançar à Aula 2.
+Revisão concluída pelo professor e publicação autorizada. Preserve as tags aprovadas.
 Tag lesson-01-start permanece intacta; revisão aprovada do start está no commit 171c324.
 Um único sistema evolui nas quatro aulas; não criar quatro aplicações.
 Python 3.12, uv, Pydantic e LangGraph. Nesta entrega apenas mock; OpenAI foi adiado.

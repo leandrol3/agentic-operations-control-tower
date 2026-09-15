@@ -8,7 +8,7 @@ from .tools import Tools
 from .smoke import check_demo
 
 def main():
-    parser = argparse.ArgumentParser(description="NovaCore — candidato lesson-01-complete")
+    parser = argparse.ArgumentParser(description="NovaCore — lesson-01-complete")
     parser.add_argument("command", choices=["doctor", "incident", "tools", "smoke", "run", "graph"])
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Raiz do checkout (padrão: diretório atual)")
     parser.add_argument("incident_id", nargs="?", help="Obrigatório para run: INCIDENT-001")
@@ -33,7 +33,7 @@ def main():
                 mode = value.strip().strip("\"'")
     mode = os.environ.get("LLM_MODE", mode)
     if mode != "mock":
-        parser.error("Este candidato suporta LLM_MODE=mock. OpenAI foi adiado; o grafo não faz chamadas LLM.")
+        parser.error("Este checkpoint suporta LLM_MODE=mock. OpenAI foi adiado; o grafo não faz chamadas LLM.")
     try:
         tools = Tools(root)
         incident = tools.load_incident(root / "incidents/incident_001.json")
@@ -64,7 +64,7 @@ def main():
             print(json.dumps({"status": "ok", "mode": mode, "incident_id": incident.incident_id,
                               "related_orders": len(tools.get_orders(incident.material, incident.plant)),
                               "impact_status": "not_assessed",
-                              "checkpoint": "lesson-01-complete-candidate", "orchestration": "available_via_run", **details}, indent=2))
+                              "checkpoint": "lesson-01-complete", "orchestration": "available_via_run", **details}, indent=2))
         elif args.command == "incident":
             print(incident.model_dump_json(indent=2))
         else:

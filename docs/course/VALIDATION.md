@@ -1,4 +1,4 @@
-# Validação do candidato lesson-01-complete
+# Validação de lesson-01-complete
 
 ## Resultado atual
 
@@ -24,7 +24,7 @@
   aprovação obrigatória e imutabilidade dos dados operacionais.
 - Exemplos gravados em docs/course/examples e diagrama extraído do grafo real em docs/architecture.
 - Não testado: OpenAI (não implementado), Windows/Linux, infraestrutura de aulas seguintes.
-- Sem tag lesson-01-complete. Tag lesson-01-start preservada em 5dc5fa09782c74dd61fe83b56a6c6dc8b0311afb.
+- Revisão concluída e publicação autorizada pelo professor. Tag lesson-01-start preservada em 5dc5fa09782c74dd61fe83b56a6c6dc8b0311afb.
 - Start revisado aprovado registrado em 171c324 para comparação separada.
 
 ## Histórico da validação do start

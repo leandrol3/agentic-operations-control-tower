@@ -16,12 +16,13 @@ A progressão posterior demonstra shared state, especialistas, Supervisor, LangG
 consolidação, Finance, Challenger, recomendação estruturada e aprovação humana.
 Start revisado aprovado pelo professor, registrado em 171c324. Agora está autorizada a implementação
 do candidato lesson-01-complete para Demos 5–8, na branch codex/lesson-01-complete.
-A tag publicada lesson-01-start permanece intacta. Não criar/mover lesson-01-complete antes da revisão.
+Revisão de lesson-01-complete concluída pelo professor; publicação e checkpoint autorizados.
+A tag lesson-01-start permanece intacta.
 Mock é o modo desta entrega; OpenAI opcional foi adiado. Não avançar à Aula 2 nem adicionar infraestrutura
 prevista para aulas seguintes. Os contratos e cálculos são determinísticos, a orquestração usa LangGraph.
 
 ## Status e limite de escopo
-Fase atual: candidato `lesson-01-complete`. Na inspeção inicial, o repositório estava vazio, sem histórico,
+Fase atual: `lesson-01-complete` aprovado. Na inspeção inicial, o repositório estava vazio, sem histórico,
 tags, código ou documentos de curso anteriores. Abaixo está o briefing integral do professor,
 preservado como fonte de requisitos e organizado pelas 49 seções originais.
 Somente após validação do professor implementar `lesson-01-complete`; não avançar à Aula 2.

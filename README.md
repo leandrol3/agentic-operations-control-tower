@@ -5,9 +5,9 @@ Multi-Agents — professor Leandro Lopes. Disciplina de 16 horas, em quatro aula
 O professor implementa e demonstra; alunos observam decisões, comportamento e trade-offs.
 Os comandos permitem reprodução posterior, sem exercícios de programação durante a aula.
 
-**Estado atual: candidato `lesson-01-complete`, em revisão local.** Não há tag complete.
-A tag publicada `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
-o candidato está na branch local `codex/lesson-01-complete`, ainda não publicada.
+**Estado atual: `lesson-01-complete`, aprovado pelo professor.**
+A tag `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
+a tag `lesson-01-complete` identifica a conclusão da Aula 1.
 
 ## Proposta de valor e case
 
@@ -39,11 +39,12 @@ Veja [arquitetura e diagrama](docs/architecture/README.md) e [premissas do case]
 Git, Python 3.12 e [uv](https://docs.astral.sh/uv/getting-started/installation/).
 Primeira instalação requer internet; depois o workflow mock funciona offline.
 
-Para esta revisão, use o checkout local existente:
+Para instalar e reproduzir o checkpoint aprovado:
 
 ```bash
-cd "/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower"
-git switch codex/lesson-01-complete
+git clone https://github.com/leandrol3/agentic-operations-control-tower.git
+cd agentic-operations-control-tower
+git checkout lesson-01-complete
 uv python install 3.12
 uv sync --locked
 cp .env.example .env
@@ -52,19 +53,10 @@ uv run control-tower smoke
 uv run control-tower run INCIDENT-001
 ```
 
+Em um clone existente, salve suas alterações e execute `git fetch --tags` antes do checkout.
 Copie `.env.example` apenas se ainda não tiver `.env`; preserve sua configuração existente.
 PowerShell: `Copy-Item .env.example .env`. Não precisa ativar o ambiente virtual.
-Para alunos em outra máquina, após publicação da branch candidata:
-
-```bash
-git clone https://github.com/leandrol3/agentic-operations-control-tower.git
-cd agentic-operations-control-tower
-git switch codex/lesson-01-complete
-uv sync --locked
-```
-
-A branch não estará no clone remoto até ser publicada. Para a versão start já publicada, use
-`git checkout lesson-01-start`; nessa versão ainda não existe `run`.
+Para reproduzir o início original da aula, use `git checkout lesson-01-start`; nessa versão não existe `run`.
 
 ## Demonstração — comandos prontos
 
@@ -166,8 +158,8 @@ própria caso queira experimentar depois. Não movemos tags aprovadas.
 | Checkpoint | Estado |
 |---|---|
 | lesson-01-start | Tag original publicada e preservada |
-| Start revisado (171c324) | Aprovado, commit local |
-| lesson-01-complete | Candidato local em revisão, sem tag |
+| Start revisado (171c324) | Aprovado, incluído no histórico |
+| lesson-01-complete | Aprovado, checkpoint de conclusão da Aula 1 |
 | lesson-02-start / complete | Redis/Celery: futuro |
 | lesson-03-start / complete | FastAPI/PostgreSQL/Docker: futuro |
 | lesson-04-start / complete | Observabilidade/chaos/escala/FinOps: futuro |
@@ -194,7 +186,7 @@ Após criação/publicação das tags futuras: `git fetch --tags`, `git checkout
 - Smoke falha: confira o fixture oficial. Doctor pode aceitar um subconjunto válido que não atende à demo.
 - `run` bloqueia: leia o especialista/erro ou o relatório do Challenger; não existe fallback de decisão inventada.
 - Mais lento no primeiro comando: importação de dependências também custa tempo; não comparar partida fria com quente.
-- Branch/tag não encontrada: diferencie candidato local de versão publicada.
+- Branch/tag não encontrada: execute `git fetch --tags` e confira `git tag --list`.
 - Teste falha: preserve a saída completa, rode doctor e confira `git status`.
 
 Nunca comite `.env`, tokens ou chaves.

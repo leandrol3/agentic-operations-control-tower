@@ -17,7 +17,7 @@ INCIDENT-001 → CLI → Tools → CSV/JSON
                  Pydantic
 ```
 
-**Depois, candidato complete executável em mock:**
+**Depois, complete aprovado executável em mock:**
 
 ```text
 Incidente → Supervisor → estado compartilhado
@@ -48,7 +48,7 @@ ordens com atraso confirmado. `not_assessed` não significa ausência de impacto
 
 ## Demos 5–8 — o que observar no complete
 
-No candidato complete, execute `uv run control-tower run INCIDENT-001` e observe os papéis abaixo.
+No complete aprovado, execute `uv run control-tower run INCIDENT-001` e observe os papéis abaixo.
 Use `--json` para inspecionar estado/evidências; `uv run control-tower graph` mostra o grafo real.
 Compare `--demo-delay-ms 500` com `--sequential --demo-delay-ms 500`; a espera é artificial.
 Use `--fail-specialist logistics` para observar o bloqueio no join (saída 1 esperada).
@@ -83,5 +83,5 @@ git diff lesson-01-start..HEAD -- src/control_tower labs docs/course
 ```
 
 O primeiro diff isola o complete commitado; o segundo inclui correções aprovadas do start.
-A tag lesson-01-complete não existe até a revisão. Alunos observam e reproduzem;
+Use a tag lesson-01-complete para reproduzir esta entrega. Alunos observam e reproduzem;
 nenhuma implementação é solicitada durante a aula.

@@ -3,13 +3,13 @@
 **Duração:** 4 horas de uma disciplina de 16 horas. Professor implementa/demonstra; alunos observam
 e discutem. Não reservar tempo para alunos digitarem código, instalarem dependências ou completarem TODOs.
 
-**Estado deste documento:** Demos 1–8 executáveis no candidato local `lesson-01-complete`,
+**Estado deste documento:** Demos 1–8 executáveis no checkpoint aprovado `lesson-01-complete`,
 branch `codex/lesson-01-complete`, em modo mock. O start revisado aprovado está em `171c324`.
-A tag `lesson-01-start` permanece intacta; a tag complete ainda não existe.
+A tag `lesson-01-start` permanece intacta; use `lesson-01-complete` para reproduzir a conclusão.
 
 ## Preparação antes da aula (fora das 4 horas)
 
-- Use o checkout candidato na branch `codex/lesson-01-complete`; não faça checkout da tag start para estas demos.
+- Use `git checkout lesson-01-complete`; não faça checkout da tag start para estas demos.
 - Rode `uv sync --locked`, configure `.env` com `LLM_MODE=mock` e execute os comandos abaixo.
 - Deixe abertos este runbook, o guia de observação, o case, main.py, models.py e tools.py.
 - Instalação, parsing, fixtures e boilerplate já vêm prontos. Concentre a comparação entre os estados em estado,
@@ -28,7 +28,7 @@ Antes de mudar de checkpoint, confira `git status --short` e preserve alteraçõ
 Não mova tags aprovadas. Use `git diff 171c324..HEAD -- src/control_tower` para comparar start revisado e candidato commitado.
 Use `git diff lesson-01-start..HEAD` para incluir também os ajustes pedagógicos aprovados.
 Para revisão antes de commit, `git diff 171c324 -- src/control_tower` inclui edições rastreadas locais.
-A comparação entre as duas tags só estará disponível após aprovação e criação de complete.
+Compare as tags com `git diff lesson-01-start..lesson-01-complete`.
 
 ## Agenda de 240 minutos
 
@@ -250,5 +250,4 @@ mostrar pequenas alterações conceituais via Git e executar o candidato já pre
 Retomar quem decide, onde está o estado, como falha, como observar, custo e quando usar código
 em vez de agente. Comparar `git diff 171c324..HEAD -- src/control_tower` e apontar capabilities preservadas.
 Alunos reproduzem com o guia; não há tarefa de programação. O workflow termina antes da decisão humana:
-a duração da CLI não mede Time-to-Decision completo. A aprovação do candidato e criação da tag
-lesson-01-complete continuam pendentes da revisão do professor.
+a duração da CLI não mede Time-to-Decision completo. O checkpoint lesson-01-complete foi aprovado pelo professor. Não avançar à Aula 2 sem nova autorização.
