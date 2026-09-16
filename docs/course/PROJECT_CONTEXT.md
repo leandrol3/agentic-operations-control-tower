@@ -1,5 +1,14 @@
 # Contexto permanente do projeto
 
+## Revisão vigente — segundo modo com LLM
+
+Autorizado: OpenAI no mesmo grafo, apenas para Supervisor, sínteses dos especialistas, Challenger
+e Recommendation. Pydantic em todas as saídas. Dados, cálculos, multas, políticas e validações
+continuam determinísticos. Mock permanece offline. Nenhuma execução operacional ou Aula 2.
+OPENAI_API_KEY e OPENAI_MODEL configuram o modo real; .keys é credencial local ignorada.
+Esta seção prevalece sobre o adiamento histórico de OpenAI descrito abaixo.
+
+
 ## Rodada atual — experiência de aula
 
 A implementação técnica foi aprovada. A revisão atual ajusta somente apresentação, views e materiais,

@@ -4,6 +4,8 @@ from typing import Generic, Literal, TypeVar
 
 from pydantic import model_validator
 
+from ..llm import ChallengerJudgment, InvestigationPlan, RecommendationDecision, SpecialistSynthesis
+
 from ..models import (
     Carrier, Contract, CustomerOrder, Incident, Money, NonNegative, ProductionOrder,
     Recommendation, Stock, Supplier,
@@ -133,6 +135,15 @@ class WorkflowState(Contract):
     approval: Approval | None = None
     status: Literal['investigating', 'blocked', 'awaiting_approval'] = 'investigating'
     blockers: tuple[str, ...] = ()
+
+    llm_mode: Literal['mock', 'openai'] = 'mock'
+    llm_model: str | None = None
+    llm_plan: InvestigationPlan | None = None
+    supply_synthesis: SpecialistSynthesis | None = None
+    production_synthesis: SpecialistSynthesis | None = None
+    logistics_synthesis: SpecialistSynthesis | None = None
+    llm_challenger: ChallengerJudgment | None = None
+    llm_recommendation: RecommendationDecision | None = None
 
     @model_validator(mode='after')
     def terminal_contract(self):

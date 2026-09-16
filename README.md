@@ -9,6 +9,7 @@ Os comandos permitem reprodução posterior, sem exercícios de programação du
 **Estado atual: `lesson-01-complete`, aprovado pelo professor.**
 A tag `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
 a tag `lesson-01-complete` identifica a conclusão da Aula 1.
+Revisão com mock + OpenAI disponível na `main`; tags anteriores preservadas.
 
 ## Para o professor — revisão de experiência de aula
 
@@ -150,16 +151,34 @@ Challenger pede confirmação de disponibilidade, capacidade e custos ausentes. 
 ```text
 src/control_tower/
 ├── main.py / models.py / tools.py / smoke.py
-├── scenarios.py / presentation.py
-├── agents/{specialists,supervisor,finance,challenger}.py
+├── scenarios.py / presentation.py / views.py / settings.py / llm.py
+├── agents/{specialists,supervisor,finance,challenger,interpretation}.py
 └── graph/{state,workflow}.py
 data/ / incidents/ / tests/ / docs/ / labs/
 ```
 
 ## Configuração e recursos
 
-`.env` usa `LLM_MODE=mock`; variável de ambiente tem precedência. `LLM_MODE=openai` é rejeitado
-explicitamente: provider real foi adiado nesta etapa. Nenhuma chave é necessária.
+.env usa `LLM_MODE=mock`; variável de ambiente tem precedência. Mock não exige chave.
+A revisão na `main` adiciona `LLM_MODE=openai` ao mesmo grafo:
+
+```bash
+LLM_MODE=mock uv run control-tower show INCIDENT-001 llm-decisions
+LLM_MODE=openai OPENAI_MODEL=gpt-4.1-mini uv run control-tower show INCIDENT-001 llm-decisions
+LLM_MODE=openai uv run python scripts/compare_modes.py
+```
+
+Forneça `OPENAI_API_KEY` no ambiente ou `.env` ignorado; `.keys` na raiz do checkout também é aceito.
+Para arquivo externo ao checkout, use `OPENAI_API_KEY_FILE=../.keys` (não há busca automática em pastas pais).
+O arquivo aceita valor simples ou `OPENAI_API_KEY=...`; nunca o inclua no Git.
+Modelo configurável por `OPENAI_MODEL`; padrão `gpt-4.1-mini`. Falta de chave é erro explícito.
+**LLMs interpretam e julgam. Código determinístico mede e valida.**
+Seis chamadas no fluxo OpenAI: Supervisor, três sínteses, Challenger e Recommendation.
+Finance, evidências, políticas e aprovação obrigatória continuam determinísticos.
+O LLM pode preferir outro cenário admissível; os valores de cada cenário são conferidos pelo código.
+Falha/recusa da API bloqueia o fluxo; retorne explicitamente ao mock para o fallback.
+Veja [fronteiras e comparação](docs/course/llm-modes.md) e o
+[exemplo real gravado](docs/course/examples/incident-001-modes-comparison.txt). Esta revisão não altera as tags.
 Python local, sem GPU, modelo local ou Docker. Planejamento conservador: 4 GB de RAM na máquina e
 1 GB de disco livre; não são mínimos medidos. Testado em macOS ARM64/Apple Silicon; Windows/Linux
 seguem comandos equivalentes, mas ainda não foram testados nesta entrega.
@@ -217,7 +236,7 @@ Após criação/publicação das tags futuras: `git fetch --tags`, `git checkout
 - `uv` não encontrado: reinicie o terminal e confira PATH após instalar.
 - Python incompatível: `uv python install 3.12`, depois `uv sync --locked`.
 - Dados ausentes: execute na raiz ou use `--root CAMINHO`.
-- OpenAI rejeitado: ajuste `.env` e variável de ambiente para `LLM_MODE=mock`.
+- OpenAI indisponível: confira chave/modelo e acesso à API; `LLM_MODE=mock` é o fallback offline.
 - Erro de instalação: confira conexão/proxy; não desabilite TLS.
 - Smoke falha: confira o fixture oficial. Doctor pode aceitar um subconjunto válido que não atende à demo.
 - `run` bloqueia: leia o especialista/erro ou o relatório do Challenger; não existe fallback de decisão inventada.

@@ -1,0 +1,38 @@
+EXEMPLO REAL GRAVADO — 15/09/2026 — gpt-4.1-mini — 8,61 s (observação, não benchmark)
+
+DECISÕES | mock | sem chamadas LLM
+Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.
+Supervisor: Investigar material, ordens/clientes e rotas; ramos independentes
+Especialistas: supply, production, logistics
+supply: evidência tipada; síntese fixa/determinística
+production: evidência tipada; síntese fixa/determinística
+logistics: evidência tipada; síntese fixa/determinística
+Challenger (premissas / informação insuficiente):
+- Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora…
+- Capacidade produtiva simplificada e reposição do safety stock local precisam de validação…
+- Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de…
+Justificativa: Menor custo incremental entre cenários admissíveis; riscos exigem confirmação
+humana.
+Cenário D | custo R$ 12.500 | aprovação obrigatória
+awaiting_approval | actions_executed=false
+LLMs interpretam e julgam. Código determinístico mede e valida.
+
+DECISÕES | openai | gpt-4.1-mini
+Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.
+Supervisor: Atraso de 7 dias na entrega do material M42 do fornecedor Alpha afeta produção e
+logística na planta de São Paulo.
+Especialistas: supply, production, logistics
+supply: O estoque atual de M42 na planta São Paulo é de 300 unidades, das quais 200 podem ser…
+production: As ordens PO-001, PO-002 e PO-003 na planta de São Paulo dependem do M42 previsto…
+logistics: Dada a informação do atraso de 7 dias na entrega do material M42 pela Alpha para a…
+Challenger (premissas / informação insuficiente):
+- Custo e prazo do transporte expresso podem não ter disponibilidade garantida imediata.
+- Necessário confirmar capacidade e flexibilidade da produção para acomodar remanejamentos e…
+- Verificar condições comerciais para cancelamento parcial ou substituição do fornecedor…
+Justificativa: Equilíbrio entre custo e atraso: menor custo total com atraso parcial em pedido
+não estratégico e redução de penalidades.
+Cenário D | custo R$ 12.500 | aprovação obrigatória
+awaiting_approval | actions_executed=false
+LLMs interpretam e julgam. Código determinístico mede e valida.
+PARIDADE | mesma evidência: True | mesmos cálculos A–D: True
+Escolhas finais podem diferir entre cenários admissíveis; contas de cada cenário não mudam.

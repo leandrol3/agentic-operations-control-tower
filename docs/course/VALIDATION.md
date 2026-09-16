@@ -1,5 +1,25 @@
 # Validação de lesson-01-complete
 
+## Revisão mock + OpenAI — 15/09/2026
+
+- Suíte completa offline: **169 testes passaram**, 7,65 s; mock, contratos e provider controlado.
+- Smoke mock: 12 verificações passaram. E2E mock preserva o estado de negócio do exemplo anterior.
+- E2E real com gpt-4.1-mini: seis respostas estruturadas, cenário D, custo R$ 12.500,
+  awaiting_approval, actions_executed=false. Acesso habilitado pelo professor após erro inicial 403.
+- CLI real `show INCIDENT-001 llm-decisions`: código 0; view de 17 linhas, até 94 colunas.
+- Script compare_modes.py: código 0; Investigation e FinanceReport idênticos entre mock e OpenAI.
+  Comparação observada em 8,61 s; não é benchmark. Exemplo gravado em examples/incident-001-modes-comparison.txt.
+- Saída inválida/incompleta, recusa, timeout, plano incompleto, referência desconhecida, alteração
+  de número e cenário inadmissível bloqueiam o fluxo; não há fallback silencioso nem aprovação automática.
+- Valores monetários mantêm validação Decimal local; schema de transporte LLM usa strings para evitar
+  a união/regex decimal complexa. Respostas passam também pela validação contra cálculos determinísticos.
+- Oito views mock: 10–16 linhas, até 94 colunas; nova view OpenAI gravada também cabe em 20 × 96.
+- Runbook mantém 240 minutos e inclui comparação de oito minutos no bloco 10B.
+- Dados, tools, models, cenários, Finance e regras determinísticas de Challenger não foram modificados.
+- Sem novas dependências de infraestrutura. SDK OpenAI instalado; modo mock continua sem rede.
+- Credencial .keys fora do Git; tags start/complete preservadas. Publicação na main autorizada pelo professor.
+
+
 ## Revisão de experiência de aula — 15/09/2026
 
 - Suíte completa: **120 testes passaram** em 7,05 s.

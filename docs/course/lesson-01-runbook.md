@@ -9,20 +9,23 @@ Esta aula não é uma aula de sintaxe LangGraph nem live coding. Os alunos não 
 O professor explica, pergunta e demonstra partes selecionadas da implementação já pronta.
 Código aparece apenas quando esclarece uma decisão arquitetural; JSON integral e diffs ficam para estudo posterior.
 
-**Revisão de experiência de aula:** disponível na `main` (`git switch main` e `git pull --ff-only`).
-As tags publicadas permanecem intactas. Não fazer checkout de `lesson-01-complete` para estas novas views:
-a tag aponta para a entrega técnica anterior. Os novos materiais estão na main.
+**Revisão mock + OpenAI:** disponível na `main` (`git switch main` e `git pull --ff-only`).
+O bloco 10B e llm-decisions fazem parte desta revisão.
+As tags publicadas permanecem intactas e não incluem estes ajustes.
 
 ## Professor Setup — antes da aula
 
 - Ambiente instalado previamente: nesta branch, executar `uv sync --locked` antes de entrar em sala.
 - `.env` com `LLM_MODE=mock`; conferir que variável do terminal não aponta para outro modo.
+- Para a comparação final, configurar OPENAI_API_KEY (ou OPENAI_API_KEY_FILE) e OPENAI_MODEL
+  antes da aula. Executar `LLM_MODE=openai uv run python scripts/compare_modes.py` no ensaio.
+  Guardar a saída como exemplo gravado; não depurar credenciais nem instalar SDK em sala.
 - Testes e smoke executados; nenhum processo de instalação ou depuração durante a aula.
 - Abrir `docs/course/classroom/index.html` em um navegador local, por duplo clique no arquivo.
   O documento não usa rede. Deixar selecionado **Contexto**, sem revelar as telas finais.
 - Pelo seletor do documento, localizar antecipadamente **Arquitetura**, **Timeline**, **SP / Campinas**,
   **Cenários A–D** e os oito recortes de código. Mostrar uma tela por vez.
-- Alternativas: `graph.svg` pronto, `snippets.md` e sete arquivos `.txt` de fallback na mesma pasta.
+- Alternativas: `graph.svg` pronto, `snippets.md` e oito arquivos `.txt` de fallback na mesma pasta.
 - Terminal em tela cheia com pelo menos **96 colunas × 24 linhas**, fonte grande e apenas um comando por vez.
   Views têm no máximo 20 linhas; reservar espaço para prompt. Limpar a tela entre conceitos.
 - Se o ambiente falhar, usar arquivos gravados identificados como fallback. Não instalar dependências em aula.
@@ -45,7 +48,8 @@ uv run python scripts/prepare_classroom.py
 `LLM_MODE=mock` demonstra a arquitetura REAL de coordenação usando especialistas determinísticos.
 Não existe raciocínio de LLM nesse modo. O valor é explicar state, roles, graph, orchestration,
 parallelism, consolidation e contracts. LLM real não é necessário para o objetivo desta aula.
-OpenAI permanece não implementado; não configurar chaves nem demonstrar chamadas pagas.
+OpenAI é a segunda demonstração, somente no bloco 10B após a recomendação.
+Prepare chave e modelo antes da aula; os blocos anteriores continuam em mock.
 
 ## Agenda — 240 minutos
 
@@ -61,7 +65,8 @@ OpenAI permanece não implementado; não configurar chaves nem demonstrar chamad
 | 02:25–02:45 | 7. Parallel execution + join | 20 min |
 | 02:45–03:15 | 8. Finance e cenários A–D | 30 min |
 | 03:15–03:35 | 9. Challenger | 20 min |
-| 03:35–03:50 | 10. Structured Recommendation + Human Approval | 15 min |
+| 03:35–03:42 | 10A. Structured Recommendation + Human Approval | 7 min |
+| 03:42–03:50 | 10B. Mock vs OpenAI: interpretação e validação | 8 min |
 | 03:50–04:00 | 11. Síntese e provocação para Aula 2 | 10 min |
 
 Primeiros 70 minutos reservados a contexto e teoria, com no máximo dois minutos de comando no bloco 3:
@@ -241,10 +246,10 @@ uv run control-tower show INCIDENT-001 challenger
 - **Pergunta:** “Que evidência poderia nos fazer abandonar o plano aparentemente mais barato?”
 - **Fallback:** `challenger.txt`; discutir confirmação do prazo de Alpha e reposição do estoque local.
 
-## 10. Structured Recommendation + Human Approval — 15 minutos
+## 10A. Structured Recommendation + Human Approval — 7 minutos
 
 - **Objetivo/conceito:** separar contrato válido de autorização para agir.
-- **Condução:** 4 min de contrato, 4 min de view/snippet, 7 min de pergunta e decisão humana.
+- **Condução:** 2 min de contrato, 2 min de view/snippet, 3 min de decisão humana.
 
 ```bash
 uv run control-tower show INCIDENT-001 recommendation
@@ -257,7 +262,43 @@ uv run control-tower show INCIDENT-001 recommendation
 - **Mensagem-chave:** “Uma recomendação válida não é uma decisão autorizada.”
 - **Limite real:** o nó cria solicitação pending e termina; não existe retomada, comando de aprovar
   nem integração operacional. Nenhuma compra, transporte ou transferência é executada.
-- **Fallback:** `recommendation.txt`. Não projetar as 626 linhas do estado integral.
+- **Fallback:** `recommendation.txt`. Não projetar o estado integral.
+
+## 10B. Mock vs OpenAI — 8 minutos
+
+- **Objetivo:** distinguir interpretação/julgamento de medidas e validação.
+- **Conceito:** mesmas fontes, tools, cálculos, nós e arestas; seis chamadas LLM em pontos definidos.
+- **Condução:** 1 min retomando a fronteira; até 2 min de execução; 3 min comparando; 2 min de discussão.
+- **Arquivos:** `llm.py`, `agents/interpretation.py`, `settings.py`, `scripts/compare_modes.py`.
+- **Preparação:** chave/modelo testados; comando de comparação e saída gravada já abertos.
+  Se não concluir em 2 min, interromper e usar fallback. Cada chamada tem timeout de 45 s, sem retry.
+
+```bash
+LLM_MODE=mock uv run control-tower show INCIDENT-001 llm-decisions
+LLM_MODE=openai uv run control-tower show INCIDENT-001 llm-decisions
+```
+
+Para verificar a paridade automaticamente no ensaio, em duas execuções reais:
+
+```bash
+LLM_MODE=openai uv run python scripts/compare_modes.py
+```
+
+- **Alteração demonstrada:** Supervisor interpreta e gera perguntas; especialistas sintetizam suas
+  evidências; Challenger aponta premissas/ausências; Recommendation explica trade-offs e escolhe
+  entre cenários admissíveis. O mock preserva suas respostas determinísticas.
+- **Output esperado:** view curta com modo/modelo, interpretação, especialistas, achados e justificativa;
+  `awaiting_approval` e `actions_executed=false`. Cálculos A–D idênticos; textos e cenário escolhido
+  podem variar. O script imprime `mesma evidência: True | mesmos cálculos A–D: True` quando ambos concluem.
+- **O que o código decide:** quais dados existem, valores, multas, políticas, plano completo para este
+  incidente, admissibilidade e conferência da Recommendation. C não se torna admissível por opinião LLM.
+- **Pergunta:** “Se a explicação parece convincente mas muda o custo, qual camada deve rejeitá-la?”
+- **Mensagem-chave:** **LLMs interpretam e julgam. Código determinístico mede e valida.**
+- **Fallback:** executar mock; apresentar exemplo OpenAI gravado somente se validado e rotulado.
+  Sem gravação de sucesso, mostrar o erro observado e declarar que a execução real não foi concluída.
+  Não há troca automática de provider, cadeia de raciocínio, prompts extensos ou JSON gigante na tela.
+- **Limite:** Challenger LLM é consultivo; riscos são preservados para decisão humana. Validação de
+  estrutura e números não prova que todo texto gerado seja factualmente correto.
 
 ## 11. Síntese — 10 minutos
 
@@ -273,22 +314,23 @@ Todos já estão no HTML e em `classroom/snippets.md`, extraídos do código rea
 
 | ID | Conceito | Arquivo em src/control_tower/ | Linhas |
 |---|---|---|---|
-| S1 | Shared state (somente evidências) | graph/state.py | 120–129 |
+| S1 | Shared state (somente evidências) | graph/state.py | 122–131 |
 | S2 | Specialist output | agents/specialists.py | 7–20 |
 | S3 | Supervisor | agents/supervisor.py | 6–17 |
-| S4 | LangGraph edges | graph/workflow.py | 98–120 |
-| S5 | Parallel join | graph/workflow.py | 109–123 |
+| S4 | LangGraph edges | graph/workflow.py | 113–134 |
+| S5 | Parallel join | graph/workflow.py | 123–137 |
 | S6 | Finance deterministic calculation | scenarios.py | 82–93 |
 | S7 | Challenger | agents/challenger.py | 55–70 |
-| S8 | Recommendation | graph/workflow.py | 67–79 |
+| S8 | Recommendation | agents/interpretation.py | 59–70 |
 
 Os testes verificam que os trechos continuam idênticos ao código-fonte. O gerador não edita o grafo.
 S1 contém oito linhas de código e duas de separação para não expor campos de etapas posteriores.
 
 ## Notas operacionais
 
-- `show` não carrega um histórico salvo: cada comando executa novamente o mesmo fixture em mock até
-  o ponto necessário. O estado de uma view não é retomado pela próxima. Resultados de negócio são determinísticos.
+- `show` não carrega um histórico salvo: cada comando executa novamente o mesmo fixture no modo escolhido até
+  o ponto necessário. O estado de uma view não é retomado pela próxima. Em mock os resultados são
+  determinísticos; OpenAI varia apenas interpretação, síntese e julgamento.
 - Eventos da view coordination refletem execução real; HTML e arquivos de fallback são snapshots estáticos.
 - Ausência/erro interrompe a apresentação e retorna saída 1; nunca inventar valores para completar um quadro.
 - `run`, `--json`, testes de fixture e diffs continuam disponíveis para preparação/estudo. Não são a aula.

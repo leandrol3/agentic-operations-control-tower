@@ -11,6 +11,8 @@
 <option value="scenarios">Cenários A–D</option>
 <option value="challenger">Challenger</option>
 <option value="recommendation">Recomendação</option>
+<option value="llm-decisions">Decisões · mock</option>
+<option value="openai-recorded">Decisões · OpenAI gravado</option>
 <option value="shared-state">Código · Shared state: canais de evidência</option>
 <option value="specialist-output">Código · Specialist output: Supply</option>
 <option value="supervisor">Código · Supervisor: plano explícito</option>
@@ -48,7 +50,7 @@ status         investigating
 
 Cada especialista escreve somente em seu canal tipado.
 Mesmo incidente; responsabilidades distintas; nenhuma alocação executada.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 state</p></section>
-<section id="specialists" class=""><pre>SPECIALISTS | papéis determinísticos em mock
+<section id="specialists" class=""><pre>SPECIALISTS | mock | evidências determinísticas
 
 Supply      estoque + fornecedores: SP 300, Campinas 500
             transferência preservando piso: 300
@@ -118,7 +120,41 @@ approval = pending | responsável: operations_manager
 actions_executed = false
 
 Uma recomendação válida não é uma decisão autorizada.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 recommendation</p></section>
-<section id="shared-state" class=""><div class="code"><h1>Shared state: canais de evidência</h1><p>src/control_tower/graph/state.py:120–129</p><pre>
+<section id="llm-decisions" class=""><pre>DECISÕES | mock | sem chamadas LLM
+Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.
+Supervisor: Investigar material, ordens/clientes e rotas; ramos independentes
+Especialistas: supply, production, logistics
+supply: evidência tipada; síntese fixa/determinística
+production: evidência tipada; síntese fixa/determinística
+logistics: evidência tipada; síntese fixa/determinística
+Challenger (premissas / informação insuficiente):
+- Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora…
+- Capacidade produtiva simplificada e reposição do safety stock local precisam de validação…
+- Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de…
+Justificativa: Menor custo incremental entre cenários admissíveis; riscos exigem confirmação
+humana.
+Cenário D | custo R$ 12.500 | aprovação obrigatória
+awaiting_approval | actions_executed=false
+LLMs interpretam e julgam. Código determinístico mede e valida.</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 llm-decisions</p></section>
+<section id="openai-recorded" class=""><pre>DECISÕES | openai | gpt-4.1-mini
+Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.
+Supervisor: O atraso na entrega do material M42 pela Alpha impacta diretamente a produção na
+planta São Paulo, necessitando avaliação integrada de estoque, ordens e rotas…
+Especialistas: supply, production, logistics
+supply: A Alpha, principal fornecedora do material M42 para a planta São Paulo, possui um…
+production: As ordens PO-001, PO-002 e PO-003 dependem do material M42. O atraso de 7 dias na…
+logistics: Devido ao atraso de 7 dias na entrega do material M42 pela Alpha, a melhor…
+Challenger (premissas / informação insuficiente):
+- Romper safety stock em Campinas pode comprometer operação futura; impacto financeiro e…
+- Necessário confirmar prazos e capacidade de entrega da Alpha e condições comerciais da Beta…
+- Simplificação da capacidade produtiva e regras de reposição do estoque de segurança…
+Justificativa: Escolhido cenário D por custo total mais baixo e mitigação parcial de atrasos,
+mesmo com pequeno atraso residual. Balanceia custo e pontualidade com menor…
+Cenário D | custo R$ 12.500 | aprovação obrigatória
+awaiting_approval | actions_executed=false
+LLMs interpretam e julgam. Código determinístico mede e valida.
+</pre><p class="subtitle">Execução real gravada em 15/09/2026 · gpt-4.1-mini. Fallback offline; não é chamada ao vivo.</p></section>
+<section id="shared-state" class=""><div class="code"><h1>Shared state: canais de evidência</h1><p>src/control_tower/graph/state.py:122–131</p><pre>
 
 class WorkflowState(Contract):
     incident: Incident
@@ -154,14 +190,13 @@ def production(tools: Tools, incident: Incident) -&gt; ProductionEvidence:
 
 def consolidate(state: WorkflowState) -&gt; dict:
     &quot;&quot;&quot;Join semântico após a barreira do grafo: ausência/erro impede Finance.&quot;&quot;&quot;</pre></div></section>
-<section id="langgraph-edges" class=""><div class="code"><h1>LangGraph: nós e transições</h1><p>src/control_tower/graph/workflow.py:98–120</p><pre>    builder = StateGraph(WorkflowState)
-    builder.add_node(&#x27;supervisor&#x27;, visible(&#x27;supervisor&#x27;, supervisor.supervise))
+<section id="langgraph-edges" class=""><div class="code"><h1>LangGraph: nós e transições</h1><p>src/control_tower/graph/workflow.py:113–134</p><pre>    builder = StateGraph(WorkflowState)
+    builder.add_node(&#x27;supervisor&#x27;, visible(&#x27;supervisor&#x27;, supervisor_node))
     for name in SPECIALISTS:
         builder.add_node(name, specialist_node(name))
     builder.add_node(&#x27;consolidation&#x27;, visible(&#x27;consolidation&#x27;, supervisor.consolidate))
     builder.add_node(&#x27;finance&#x27;, visible(&#x27;finance&#x27;, finance_node))
-    builder.add_node(&#x27;challenger&#x27;, visible(&#x27;challenger&#x27;, lambda s: {
-        &#x27;review&#x27;: challenger.challenge(tools, s.investigation, s.finance)}))
+    builder.add_node(&#x27;challenger&#x27;, visible(&#x27;challenger&#x27;, challenger_node))
     builder.add_node(&#x27;recommendation&#x27;, visible(&#x27;recommendation&#x27;, recommendation_node))
     builder.add_node(&#x27;human_approval&#x27;, visible(&#x27;human_approval&#x27;, human_approval))
     builder.add_node(&#x27;blocked&#x27;, visible(&#x27;blocked&#x27;, blocked))
@@ -177,7 +212,7 @@ def consolidate(state: WorkflowState) -&gt; dict:
                                       {n: n for n in (*SPECIALISTS, &#x27;blocked&#x27;)})
         # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.
         builder.add_edge(list(SPECIALISTS), &#x27;consolidation&#x27;)</pre></div></section>
-<section id="parallel-join" class=""><div class="code"><h1>Paralelismo: esperar todos antes de consolidar</h1><p>src/control_tower/graph/workflow.py:109–123</p><pre>    builder.add_edge(START, &#x27;supervisor&#x27;)
+<section id="parallel-join" class=""><div class="code"><h1>Paralelismo: esperar todos antes de consolidar</h1><p>src/control_tower/graph/workflow.py:123–137</p><pre>    builder.add_edge(START, &#x27;supervisor&#x27;)
     if sequential:
         builder.add_conditional_edges(&#x27;supervisor&#x27;, lambda s: &#x27;blocked&#x27; if s.blockers else &#x27;supply&#x27;,
                                       {&#x27;blocked&#x27;: &#x27;blocked&#x27;, &#x27;supply&#x27;: &#x27;supply&#x27;})
@@ -220,17 +255,16 @@ def consolidate(state: WorkflowState) -&gt; dict:
             flag(&#x27;policy&#x27;, &#x27;Custo requer escalonamento ao gerente&#x27;, blocking=False)
         if not rejected:
             eligible.append(scenario)</pre></div></section>
-<section id="recommendation" class=""><div class="code"><h1>Recommendation: contrato existente</h1><p>src/control_tower/graph/workflow.py:67–79</p><pre>    def recommendation_node(state: WorkflowState):
-        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)
-        baseline = next(s for s in state.finance.scenarios if s.scenario_id == &#x27;A&#x27;)
-        risks = [f.message for f in state.review.findings if f.scenario_id in (&#x27;all&#x27;, selected.scenario_id)]
-        result = Recommendation(
-            incident_id=state.incident.incident_id, severity=&#x27;high&#x27;,
-            recommended_action=f&#x27;Cenário {selected.scenario_id}: {selected.description}&#x27;,
-            estimated_cost_brl=selected.total_cost_brl,
-            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
-            customer_delay_days=max(d.delay_days for d in selected.deliveries),
-            confidence=0.65, risks=risks, approval_required=True,
-        )
-        return {&#x27;recommendation&#x27;: result}</pre></div></section>
+<section id="recommendation" class=""><div class="code"><h1>Recommendation: contrato existente</h1><p>src/control_tower/agents/interpretation.py:59–70</p><pre>def template(state, scenario_id):
+    selected = next(s for s in state.finance.scenarios if s.scenario_id == scenario_id)
+    baseline = next(s for s in state.finance.scenarios if s.scenario_id == &#x27;A&#x27;)
+    risks = [f.message for f in state.review.findings if f.scenario_id in (&#x27;all&#x27;, scenario_id)]
+    return Recommendation(
+        incident_id=state.incident.incident_id, severity=&#x27;high&#x27;,
+        recommended_action=f&#x27;Cenário {selected.scenario_id}: {selected.description}&#x27;,
+        estimated_cost_brl=selected.total_cost_brl,
+        avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
+        customer_delay_days=max(d.delay_days for d in selected.deliveries),
+        confidence=0.65, risks=risks, approval_required=True,
+    )</pre></div></section>
 </main><script>const s=document.querySelector("select");function show(){document.querySelectorAll("section").forEach(x=>x.classList.toggle("active",x.id===s.value));}s.onchange=show;document.querySelector("#next").onclick=()=>{s.selectedIndex=Math.min(s.length-1,s.selectedIndex+1);show()};document.querySelector("#back").onclick=()=>{s.selectedIndex=Math.max(0,s.selectedIndex-1);show()};</script></html>

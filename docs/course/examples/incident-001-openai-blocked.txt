@@ -1,0 +1,6 @@
+TENTATIVA REAL — 15/09/2026 | openai | gpt-4.1-mini
+INVESTIGAÇÃO INCOMPLETA
+OpenAI/supervisor: HTTP 403; acesso negado. Use LLM_MODE=mock
+Ausência de evidência precisa aparecer como erro, não como conclusão.
+status=blocked | nenhuma recomendação ou ação operacional
+Diagnóstico: model_not_found; projeto sem acesso a gpt-4.1-mini.

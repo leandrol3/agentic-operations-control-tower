@@ -14,14 +14,14 @@ tools = Tools(ROOT)
 incident = tools.load_incident(ROOT / 'incidents/incident_001.json')
 
 SNIPPETS = [
-    ('shared-state', 'Shared state: canais de evidência', 'graph/state.py', 120, 129),
+    ('shared-state', 'Shared state: canais de evidência', 'graph/state.py', 122, 131),
     ('specialist-output', 'Specialist output: Supply', 'agents/specialists.py', 7, 20),
     ('supervisor', 'Supervisor: plano explícito', 'agents/supervisor.py', 6, 17),
-    ('langgraph-edges', 'LangGraph: nós e transições', 'graph/workflow.py', 98, 120),
-    ('parallel-join', 'Paralelismo: esperar todos antes de consolidar', 'graph/workflow.py', 109, 123),
+    ('langgraph-edges', 'LangGraph: nós e transições', 'graph/workflow.py', 113, 134),
+    ('parallel-join', 'Paralelismo: esperar todos antes de consolidar', 'graph/workflow.py', 123, 137),
     ('finance', 'Finance: composição determinística de custo', 'scenarios.py', 82, 93),
     ('challenger', 'Challenger: saldo, piso e política de frete', 'agents/challenger.py', 55, 70),
-    ('recommendation', 'Recommendation: contrato existente', 'graph/workflow.py', 67, 79),
+    ('recommendation', 'Recommendation: contrato existente', 'agents/interpretation.py', 59, 70),
 ]
 manifest = []
 md = ['# Snippets para projeção', '', 'Recortes do código real. Mostrar só quando esclarecem uma decisão;',
@@ -88,7 +88,7 @@ for name,(x,y,w,label) in positions.items():
             f'<text x="{x+w/2}" y="{y+37}" text-anchor="middle" font-family="sans-serif" font-size="21" fill="#17314b">{escape(label)}</text>']
 svg += ['<text x="870" y="276" font-family="sans-serif" font-size="20" fill="#526880">aguarda os 3</text>',
         '<rect x="55" y="712" width="1330" height="58" rx="10" fill="#f8e9dc"/>',
-        '<text x="77" y="748" font-family="sans-serif" font-size="21" fill="#703c20">Saídas de bloqueio: Supervisor, Join, Finance ou Challenger → blocked → fim.</text>',
+        '<text x="77" y="748" font-family="sans-serif" font-size="18" fill="#703c20">Saídas de bloqueio: Supervisor, Join, Finance, Challenger ou Recommendation → blocked → fim.</text>',
         '<text x="55" y="797" font-family="sans-serif" font-size="17" fill="#526880">Caminho principal extraído do grafo real. Mock: coordenação real, especialistas determinísticos; sem raciocínio de LLM.</text>', '</svg>']
 (OUT/'graph.svg').write_text('\n'.join(svg)+'\n',encoding='utf-8')
 (OUT/'graph-edges.json').write_text(json.dumps(edges,indent=2)+'\n')
@@ -99,9 +99,14 @@ sections=[('context','Contexto', '''<h1>NovaCore: o problema é coordenação</h
 ('theory','Teoria', '''<h1>Do agente à organização</h1><p>Um agente é uma unidade de inteligência.<br>Um sistema multiagente é uma organização.<br>Colocar essa organização em produção é um problema de engenharia.</p><ul><li>Who decides? · Where is the state?</li><li>What happens when it fails? · Can I observe it?</li><li>What does it cost? · Should this even be an agent?</li></ul><p class="subtitle">Mock demonstra state, roles, graph, orchestration, parallelism, consolidation e contracts — sem raciocínio de LLM.</p>'''),
 ('timeline','Timeline', '''<h1>O evento não confirma atraso do cliente</h1><div class="timeline"><div class="card"><div class="date">01/10</div><p>Evento; estoque inicial.<br>Alpha era esperado.</p></div><div class="card"><div class="date">02/10</div><p>Expresso chega se sair dia 1.<br>Produção usa material de manhã.</p></div><div class="card"><div class="date">03/10</div><p>Beta chega se pedido dia 1.<br>Prazo de CO-001.</p></div><div class="card"><div class="date">08/10</div><p>Novo prazo Alpha.<br>Produzir dia 8 permite entregar dia 9.</p></div></div><p>Produção durante D → entrega até o fim de D+1. Dias corridos, datas fixas.</p><p class="subtitle">Time-to-Decision inclui a decisão humana, ainda pendente; a duração da CLI mede só o workflow.</p>'''),
 ('graph','Arquitetura','<img src="graph.svg" alt="Grafo real de coordenação com join e aprovação humana"/>')]
-labels={'summary':'SP / Campinas','state':'Shared state','specialists':'Especialistas','coordination':'Coordenação','scenarios':'Cenários A–D','challenger':'Challenger','recommendation':'Recomendação'}
+labels={'summary':'SP / Campinas','state':'Shared state','specialists':'Especialistas','coordination':'Coordenação','scenarios':'Cenários A–D','challenger':'Challenger','recommendation':'Recomendação','llm-decisions':'Decisões · mock'}
 for view in VIEWS:
     sections.append((view,labels[view],'<pre>'+escape(views[view])+'</pre><p class="subtitle">Fallback gravado do fixture oficial. Para execução ao vivo: uv run control-tower show INCIDENT-001 '+view+'</p>'))
+live_example = ROOT / 'docs/course/examples/incident-001-openai-decisions.txt'
+if live_example.is_file():
+    sections.append(('openai-recorded', 'Decisões · OpenAI gravado',
+                     '<pre>'+escape(live_example.read_text())+'</pre><p class="subtitle">'
+                     'Execução real gravada em 15/09/2026 · gpt-4.1-mini. Fallback offline; não é chamada ao vivo.</p>'))
 for item in manifest:
     sections.append((item['id'],'Código · '+item['title'], f'<div class="code"><h1>{escape(item["title"])}</h1><p>{item["path"]}:{item["start"]}–{item["end"]}</p><pre>{escape(item["code"])}</pre></div>'))
 html=['<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NovaCore · Aula 1</title><style>'+css+'</style>',

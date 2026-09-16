@@ -19,11 +19,11 @@ Depois: evento → evidências → coordenação → cenários → crítica → 
 
 Veja o [material visual](../../docs/course/classroom/index.html), que abre localmente sem rede.
 O professor seleciona a tela correspondente ao conceito. Mock executa o grafo real com especialistas
- determinísticos: não há raciocínio de LLM nem ação operacional automática.
+determinísticos: não há raciocínio de LLM nem ação operacional automática.
 
 ## O que observar — e como reproduzir depois
 
-Na branch de revisão `codex/lesson-01-classroom`, após instalação indicada no README:
+Na revisão atual, após instalação indicada no README:
 
 | Conceito | Comando | Output esperado | Discussão / aprendizado |
 |---|---|---|---|
@@ -57,3 +57,17 @@ repositório; a aula usa apenas uma nota curta, sem antecipar resiliência opera
 Para estudo posterior: `uv run control-tower run INCIDENT-001 --json` e comparação Git entre versões.
 O professor usa [o runbook](../../docs/course/lesson-01-runbook.md); não precisa percorrer grandes diffs.
 Tags existentes permanecem intactas e ainda não contêm estas novas views.
+
+## Observar a fronteira mock vs OpenAI
+
+Após a recomendação, compare `LLM_MODE=mock` e `LLM_MODE=openai` usando
+`uv run control-tower show INCIDENT-001 llm-decisions`.
+O modo real usa a credencial previamente configurada pelo professor. Ninguém programa em sala.
+
+- Observe interpretação do Supervisor, três sínteses, achados do Challenger e justificativa final.
+- Mesmas fontes e cálculos A–D; narrativas e preferência entre alternativas admissíveis podem variar.
+- Pergunta: se o modelo sugerir outro valor ou ignorar uma política, quem impede a recomendação?
+- Aprendizado: **LLMs interpretam e julgam. Código determinístico mede e valida.**
+- Fallback: mock ao vivo e exemplo gravado identificado pelo modo, nunca simular sucesso da API.
+
+Roteiro detalhado em [llm-modes.md](../../docs/course/llm-modes.md).

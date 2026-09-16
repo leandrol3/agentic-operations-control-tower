@@ -3,8 +3,8 @@
     "id": "shared-state",
     "title": "Shared state: canais de evidência",
     "path": "src/control_tower/graph/state.py",
-    "start": 120,
-    "end": 129,
+    "start": 122,
+    "end": 131,
     "code": "\n\nclass WorkflowState(Contract):\n    incident: Incident\n    plan: tuple[Specialist, ...] = ()\n    supervisor_reason: str = ''\n    supply: Result[SupplyEvidence] | None = None\n    production: Result[ProductionEvidence] | None = None\n    logistics: Result[LogisticsEvidence] | None = None\n    investigation: Investigation | None = None"
   },
   {
@@ -27,16 +27,16 @@
     "id": "langgraph-edges",
     "title": "LangGraph: nós e transições",
     "path": "src/control_tower/graph/workflow.py",
-    "start": 98,
-    "end": 120,
-    "code": "    builder = StateGraph(WorkflowState)\n    builder.add_node('supervisor', visible('supervisor', supervisor.supervise))\n    for name in SPECIALISTS:\n        builder.add_node(name, specialist_node(name))\n    builder.add_node('consolidation', visible('consolidation', supervisor.consolidate))\n    builder.add_node('finance', visible('finance', finance_node))\n    builder.add_node('challenger', visible('challenger', lambda s: {\n        'review': challenger.challenge(tools, s.investigation, s.finance)}))\n    builder.add_node('recommendation', visible('recommendation', recommendation_node))\n    builder.add_node('human_approval', visible('human_approval', human_approval))\n    builder.add_node('blocked', visible('blocked', blocked))\n    builder.add_edge(START, 'supervisor')\n    if sequential:\n        builder.add_conditional_edges('supervisor', lambda s: 'blocked' if s.blockers else 'supply',\n                                      {'blocked': 'blocked', 'supply': 'supply'})\n        builder.add_edge('supply', 'production')\n        builder.add_edge('production', 'logistics')\n        builder.add_edge('logistics', 'consolidation')\n    else:\n        builder.add_conditional_edges('supervisor', route_supervisor,\n                                      {n: n for n in (*SPECIALISTS, 'blocked')})\n        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.\n        builder.add_edge(list(SPECIALISTS), 'consolidation')"
+    "start": 113,
+    "end": 134,
+    "code": "    builder = StateGraph(WorkflowState)\n    builder.add_node('supervisor', visible('supervisor', supervisor_node))\n    for name in SPECIALISTS:\n        builder.add_node(name, specialist_node(name))\n    builder.add_node('consolidation', visible('consolidation', supervisor.consolidate))\n    builder.add_node('finance', visible('finance', finance_node))\n    builder.add_node('challenger', visible('challenger', challenger_node))\n    builder.add_node('recommendation', visible('recommendation', recommendation_node))\n    builder.add_node('human_approval', visible('human_approval', human_approval))\n    builder.add_node('blocked', visible('blocked', blocked))\n    builder.add_edge(START, 'supervisor')\n    if sequential:\n        builder.add_conditional_edges('supervisor', lambda s: 'blocked' if s.blockers else 'supply',\n                                      {'blocked': 'blocked', 'supply': 'supply'})\n        builder.add_edge('supply', 'production')\n        builder.add_edge('production', 'logistics')\n        builder.add_edge('logistics', 'consolidation')\n    else:\n        builder.add_conditional_edges('supervisor', route_supervisor,\n                                      {n: n for n in (*SPECIALISTS, 'blocked')})\n        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.\n        builder.add_edge(list(SPECIALISTS), 'consolidation')"
   },
   {
     "id": "parallel-join",
     "title": "Paralelismo: esperar todos antes de consolidar",
     "path": "src/control_tower/graph/workflow.py",
-    "start": 109,
-    "end": 123,
+    "start": 123,
+    "end": 137,
     "code": "    builder.add_edge(START, 'supervisor')\n    if sequential:\n        builder.add_conditional_edges('supervisor', lambda s: 'blocked' if s.blockers else 'supply',\n                                      {'blocked': 'blocked', 'supply': 'supply'})\n        builder.add_edge('supply', 'production')\n        builder.add_edge('production', 'logistics')\n        builder.add_edge('logistics', 'consolidation')\n    else:\n        builder.add_conditional_edges('supervisor', route_supervisor,\n                                      {n: n for n in (*SPECIALISTS, 'blocked')})\n        # Lista significa esperar TODOS, não três arestas que podem disparar a junção separadamente.\n        builder.add_edge(list(SPECIALISTS), 'consolidation')\n    builder.add_conditional_edges('consolidation', route_consolidation, ['finance', 'blocked'])\n    builder.add_conditional_edges('finance', route_finance, ['challenger', 'blocked'])\n    builder.add_conditional_edges('challenger', route_review, ['recommendation', 'blocked'])"
   },
   {
@@ -58,9 +58,9 @@
   {
     "id": "recommendation",
     "title": "Recommendation: contrato existente",
-    "path": "src/control_tower/graph/workflow.py",
-    "start": 67,
-    "end": 79,
-    "code": "    def recommendation_node(state: WorkflowState):\n        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)\n        baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')\n        risks = [f.message for f in state.review.findings if f.scenario_id in ('all', selected.scenario_id)]\n        result = Recommendation(\n            incident_id=state.incident.incident_id, severity='high',\n            recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',\n            estimated_cost_brl=selected.total_cost_brl,\n            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),\n            customer_delay_days=max(d.delay_days for d in selected.deliveries),\n            confidence=0.65, risks=risks, approval_required=True,\n        )\n        return {'recommendation': result}"
+    "path": "src/control_tower/agents/interpretation.py",
+    "start": 59,
+    "end": 70,
+    "code": "def template(state, scenario_id):\n    selected = next(s for s in state.finance.scenarios if s.scenario_id == scenario_id)\n    baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')\n    risks = [f.message for f in state.review.findings if f.scenario_id in ('all', scenario_id)]\n    return Recommendation(\n        incident_id=state.incident.incident_id, severity='high',\n        recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',\n        estimated_cost_brl=selected.total_cost_brl,\n        avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),\n        customer_delay_days=max(d.delay_days for d in selected.deliveries),\n        confidence=0.65, risks=risks, approval_required=True,\n    )"
   }
 ]

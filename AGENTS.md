@@ -2,11 +2,11 @@
 Leia completamente docs/course/ antes de alterar código. PROJECT_CONTEXT.md é a fonte de requisitos.
 Preserve decisões e checkpoints existentes; não mova tags aprovadas silenciosamente.
 Escopo atual: lesson-01-complete aprovado, Demos 5–8. Não avançar à Aula 2.
-Rodada atual: experiência de aula e apresentação didática. Preserve arquitetura central e tags.
+Rodada atual: mock + OpenAI no mesmo grafo. Preserve capacidades/cálculos determinísticos e tags.
 Não publicar esta revisão sem solicitação. Não transformar a aula em live coding.
 Tag lesson-01-start permanece intacta; revisão aprovada do start está no commit 171c324.
 Um único sistema evolui nas quatro aulas; não criar quatro aplicações.
-Python 3.12, uv, Pydantic e LangGraph. Nesta entrega apenas mock; OpenAI foi adiado.
+Python 3.12, uv, Pydantic e LangGraph. Mock offline e OpenAI via OPENAI_API_KEY; OPENAI_MODEL seleciona modelo.
 Use contratos tipados, módulos pequenos, Decimal para dinheiro e cálculos determinísticos.
 Agentes acessam capabilities em tools, nunca CSVs diretamente. Aprovação humana permanece obrigatória.
 Modo mock deve funcionar offline após instalação, sem chave e sem chamadas pagas.

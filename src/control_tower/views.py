@@ -9,11 +9,11 @@ from .graph.workflow import build_graph
 from .models import Incident
 from .tools import Tools
 
-VIEWS = ('summary', 'state', 'specialists', 'coordination', 'scenarios', 'challenger', 'recommendation')
+VIEWS = ('summary', 'state', 'specialists', 'coordination', 'scenarios', 'challenger', 'recommendation', 'llm-decisions')
 STOP_AFTER = {
     'summary': 'consolidation', 'state': 'consolidation', 'specialists': 'consolidation',
     'coordination': 'consolidation', 'scenarios': 'challenger', 'challenger': 'challenger',
-    'recommendation': None,
+    'recommendation': None, 'llm-decisions': None,
 }
 
 
@@ -41,6 +41,30 @@ def render_view(state: WorkflowState, view: str, tools: Tools) -> str:
     if evidence is None:
         raise ValueError('Evidências ainda não consolidadas')
     supply, production, logistics = evidence.supply, evidence.production, evidence.logistics
+    if view == 'llm-decisions':
+        from textwrap import shorten, wrap
+        def concise(label, value):
+            return wrap(label + ': ' + shorten(' '.join(value.split()), width=160, placeholder='…'), width=94)
+        findings = ([f.message for f in state.llm_challenger.findings] if state.llm_challenger else
+                    [f.message for f in state.review.findings if not f.blocking])
+        rationale = (state.llm_recommendation.rationale if state.llm_recommendation else
+                     'Menor custo incremental entre cenários admissíveis; riscos exigem confirmação humana.')
+        lines = [f'DECISÕES | {state.llm_mode} | ' + (state.llm_model or 'sem chamadas LLM'),
+                 'Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.']
+        lines += concise('Supervisor', state.supervisor_reason)
+        lines += ['Especialistas: ' + ', '.join(state.plan)]
+        for name in ('supply', 'production', 'logistics'):
+            synthesis = getattr(state, name + '_synthesis')
+            value = synthesis.summary if synthesis else 'evidência tipada; síntese fixa/determinística'
+            lines += [shorten(f'{name}: ' + ' '.join(value.split()), width=94, placeholder='…')]
+        lines += ['Challenger (premissas / informação insuficiente):']
+        lines += [shorten('  - ' + ' '.join(f.split()), width=94, placeholder='…') for f in findings[:3]]
+        lines += concise('Justificativa', rationale)
+        if state.recommendation:
+            lines += [f'Cenário {state.review.selected_scenario} | custo R$ {money(state.recommendation.estimated_cost_brl)} | aprovação obrigatória',
+                      f'{state.status} | actions_executed=false']
+        lines += ['LLMs interpretam e julgam. Código determinístico mede e valida.']
+        return '\n'.join(lines)
     if view == 'summary':
         demand = production.demand_units
         return '\n'.join([
@@ -70,7 +94,7 @@ def render_view(state: WorkflowState, view: str, tools: Tools) -> str:
         ])
     if view == 'specialists':
         return '\n'.join([
-            'SPECIALISTS | papéis determinísticos em mock', '',
+            f'SPECIALISTS | {state.llm_mode} | evidências determinísticas', '',
             f'Supply      estoque + fornecedores: SP {supply.local.available_units}, Campinas {supply.origin.available_units}',
             f'            transferência preservando piso: {supply.origin.transferable_without_safety_stock_units}',
             f'Production  ordens + clientes: demanda {production.demand_units}',

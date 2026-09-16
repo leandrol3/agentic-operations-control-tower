@@ -3,7 +3,7 @@ from .graph.state import WorkflowState
 
 
 def render(state: WorkflowState) -> str:
-    lines = [f'\n=== {state.incident.incident_id} | mock | resumo ===',
+    lines = [f'\n=== {state.incident.incident_id} | {state.llm_mode} | resumo ===',
              f'Supervisor: {state.supervisor_reason}', f'Plano: {", ".join(state.plan)}']
     for name in ('supply', 'production', 'logistics'):
         result = getattr(state, name)
@@ -13,6 +13,9 @@ def render(state: WorkflowState) -> str:
             lines.append(f'{name.title()}: ERRO — {result.error}')
         else:
             lines.append(f'{name.title()}: OK')
+            synthesis = getattr(state, name + '_synthesis')
+            if synthesis:
+                lines.append(f'  Síntese LLM (consultiva): {synthesis.summary}')
             if name == 'supply':
                 lines.append(f'  SP={result.data.local.available_units}; Campinas={result.data.origin.available_units}; '
                              f'transferível sem romper piso={result.data.origin.transferable_without_safety_stock_units}; '
@@ -40,6 +43,8 @@ def render(state: WorkflowState) -> str:
     if state.recommendation:
         lines.extend(['Recomendação estruturada:', state.recommendation.model_dump_json(indent=2)])
         lines.append('Confiança 0.65: valor didático conservador, não probabilidade calibrada.')
+    if state.llm_recommendation:
+        lines.append(f'Justificativa LLM: {state.llm_recommendation.rationale}')
     if state.approval:
         lines.append(f'APROVAÇÃO HUMANA NECESSÁRIA | pending | responsável={state.approval.authority}')
     if state.blockers:

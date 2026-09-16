@@ -21,6 +21,7 @@ flowchart TD
     Join -. erro ou ausência .-> Blocked
     Finance -. simulação incompleta .-> Blocked
     Challenger -. nenhum cenário admissível .-> Blocked
+    Recommendation -. resposta inválida .-> Blocked
 ```
 
 O arquivo [lesson-01-graph.mmd](lesson-01-graph.mmd) é gerado do grafo real por
@@ -44,14 +45,18 @@ O arquivo [lesson-01-graph.mmd](lesson-01-graph.mmd) é gerado do grafo real por
 
 ## Escolhas e limites
 
-Mock executa o grafo real, mas seus papéis usam funções determinísticas. OpenAI foi adiado; não há
-chave, acesso a API ou alegação de raciocínio probabilístico. A separação entre evidências, cálculos e
-revisão permite adicionar um provider depois, mantendo cálculos fora do LLM. Não foi criada uma
-abstração de provider sem uma segunda implementação para justificar sua complexidade.
+Mock executa o grafo real sem rede. OpenAI usa os mesmos nós/arestas e adiciona contratos Pydantic
+em canais exclusivos para sínteses; evidências não são substituídas por texto do LLM.
+Supervisor seleciona/pergunta; o código exige os três papéis para o fixture atual antes do fan-out.
+Challenger aplica primeiro regras determinísticas, depois inclui alertas consultivos do LLM.
+Recommendation pode selecionar outro cenário admissível, mas o código confere seus valores e
+preserva riscos existentes, ação canônica e aprovação obrigatória. Qualquer violação bloqueia.
+O grafo agora também liga Recommendation a blocked para recusa/saída inválida do provider.
+Veja [a fronteira completa](../course/llm-modes.md). Não existe nó de execução operacional.
 
 `--sequential` altera somente as arestas para comparação didática. `--demo-delay-ms` injeta uma espera
 limitada de até 2 s por especialista; padrão zero. Tempos reais variam, não são benchmark.
-`--fail-specialist` demonstra a consequência de resultado ausente. Sem retry, timeout, backoff ou caos.
+`--fail-specialist` demonstra a consequência de resultado ausente. Sem retry, backoff ou caos; a chamada OpenAI tem limite de 45 s para não prender a demo.
 
 Dependências transitivas do LangGraph incluem LangSmith/checkpoint/SDK, mas não são serviços ativados.
 Tracing é explicitamente desabilitado no workflow mock, inclusive quando o ambiente pede tracing.

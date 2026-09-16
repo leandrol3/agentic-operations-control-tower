@@ -1,18 +1,18 @@
-"""CLI offline: base e demonstração completa da Aula 1."""
+"""CLI da Aula 1: mock offline e interpretação OpenAI opcional."""
 import argparse
 import json
-import os
 import time
 from pathlib import Path
 from .tools import Tools
 from .smoke import check_demo
+from .settings import Settings
 
 def main():
     parser = argparse.ArgumentParser(description="NovaCore — lesson-01-complete")
     parser.add_argument("command", choices=["doctor", "incident", "tools", "smoke", "run", "graph", "show"])
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Raiz do checkout (padrão: diretório atual)")
     parser.add_argument("incident_id", nargs="?", help="Obrigatório para run: INCIDENT-001")
-    parser.add_argument("view", nargs="?", choices=["summary", "state", "specialists", "coordination", "scenarios", "challenger", "recommendation"])
+    parser.add_argument("view", nargs="?", choices=["summary", "state", "specialists", "coordination", "scenarios", "challenger", "recommendation", "llm-decisions"])
     parser.add_argument("--json", action="store_true", help="Estado completo em JSON, sem eventos")
     parser.add_argument("--sequential", action="store_true", help="Controle sequencial para comparar com o paralelismo")
     parser.add_argument("--demo-delay-ms", type=int, default=0, help="Espera artificial por especialista, 0–2000 ms")
@@ -33,23 +33,16 @@ def main():
             args.command == "graph" and not args.fail_specialist and not args.demo_delay_ms):
             parser.error("Opções de execução são de run, show coordination ou graph --sequential")
     root = args.root.resolve()
-    mode = "mock"
-    env_file = root / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            key, sep, value = line.strip().partition("=")
-            if sep and key.strip() == "LLM_MODE":
-                mode = value.strip().strip("\"'")
-    mode = os.environ.get("LLM_MODE", mode)
-    if mode != "mock":
-        parser.error("Este checkpoint suporta LLM_MODE=mock. OpenAI foi adiado; o grafo não faz chamadas LLM.")
     try:
+        settings = Settings.load(root)
+        mode = settings.mode
+        llm = settings.interpreter() if args.command in {'run', 'show'} else None
         tools = Tools(root)
         incident = tools.load_incident(root / "incidents/incident_001.json")
         if args.command == "show":
             from .views import show
             text, blocked = show(tools, incident, args.view, sequential=args.sequential,
-                                 demo_delay_ms=args.demo_delay_ms, fail_specialist=args.fail_specialist)
+                                 demo_delay_ms=args.demo_delay_ms, fail_specialist=args.fail_specialist, llm=llm)
             print(text)
             if blocked:
                 raise SystemExit(1)
@@ -61,13 +54,13 @@ def main():
             from .presentation import render
             started = time.perf_counter()
             if not args.json:
-                print(f"Execução {'sequencial' if args.sequential else 'paralela'} | mock | "
+                print(f"Execução {'sequencial' if args.sequential else 'paralela'} | {mode} | "
                       f"latência artificial por especialista: {args.demo_delay_ms} ms", flush=True)
             def observe(name, phase):
                 print(f"  {name}: {phase}", flush=True)
             state = run_workflow(tools, incident, sequential=args.sequential,
                                  demo_delay_ms=args.demo_delay_ms, fail_specialist=args.fail_specialist,
-                                 observer=None if args.json else observe)
+                                 observer=None if args.json else observe, llm=llm)
             if args.json:
                 print(state.model_dump_json(indent=2))
             else:

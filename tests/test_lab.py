@@ -92,13 +92,13 @@ def test_cli_offline(command, tmp_path):
     assert json.loads(result.stdout)
 
 def test_env_file_rejects_unsupported_provider(tmp_path):
-    (tmp_path / '.env').write_text('LLM_MODE=openai\n')
+    (tmp_path / '.env').write_text('LLM_MODE=unsupported\n')
     env = dict(os.environ)
     env.pop('LLM_MODE', None)
     result = subprocess.run([sys.executable, '-m', 'control_tower.main', 'doctor', '--root', str(tmp_path)],
                             env=env, text=True, capture_output=True)
     assert result.returncode == 2
-    assert 'suporta LLM_MODE=mock' in result.stderr
+    assert 'LLM_MODE deve ser mock ou openai' in result.stderr
 
 def test_policy_values(tools):
     assert tools.policies.priority_customer_max_delay_days == 1

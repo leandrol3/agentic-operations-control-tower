@@ -37,6 +37,10 @@
   ],
   [
     "recommendation",
+    "blocked"
+  ],
+  [
+    "recommendation",
     "human_approval"
   ],
   [

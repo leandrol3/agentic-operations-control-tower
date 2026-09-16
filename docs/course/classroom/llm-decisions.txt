@@ -1,0 +1,16 @@
+DECISÕES | mock | sem chamadas LLM
+Mesmas tools e cálculos; sínteses são consultivas, não novas evidências.
+Supervisor: Investigar material, ordens/clientes e rotas; ramos independentes
+Especialistas: supply, production, logistics
+supply: evidência tipada; síntese fixa/determinística
+production: evidência tipada; síntese fixa/determinística
+logistics: evidência tipada; síntese fixa/determinística
+Challenger (premissas / informação insuficiente):
+- Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora…
+- Capacidade produtiva simplificada e reposição do safety stock local precisam de validação…
+- Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de…
+Justificativa: Menor custo incremental entre cenários admissíveis; riscos exigem confirmação
+humana.
+Cenário D | custo R$ 12.500 | aprovação obrigatória
+awaiting_approval | actions_executed=false
+LLMs interpretam e julgam. Código determinístico mede e valida.

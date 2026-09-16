@@ -1,4 +1,4 @@
-SPECIALISTS | papéis determinísticos em mock
+SPECIALISTS | mock | evidências determinísticas
 
 Supply      estoque + fornecedores: SP 300, Campinas 500
             transferência preservando piso: 300

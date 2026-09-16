@@ -5,8 +5,8 @@ import time
 from langgraph.graph import END, START, StateGraph
 from langsmith import tracing_context
 
-from ..agents import challenger, finance, specialists, supervisor
-from ..models import Recommendation
+from ..agents import challenger, finance, specialists, supervisor, interpretation
+from ..llm import Interpreter
 from ..tools import Tools
 from .state import Approval, LogisticsEvidence, ProductionEvidence, Result, SupplyEvidence, WorkflowState
 
@@ -26,11 +26,12 @@ def route_finance(state: WorkflowState):
 
 
 def route_review(state: WorkflowState):
-    return 'recommendation' if state.review and state.review.selected_scenario else 'blocked'
+    return 'recommendation' if not state.blockers and state.review and state.review.selected_scenario else 'blocked'
 
 
 def build_graph(tools: Tools, *, sequential: bool = False, fail_specialist: str | None = None,
-                demo_delay_ms: int = 0, observer: Callable[[str, str], None] | None = None):
+                demo_delay_ms: int = 0, observer: Callable[[str, str], None] | None = None,
+                llm: Interpreter | None = None):
     if fail_specialist is not None and fail_specialist not in SPECIALISTS:
         raise ValueError('Especialista desconhecido para falha simulada')
     if not 0 <= demo_delay_ms <= 2000:
@@ -52,10 +53,14 @@ def build_graph(tools: Tools, *, sequential: bool = False, fail_specialist: str 
                 evidence_type = {'supply': SupplyEvidence, 'production': ProductionEvidence,
                                  'logistics': LogisticsEvidence}[name]
                 result = Result[evidence_type](data=data)
+                synthesis = interpretation.synthesize(llm, name, state.incident, result.data, state.llm_plan) if llm else None
             except (ValueError, OSError) as error:
                 result = Result(error=str(error))
             notify(name, 'erro' if result.error else 'fim')
-            return {name: result}
+            update = {name: result}
+            if llm and not result.error:
+                update[name + '_synthesis'] = synthesis
+            return update
         return node
 
     def finance_node(state: WorkflowState):
@@ -65,18 +70,21 @@ def build_graph(tools: Tools, *, sequential: bool = False, fail_specialist: str 
             return {'blockers': (f'Finance: {error}',)}
 
     def recommendation_node(state: WorkflowState):
-        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)
-        baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')
-        risks = [f.message for f in state.review.findings if f.scenario_id in ('all', selected.scenario_id)]
-        result = Recommendation(
-            incident_id=state.incident.incident_id, severity='high',
-            recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',
-            estimated_cost_brl=selected.total_cost_brl,
-            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
-            customer_delay_days=max(d.delay_days for d in selected.deliveries),
-            confidence=0.65, risks=risks, approval_required=True,
-        )
-        return {'recommendation': result}
+        if llm:
+            return interpretation.recommend(llm, state)
+        return {'recommendation': interpretation.template(state, state.review.selected_scenario)}
+
+    def supervisor_node(state: WorkflowState):
+        update = interpretation.supervise(llm, state) if llm else supervisor.supervise(state)
+        if llm:
+            update.update(llm_mode='openai', llm_model=llm.model)
+        return update
+
+    def challenger_node(state: WorkflowState):
+        review = challenger.challenge(tools, state.investigation, state.finance)
+        if llm and review.selected_scenario:
+            return interpretation.challenge(llm, state, review)
+        return {'review': review}
 
     def human_approval(state: WorkflowState):
         if state.recommendation is None or not state.recommendation.approval_required:
@@ -90,19 +98,25 @@ def build_graph(tools: Tools, *, sequential: bool = False, fail_specialist: str 
     def visible(name, function):
         def node(state: WorkflowState):
             notify(name, 'início')
-            result = function(state)
+            try:
+                result = function(state)
+            except ValueError as error:
+                if not llm:
+                    raise
+                notify(name, 'erro')
+                return {'blockers': (str(error),), 'status': 'blocked',
+                        'llm_mode': 'openai', 'llm_model': llm.model}
             notify(name, 'fim')
             return result
         return node
 
     builder = StateGraph(WorkflowState)
-    builder.add_node('supervisor', visible('supervisor', supervisor.supervise))
+    builder.add_node('supervisor', visible('supervisor', supervisor_node))
     for name in SPECIALISTS:
         builder.add_node(name, specialist_node(name))
     builder.add_node('consolidation', visible('consolidation', supervisor.consolidate))
     builder.add_node('finance', visible('finance', finance_node))
-    builder.add_node('challenger', visible('challenger', lambda s: {
-        'review': challenger.challenge(tools, s.investigation, s.finance)}))
+    builder.add_node('challenger', visible('challenger', challenger_node))
     builder.add_node('recommendation', visible('recommendation', recommendation_node))
     builder.add_node('human_approval', visible('human_approval', human_approval))
     builder.add_node('blocked', visible('blocked', blocked))
@@ -121,7 +135,8 @@ def build_graph(tools: Tools, *, sequential: bool = False, fail_specialist: str 
     builder.add_conditional_edges('consolidation', route_consolidation, ['finance', 'blocked'])
     builder.add_conditional_edges('finance', route_finance, ['challenger', 'blocked'])
     builder.add_conditional_edges('challenger', route_review, ['recommendation', 'blocked'])
-    builder.add_edge('recommendation', 'human_approval')
+    builder.add_conditional_edges('recommendation', lambda s: 'blocked' if s.blockers else 'human_approval',
+                                  ['blocked', 'human_approval'])
     builder.add_edge('human_approval', END)
     builder.add_edge('blocked', END)
     return builder.compile()

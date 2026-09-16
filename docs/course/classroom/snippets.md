@@ -5,7 +5,7 @@ não digitar nem navegar por diffs durante a aula. Números de linha referem-se 
 
 ## Shared state: canais de evidência
 
-`src/control_tower/graph/state.py:120–129` — 10 linhas.
+`src/control_tower/graph/state.py:122–131` — 10 linhas.
 
 ```python
 
@@ -62,17 +62,16 @@ def consolidate(state: WorkflowState) -> dict:
 
 ## LangGraph: nós e transições
 
-`src/control_tower/graph/workflow.py:98–120` — 23 linhas.
+`src/control_tower/graph/workflow.py:113–134` — 22 linhas.
 
 ```python
     builder = StateGraph(WorkflowState)
-    builder.add_node('supervisor', visible('supervisor', supervisor.supervise))
+    builder.add_node('supervisor', visible('supervisor', supervisor_node))
     for name in SPECIALISTS:
         builder.add_node(name, specialist_node(name))
     builder.add_node('consolidation', visible('consolidation', supervisor.consolidate))
     builder.add_node('finance', visible('finance', finance_node))
-    builder.add_node('challenger', visible('challenger', lambda s: {
-        'review': challenger.challenge(tools, s.investigation, s.finance)}))
+    builder.add_node('challenger', visible('challenger', challenger_node))
     builder.add_node('recommendation', visible('recommendation', recommendation_node))
     builder.add_node('human_approval', visible('human_approval', human_approval))
     builder.add_node('blocked', visible('blocked', blocked))
@@ -92,7 +91,7 @@ def consolidate(state: WorkflowState) -> dict:
 
 ## Paralelismo: esperar todos antes de consolidar
 
-`src/control_tower/graph/workflow.py:109–123` — 15 linhas.
+`src/control_tower/graph/workflow.py:123–137` — 15 linhas.
 
 ```python
     builder.add_edge(START, 'supervisor')
@@ -156,20 +155,19 @@ def consolidate(state: WorkflowState) -> dict:
 
 ## Recommendation: contrato existente
 
-`src/control_tower/graph/workflow.py:67–79` — 13 linhas.
+`src/control_tower/agents/interpretation.py:59–70` — 12 linhas.
 
 ```python
-    def recommendation_node(state: WorkflowState):
-        selected = next(s for s in state.finance.scenarios if s.scenario_id == state.review.selected_scenario)
-        baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')
-        risks = [f.message for f in state.review.findings if f.scenario_id in ('all', selected.scenario_id)]
-        result = Recommendation(
-            incident_id=state.incident.incident_id, severity='high',
-            recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',
-            estimated_cost_brl=selected.total_cost_brl,
-            avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
-            customer_delay_days=max(d.delay_days for d in selected.deliveries),
-            confidence=0.65, risks=risks, approval_required=True,
-        )
-        return {'recommendation': result}
+def template(state, scenario_id):
+    selected = next(s for s in state.finance.scenarios if s.scenario_id == scenario_id)
+    baseline = next(s for s in state.finance.scenarios if s.scenario_id == 'A')
+    risks = [f.message for f in state.review.findings if f.scenario_id in ('all', scenario_id)]
+    return Recommendation(
+        incident_id=state.incident.incident_id, severity='high',
+        recommended_action=f'Cenário {selected.scenario_id}: {selected.description}',
+        estimated_cost_brl=selected.total_cost_brl,
+        avoided_penalty_brl=max(0, baseline.penalty_brl - selected.penalty_brl),
+        customer_delay_days=max(d.delay_days for d in selected.deliveries),
+        confidence=0.65, risks=risks, approval_required=True,
+    )
 ```
