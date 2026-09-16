@@ -1,4 +1,35 @@
+# Ajuste autorizado — LLM real e continuidade operacional na Aula 2
+
+Mesmo LangGraph e arquitetura distribuída. Task suporta mock/openai, requests estruturadas da Aula 1,
+um retry por falha transitória, fallback explícito determinístico limitado ao case ou revisão humana.
+Mock é o padrão; SIGKILL/retry de task/idempotência só em mock. Não implementar routing avançado,
+custo/SLO/observabilidade nem Aula 3. Sem tags/publicação; parar para revisão.
+
+# Atualização aprovada — candidato lesson-02-complete
+
+O usuário aprovou o start e autorizou SOMENTE o candidato complete da Aula 2. Esta atualização
+substitui proibições históricas de integração abaixo. Preservar Aula 1 e comportamento do start.
+Implementar Celery/Redis, metadata/eventos/resultado PostgreSQL, claim atômico, retry limitado,
+redelivery após morte de worker e CLI curta. Sem checkpoint por nó, API, telemetria ou aulas futuras.
+Não criar/mover tags nem publicar. Parar para revisão. Detalhes em lesson-02-runbook.md e
+lesson-02/distributed-contracts.md.
+
+---
+
 # Contexto permanente do projeto
+
+## Escopo vigente — candidato lesson-02-start
+
+Autorizado em 16/09/2026: iniciar somente o start da Aula 2, “Execução Distribuída e Escala”.
+Aula 1 congelada em 8fbc4fc; tags existentes intocáveis. Novo escopo prevalece sobre proibições
+históricas de avançar à Aula 2 abaixo. Preservar os materiais e a implementação da Aula 1.
+Adicionar generator de 500 envelopes, baseline local mock, capacidade simulada, contratos de
+Execution/ExecutionEvent/idempotência, Compose Redis/PostgreSQL e dependências opcionais preparadas.
+Baseline repete INCIDENT-001; não interpreta os payloads das cinco categorias como novos casos.
+Não implementar Celery worker real, queue/store integrados, resume, API, OTel/Langfuse, Control Plane,
+Kubernetes, Harness/Hermes ou lesson-02-complete. Não criar lesson-02-start antes de revisão.
+Runbook: lesson-02-runbook.md; guia: labs/02_distributed_execution/README.md.
+
 
 ## Revisão vigente — segundo modo com LLM
 

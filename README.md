@@ -1,3 +1,53 @@
+## Aula 2 — candidato lesson-02-complete
+
+Arquitetura real: Producer → Redis/Celery → workers locais → LangGraph → PostgreSQL.
+O batch local aprovado permanece disponível. A task distribuída usa mock por padrão e permite OpenAI
+no mesmo grafo de referência INCIDENT-001; nenhuma ação de negócio é executada.
+
+O [bloco LLM do runbook](docs/course/lesson-02-runbook.md) ensaia 3 incidentes/2 workers,
+retry de request e fallback explícito: degraded_recommendation ou human_review_required.
+[Resultados reais](docs/course/lesson-02/llm-demo-outputs.md) ·
+[Semântica de continuidade](docs/course/lesson-02/llm-continuity.md).
+Todas as demos de SIGKILL/retry de task/idempotência continuam em mock.
+
+```bash
+uv sync --locked --extra lesson02
+docker compose up -d --wait
+uv run control-tower db-init
+```
+
+Dois terminais, um comando em cada (trocar A por B no segundo):
+
+```bash
+uv run celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
+```
+
+Terceiro terminal:
+
+```bash
+uv run control-tower enqueue --count 20 --version minha-demo-v1 --demo-delay-ms 500
+uv run control-tower executions
+uv run control-tower execution <UUID>
+uv run control-tower events <UUID> --lifecycle
+uv run control-tower result <UUID>
+```
+
+Usar uma nova version para novo experimento; repetir os mesmos parâmetros demonstra idempotência.
+Parar workers com Ctrl-C antes de `docker compose down`; volumes preservados. Docker é usado apenas
+para reproduzir infraestrutura local. Docker não é assunto da aula.
+
+[Runbook completo](docs/course/lesson-02-runbook.md) ·
+[Guia de observação](labs/02_distributed_execution/README.md) ·
+[Semântica, contratos e limites](docs/course/lesson-02/distributed-contracts.md) ·
+[Ensaio real](docs/course/lesson-02/complete-demo-outputs.md)
+
+Validação: `uv run pytest -q`; com Compose, `LESSON02_INTEGRATION=1 uv run pytest tests/integration -q`.
+Ensaio automatizado opcional: `uv run python scripts/validate_lesson02_complete.py` inicia dois workers
+próprios e encerra um deles para verificar recuperação; usar infraestrutura de laboratório sem outros
+consumidores da queue lesson02. Não apaga dados, não publica no GitHub e não cria tags.
+
+---
+
 # Agentic Operations Control Tower
 
 Laboratório oficial de **Multi-Agent Systems, Deployment, and Scaling**, MBA em AI Engineering &
@@ -10,6 +60,57 @@ Os comandos permitem reprodução posterior, sem exercícios de programação du
 A tag `lesson-01-start` permanece intacta. O start revisado aprovado está em `171c324`;
 a tag `lesson-01-complete` identifica a conclusão da Aula 1.
 Revisão com mock + OpenAI disponível na `main`; tags anteriores preservadas.
+
+## Aula 2 — candidato lesson-02-start
+
+**Execução Distribuída e Escala** — De um workflow multiagente para uma operação concorrente e resiliente.
+Aula 1 está congelada na revisão `8fbc4fc`. O candidato está na branch `codex/lesson-02-start`,
+sem tag e sem publicação até revisão. O material da Aula 1 abaixo permanece válido.
+
+```bash
+uv sync --locked --extra lesson02
+uv run control-tower generate-incidents --count 500
+uv run control-tower batch --incidents 10 --workers 1 --demo-delay-ms 500
+uv run control-tower batch --incidents 10 --workers 5 --demo-delay-ms 500
+uv run control-tower batch --incidents 50 --workers 20 --provider-limit 5 --demo-delay-ms 500
+uv run control-tower idempotency-demo
+```
+
+Batch é sempre mock, local e sem API paga, mesmo com `LLM_MODE=openai` no ambiente.
+Cada envelope recebe sua execução, mas o workload repete o caso técnico INCIDENT-001 do grafo original.
+As cinco categorias representam chegadas sintéticas, não cinco análises de negócio implementadas.
+Threads não são Celery workers; semáforo simula capacidade por workflow, não rate limit real.
+`completed` significa processamento concluído com aprovação humana ainda pendente.
+
+### Infraestrutura pré-preparada pelo professor
+
+Docker é usado apenas para reproduzir infraestrutura local. Docker não é assunto da aula.
+Abra Docker Desktop antes da preparação. O batch e a Aula 1 funcionam sem estes serviços.
+
+```bash
+docker compose config
+docker compose up -d
+docker compose ps
+docker compose down
+```
+
+Redis em `127.0.0.1:16379`; PostgreSQL em `127.0.0.1:15432`; ambos com health checks e volumes próprios.
+Banco/usuário `novacore`; senha pública de demonstração local `novacore_demo_only`, configurável por
+`LESSON02_POSTGRES_PASSWORD`. Portas podem ser alteradas por `LESSON02_REDIS_PORT` e
+`LESSON02_POSTGRES_PORT`. Nenhum serviço é exposto em todas as interfaces.
+`down` mantém os volumes. Para descartar **somente os dados didáticos deste projeto**, use `docker compose down -v`.
+Primeiro pull/instalação precisa de rede; prepare antes da aula. Não foi criado Dockerfile da aplicação.
+O extra `lesson02` instala Celery/Redis e psycopg antecipadamente; nenhuma task, fila ou store foi integrada.
+
+[Runbook de 240 minutos](docs/course/lesson-02-runbook.md) ·
+[Observation Guide](labs/02_distributed_execution/README.md) ·
+[Contratos](docs/course/lesson-02/contracts.md) ·
+[Outputs reais](docs/course/lesson-02/demo-outputs.md) ·
+[Validação](docs/course/lesson-02/validation.md)
+
+Exporte fixtures/snapshots com `--output artifacts/nome-novo.jsonl` no generator ou
+`--output artifacts/nome-novo.json` no batch. Arquivos existentes não são sobrescritos.
+Esses snapshots não implementam persistência durável nem resume. Exemplos do start não são benchmark.
 
 ## Para o professor — revisão de experiência de aula
 

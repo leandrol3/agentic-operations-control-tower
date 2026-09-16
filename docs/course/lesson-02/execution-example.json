@@ -1,0 +1,12 @@
+{
+  "execution_id": "b0e3167d-78a6-4fcb-bf0b-7b258be3ee7b",
+  "incident_id": "NC-S42-0001",
+  "status": "completed",
+  "started_at": "2026-09-16T04:20:43.301713Z",
+  "completed_at": "2026-09-16T04:20:43.818219Z",
+  "current_step": "awaiting_approval",
+  "attempt": 1,
+  "worker_id": "local:95642:MainThread",
+  "error": null,
+  "workflow_status": "awaiting_approval"
+}

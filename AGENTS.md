@@ -1,8 +1,10 @@
 # Instruções de engenharia
 Leia completamente docs/course/ antes de alterar código. PROJECT_CONTEXT.md é a fonte de requisitos.
 Preserve decisões e checkpoints existentes; não mova tags aprovadas silenciosamente.
-Escopo atual: lesson-01-complete aprovado, Demos 5–8. Não avançar à Aula 2.
-Rodada atual: mock + OpenAI no mesmo grafo. Preserve capacidades/cálculos determinísticos e tags.
+Escopo atual: candidato lesson-02-complete. Aula 1 congelada no commit 8fbc4fc.
+Rodada atual: Celery/Redis e PostgreSQL reais; preservar comportamento do start aprovado.
+Preserve código/dados/testes/materiais da Aula 1, salvo despacho aditivo de novos comandos da CLI.
+Sem checkpoint/resume por nó, API ou telemetria. Não criar tags sem revisão.
 Não publicar esta revisão sem solicitação. Não transformar a aula em live coding.
 Tag lesson-01-start permanece intacta; revisão aprovada do start está no commit 171c324.
 Um único sistema evolui nas quatro aulas; não criar quatro aplicações.

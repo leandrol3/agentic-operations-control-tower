@@ -2,12 +2,19 @@
 import argparse
 import json
 import time
+import sys
 from pathlib import Path
 from .tools import Tools
 from .smoke import check_demo
 from .settings import Settings
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ('db-init', 'enqueue', 'executions', 'execution', 'events', 'result'):
+        from .distributed.remote_cli import main as distributed_main
+        return distributed_main(sys.argv[1:])
+    if len(sys.argv) > 1 and sys.argv[1] in ('generate-incidents', 'batch', 'idempotency-demo'):
+        from .distributed.cli import main as lesson02_main
+        return lesson02_main(sys.argv[1:])
     parser = argparse.ArgumentParser(description="NovaCore — lesson-01-complete")
     parser.add_argument("command", choices=["doctor", "incident", "tools", "smoke", "run", "graph", "show"])
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Raiz do checkout (padrão: diretório atual)")
