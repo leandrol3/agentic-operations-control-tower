@@ -6,6 +6,9 @@ import socket
 import httpx
 import pytest
 from openai import APITimeoutError, AuthenticationError, RateLimitError
+pytest.importorskip('celery', reason='Instale a Aula 2 com: uv sync --extra lesson02')
+pytest.importorskip('psycopg', reason='Instale a Aula 2 com: uv sync --extra lesson02')
+
 from control_tower.distributed import llm_runtime, tasks
 from control_tower.distributed.config import visibility_timeout
 from control_tower.distributed.durable import TaskOptions, FinalResult

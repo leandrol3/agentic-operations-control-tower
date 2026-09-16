@@ -21,7 +21,7 @@ Inicialmente, nos três terminais: `export LLM_MODE=mock LESSON02_VISIBILITY_TIM
 
 ```bash
 uv sync --locked --extra lesson02
-uv run pytest -q
+uv run --extra lesson02 pytest -q
 LLM_MODE=mock uv run control-tower smoke
 LLM_MODE=mock uv run control-tower run INCIDENT-001
 
@@ -29,7 +29,7 @@ docker compose config --quiet
 docker compose up -d --wait
 docker compose ps
 uv run control-tower db-init
-LESSON02_INTEGRATION=1 uv run pytest tests/integration -q
+LESSON02_INTEGRATION=1 uv run --extra lesson02 pytest tests/integration -q
 ```
 
 Docker Desktop deve estar aberto. Docker é usado apenas para reproduzir infraestrutura local.

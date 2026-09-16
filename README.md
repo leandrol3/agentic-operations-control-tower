@@ -41,7 +41,9 @@ para reproduzir infraestrutura local. Docker não é assunto da aula.
 [Semântica, contratos e limites](docs/course/lesson-02/distributed-contracts.md) ·
 [Ensaio real](docs/course/lesson-02/complete-demo-outputs.md)
 
-Validação: `uv run pytest -q`; com Compose, `LESSON02_INTEGRATION=1 uv run pytest tests/integration -q`.
+Validação completa da Aula 2: `uv run --extra lesson02 pytest -q`; com Compose,
+`LESSON02_INTEGRATION=1 uv run --extra lesson02 pytest tests/integration -q`.
+Sem o extra, `uv run pytest` executa a suíte base e pula os módulos distribuídos opcionais.
 Ensaio automatizado opcional: `uv run python scripts/validate_lesson02_complete.py` inicia dois workers
 próprios e encerra um deles para verificar recuperação; usar infraestrutura de laboratório sem outros
 consumidores da queue lesson02. Não apaga dados, não publica no GitHub e não cria tags.
