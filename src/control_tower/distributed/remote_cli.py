@@ -4,7 +4,6 @@ import json
 from uuid import UUID
 from .durable import TaskOptions
 from .incidents import generate_incidents
-from .store import Store
 
 
 def main(argv):
@@ -32,13 +31,22 @@ def main(argv):
         if name in ('events', 'executions'):
             p.add_argument('--limit', type=int, default=12 if name == 'events' else 8)
     args = parser.parse_args(argv)
+    # Ajuda/validação de argumentos não precisam do banco, broker ou extras instalados.
+    try:
+        from .store import Store
+        if args.command == 'enqueue':
+            from .producer import enqueue
+    except ModuleNotFoundError as error:
+        if error.name not in {'psycopg', 'psycopg_binary', 'celery', 'kombu', 'redis'}:
+            raise
+        parser.exit(2, 'Dependências opcionais da Aula 2 ausentes. Execute: uv sync --extra lesson02\n'
+                       'Ou use: uv run --extra lesson02 control-tower ' + args.command + ' ...\n')
     store = Store()
     try:
         if args.command == 'db-init':
             store.initialize()
             print('PostgreSQL: tabelas de execução/eventos prontas. Nenhum dado removido.')
         elif args.command == 'enqueue':
-            from .producer import enqueue
             from ..settings import Settings
             from .config import project_root
             settings = Settings.load(project_root())

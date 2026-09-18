@@ -28,7 +28,7 @@ LLM_MODE=mock uv run control-tower run INCIDENT-001
 docker compose config --quiet
 docker compose up -d --wait
 docker compose ps
-uv run control-tower db-init
+uv run --extra lesson02 control-tower db-init
 LESSON02_INTEGRATION=1 uv run --extra lesson02 pytest tests/integration -q
 ```
 
@@ -166,26 +166,26 @@ uv run control-tower batch --incidents 50 --workers 50 --provider-limit 5 --demo
 **Terminal 3 — producer, inicialmente sem workers:**
 
 ```bash
-uv run control-tower enqueue --count 20 --version demo3-v1 --demo-delay-ms 500
-uv run control-tower executions
+uv run --extra lesson02 control-tower enqueue --count 20 --version demo3-v1 --demo-delay-ms 500
+uv run --extra lesson02 control-tower executions
 ```
 
 **Terminal 1 — worker A:**
 
 ```bash
-uv run celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
 ```
 
 **Terminal 2 — worker B:**
 
 ```bash
-uv run celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-B@%h' --loglevel=INFO --without-gossip --without-mingle
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-B@%h' --loglevel=INFO --without-gossip --without-mingle
 ```
 
 **Terminal 3 — consultar enquanto processam:**
 
 ```bash
-uv run control-tower executions
+uv run --extra lesson02 control-tower executions
 ```
 
 - **Output:** queued diminui, running até 2, completed cresce; worker_id mostra A e B.
@@ -225,9 +225,9 @@ worker; os 60 s da demo mock não são uma configuração apropriada para o prov
 **Terminal 3 — somente 3 envelopes:**
 
 ```bash
-uv run control-tower enqueue --count 3 --version demo-llm-v1
-uv run control-tower executions --limit 3
-uv run control-tower execution <UUID_LLM>
+uv run --extra lesson02 control-tower enqueue --count 3 --version demo-llm-v1
+uv run --extra lesson02 control-tower executions --limit 3
+uv run --extra lesson02 control-tower execution <UUID_LLM>
 ```
 
 Para projetar queued, publicar o lote antes de reiniciar A/B. Depois observar running/completed,
@@ -274,12 +274,12 @@ flowchart TD
 **Após a carga OpenAI funcionar, com A/B ainda no perfil openai:**
 
 ```bash
-uv run control-tower enqueue --count 1 --version demo-llm-degraded-v1 --llm-failure timeout --fallback deterministic_reference
-uv run control-tower events <UUID_DEGRADED> --llm
-uv run control-tower result <UUID_DEGRADED>
-uv run control-tower enqueue --count 1 --version demo-llm-human-v1 --llm-failure timeout --fallback human
-uv run control-tower events <UUID_HUMAN> --llm
-uv run control-tower result <UUID_HUMAN>
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo-llm-degraded-v1 --llm-failure timeout --fallback deterministic_reference
+uv run --extra lesson02 control-tower events <UUID_DEGRADED> --llm
+uv run --extra lesson02 control-tower result <UUID_DEGRADED>
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo-llm-human-v1 --llm-failure timeout --fallback human
+uv run --extra lesson02 control-tower events <UUID_HUMAN> --llm
+uv run --extra lesson02 control-tower result <UUID_HUMAN>
 ```
 
 - **Output determinístico após falha artificial:** llm.requested → llm.failed → llm.retry →
@@ -323,9 +323,9 @@ implementado nesta etapa.
 **Parte A — falha tratada, Terminal 3, ambos workers disponíveis:**
 
 ```bash
-uv run control-tower enqueue --count 1 --version demo4-retry-v1 --fail-specialist logistics
-uv run control-tower execution <execution_id>
-uv run control-tower events <execution_id> --lifecycle
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo4-retry-v1 --fail-specialist logistics
+uv run --extra lesson02 control-tower execution <execution_id>
+uv run --extra lesson02 control-tower events <execution_id> --lifecycle
 ```
 
 Substituir `<execution_id>` pelo UUID impresso. Primeira tentativa falha no Logistics, espera 2 s,
@@ -338,8 +338,8 @@ três tentativas, esperas 2/4 s, failed terminal. Não fazer essa extensão se o
 2. No Terminal 3:
 
 ```bash
-uv run control-tower enqueue --count 1 --version demo4-crash-v1 --demo-delay-ms 10000
-uv run control-tower execution <execution_id>
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo4-crash-v1 --demo-delay-ms 10000
+uv run --extra lesson02 control-tower execution <execution_id>
 ```
 
 3. Confirmar `running` e copiar **o PID final do worker_id de A** (formato `lesson02-A@host:PID`).
@@ -353,8 +353,8 @@ kill -KILL <PID_DE_A>
 5. No Terminal 3:
 
 ```bash
-uv run control-tower execution <execution_id>
-uv run control-tower events <execution_id> --lifecycle
+uv run --extra lesson02 control-tower execution <execution_id>
+uv run --extra lesson02 control-tower events <execution_id> --lifecycle
 ```
 
 - **Output:** running com A permanece até recuperação; B recebe redelivery, attempt=2, completed.
@@ -375,10 +375,10 @@ uv run control-tower events <execution_id> --lifecycle
 - **Comandos (Terminal 3; reiniciar A para ter dois workers):**
 
 ```bash
-uv run control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
-uv run control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
-uv run control-tower execution <execution_id>
-uv run control-tower events <execution_id> --lifecycle
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
+uv run --extra lesson02 control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
+uv run --extra lesson02 control-tower execution <execution_id>
+uv run --extra lesson02 control-tower events <execution_id> --lifecycle
 ```
 
 - **Output:** primeira publicação novas=1, segunda existentes=1, mesmo UUID, attempt=1, um started/completed.
@@ -397,9 +397,9 @@ uv run control-tower events <execution_id> --lifecycle
 - **Comandos:** parar workers com Ctrl-C e, no Terminal 3:
 
 ```bash
-uv run control-tower execution <execution_id>
-uv run control-tower events <execution_id>
-uv run control-tower result <execution_id>
+uv run --extra lesson02 control-tower execution <execution_id>
+uv run --extra lesson02 control-tower events <execution_id>
+uv run --extra lesson02 control-tower result <execution_id>
 ```
 
 - **Output:** dados continuam consultáveis; resultado exige aprovação humana. `--json` opcional para

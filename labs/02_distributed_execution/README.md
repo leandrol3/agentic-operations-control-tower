@@ -60,14 +60,14 @@ procedimento de kill estão no [runbook do professor](../../docs/course/lesson-0
 ```bash
 uv sync --locked --extra lesson02
 docker compose up -d --wait
-uv run control-tower db-init
+uv run --extra lesson02 control-tower db-init
 ```
 
 Iniciar dois workers nos terminais 1/2 conforme runbook. No terminal 3:
 
 ```bash
-uv run control-tower enqueue --count 20 --version reproducao-v1 --demo-delay-ms 500
-uv run control-tower executions
+uv run --extra lesson02 control-tower enqueue --count 20 --version reproducao-v1 --demo-delay-ms 500
+uv run --extra lesson02 control-tower executions
 ```
 
 Copiar um UUID para `execution`, `events` e `result`. Usar `--json` somente para inspeção detalhada.

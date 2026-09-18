@@ -13,23 +13,23 @@ Todas as demos de SIGKILL/retry de task/idempotência continuam em mock.
 ```bash
 uv sync --locked --extra lesson02
 docker compose up -d --wait
-uv run control-tower db-init
+uv run --extra lesson02 control-tower db-init
 ```
 
 Dois terminais, um comando em cada (trocar A por B no segundo):
 
 ```bash
-uv run celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
 ```
 
 Terceiro terminal:
 
 ```bash
-uv run control-tower enqueue --count 20 --version minha-demo-v1 --demo-delay-ms 500
-uv run control-tower executions
-uv run control-tower execution <UUID>
-uv run control-tower events <UUID> --lifecycle
-uv run control-tower result <UUID>
+uv run --extra lesson02 control-tower enqueue --count 20 --version minha-demo-v1 --demo-delay-ms 500
+uv run --extra lesson02 control-tower executions
+uv run --extra lesson02 control-tower execution <UUID>
+uv run --extra lesson02 control-tower events <UUID> --lifecycle
+uv run --extra lesson02 control-tower result <UUID>
 ```
 
 Usar uma nova version para novo experimento; repetir os mesmos parâmetros demonstra idempotência.
