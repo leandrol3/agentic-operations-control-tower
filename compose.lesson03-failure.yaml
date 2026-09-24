@@ -1,0 +1,14 @@
+# Uso explícito apenas na Demo 5: falha artificial antes da rede.
+# Nenhuma credencial real. Sempre enviar llm_failure=timeout; não é provider real funcionando.
+x-failure: &failure
+  LLM_MODE: openai
+  OPENAI_API_KEY: demo-placeholder-never-sent
+  VISIBILITY_TIMEOUT: '900'
+  LOG_FORMAT: json
+services:
+  api:
+    environment: *failure
+  worker-a:
+    environment: *failure
+  worker-b:
+    environment: *failure

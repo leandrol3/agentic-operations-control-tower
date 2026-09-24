@@ -1,0 +1,13 @@
+# Allowlist: credenciais, .env, .git, artefatos e venv nunca entram no build context.
+*
+!Dockerfile
+!pyproject.toml
+!uv.lock
+!src/
+!src/**
+!data/
+!data/**
+!incidents/
+!incidents/**
+**/__pycache__
+**/*.pyc
