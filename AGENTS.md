@@ -1,3 +1,11 @@
+# Escopo vigente — candidato lesson-03-start
+Autorizado pelo professor em 24/09/2026: somente API mínima, runtime/container, settings,
+health/readiness e contratos de telemetria/correlação. Sem tracing distribuído completo.
+Esta seção prevalece sobre proibições históricas de API/telemetria abaixo.
+Aulas 1/2 congeladas: adicionar camadas, preservar grafo/tasks/tools/store e regressões.
+Compose base preservado; override adiciona runtime. Não criar/mover tags nem publicar sem pedido.
+Parar para revisão; detalhes em docs/course/lesson-03-runbook.md e lesson-03/contracts.md.
+
 # Instruções de engenharia
 Leia completamente docs/course/ antes de alterar código. PROJECT_CONTEXT.md é a fonte de requisitos.
 Preserve decisões e checkpoints existentes; não mova tags aprovadas silenciosamente.

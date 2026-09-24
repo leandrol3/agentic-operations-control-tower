@@ -1,3 +1,15 @@
+# Escopo vigente — Aula 3 / somente candidato lesson-03-start
+
+Autorizado em 24/09/2026: Runtime, Deployment & Production. Preservar Aulas 1/2 congeladas.
+Fronteira FastAPI reutilizando producer, imagem comum API/worker, Compose completo via override,
+Pydantic Settings, health/readiness, contexto persistido/headers Celery/logs, SDK OTel preparado.
+Sem tracing distribuído completo, dashboards, routing, governança, cloud/K8s/CI/CD ou Aula 4.
+Não criar/mover tags e não publicar; parar para revisão. A tag lesson-02-complete não será criada
+por inferência. Mensagem: produção começa com implantação, observação, reinício e previsibilidade.
+Guia e runbook são observacionais; alunos não programam. A agenda de 240 minutos está em
+lesson-03-runbook.md; decisões, limitações e contratos em lesson-03/contracts.md.
+Esta autorização substitui somente os limites históricos incompatíveis abaixo.
+
 # Ajuste autorizado — LLM real e continuidade operacional na Aula 2
 
 Mesmo LangGraph e arquitetura distribuída. Task suporta mock/openai, requests estruturadas da Aula 1,

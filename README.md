@@ -1,3 +1,56 @@
+# Aula 3 — candidato lesson-03-start (revisão local)
+
+**Runtime, Deployment & Production**: API → producer original → Redis → Celery workers → mesmo
+LangGraph → PostgreSQL. Nova camada operacional; agentes/tools/grafo/task/store anteriores preservados.
+Sem tag nova nem publicação. [Runbook completo](docs/course/lesson-03-runbook.md) ·
+[Guia de observação](labs/03_runtime_production/README.md) ·
+[Contratos/arquitetura](docs/course/lesson-03/contracts.md) ·
+[Validação real](docs/course/lesson-03/validation.md).
+
+Com Docker Desktop aberto, na raiz desta revisão:
+
+```bash
+uv sync --locked --extra lesson03
+export LLM_MODE=mock
+export OTEL_ENABLED=false
+docker compose config --quiet
+docker compose build
+docker compose up -d --wait
+docker compose ps
+curl -i http://localhost:8000/health
+curl -i http://localhost:8000/ready
+curl -i -X POST http://localhost:8000/incidents \
+  -H 'Content-Type: application/json' \
+  -d '{"incident_id":"HTTP-README-001","version":"readme-v1"}'
+```
+
+O POST retorna 202 + execution_id. Consulte `/executions/{execution_id}`, `/events` e `/result`;
+[runbook](docs/course/lesson-03-runbook.md) contém extração automática do UUID e todos os comandos.
+Aprovação humana continua obrigatória. .keys/.env não entram na imagem. API localhost:8000; mesmo
+artefato não-root para API e workers. Schema inicializado automaticamente, volumes preservados.
+
+```bash
+uv run --extra lesson03 pytest -q
+LESSON02_INTEGRATION=1 LESSON03_INTEGRATION=1 uv run --extra lesson03 pytest -q
+docker compose logs api
+docker compose logs worker-a
+docker compose logs worker-b
+docker compose down
+```
+
+`down` mantém os volumes. Logs stdout precisam ser salvos antes de remover containers.
+Start entrega correlação persistida e SDK OTel opcional, **sem spans end-to-end nem métricas coletadas**.
+É um laboratório local, ainda sem autenticação/TLS/HA/deploy cloud. Mock funciona sem provider;
+OpenAI continua opcional e exige configuração explícita igual nos três papéis.
+
+**Compatibilidade:** `compose.yaml` da Aula 2 está intacto; `compose.override.yaml` acrescenta runtime
+por padrão nesta branch. Para repetir só a Aula 2 aqui, encerre o runtime Aula 3 e use
+`docker compose -f compose.yaml up -d --wait`, seguido dos workers locais originais. Não misture ambos.
+As seções abaixo são documentação histórica dos checkpoints anteriores; não descrevem ausência de API
+nesta revisão. As tags anteriores permanecem intactas.
+
+---
+
 ## Aula 2 — candidato lesson-02-complete
 
 Arquitetura real: Producer → Redis/Celery → workers locais → LangGraph → PostgreSQL.
