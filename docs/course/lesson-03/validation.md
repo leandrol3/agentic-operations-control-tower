@@ -1,3 +1,38 @@
+# Validação vigente — lesson-03-complete
+
+[Fechamento formal e regressão final de 30/09/2026](final-freeze.md).
+
+## Validação adicional informada pelo professor — registro em 30/09/2026
+
+**OpenAI real:** smoke executado e aprovado pelo professor, conforme confirmação no pedido de
+congelamento. Nenhuma chamada paga foi repetida neste fechamento. Não foram encontrados nos
+artefatos deste candidato os detalhes exatos desse smoke. Campos pendentes de registro documental:
+
+| Campo | Evidência disponível |
+|---|---|
+| Data/hora da execução | Não informada; 30/09/2026 é a data deste registro |
+| Modelo solicitado/retornado | Não informado |
+| execution_id / trace_id | Não informados |
+| Status | Validação aprovada pelo professor; status técnico exato não informado |
+| Duração / spans relevantes | Não informados |
+| Token usage | Não informado; nenhum valor estimado |
+
+Esses campos podem ser complementados pelo professor com seus outputs. Não impedem o congelamento
+aprovado. A validação real é adicional; mock continua obrigatório e reproduzível, sem dependência
+de quota, rede ou provider externo para ministrar a aula.
+
+**Full pedagogical rehearsal completed by professor.** Todas as demos executadas com sucesso,
+progressão aprovada e aula considerada ministrável em quatro horas, conforme relato do professor.
+Tempos efetivamente medidos por bloco não foram fornecidos; a agenda continua uma estimativa.
+Preparação do ambiente, setup/build/pull ficam fora das quatro horas. Capturas permanecem como fallback.
+
+
+A revisão completa e as evidências atuais estão no [relatório para revisão](complete-review.md)
+e nas [capturas reais](complete-demo-outputs.md). O relatório abaixo permanece como histórico do
+start aprovado, não como limitação da implementação atual. Fechamento local autorizado em 30/09/2026; sem push e sem Aula 4.
+
+---
+
 # Entrega para revisão — candidato lesson-03-start
 
 **Parecer técnico: APROVAR no escopo do start. Parecer pedagógico: APROVAR para ensaio do professor.**

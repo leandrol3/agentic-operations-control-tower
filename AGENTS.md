@@ -1,3 +1,16 @@
+# Escopo vigente — fechamento e congelamento lesson-03-complete
+
+Autorizado em 30/09/2026: somente evidências/documentação, regressão final, correções indispensáveis,
+commit final e tag anotada local `lesson-03-complete` após validação. Sem push, features, refatorações
+ou Aula 4. Professor aprovou arquitetura/demos, smoke OpenAI real e rehearsal integral.
+Esta autorização substitui restrições históricas incompatíveis abaixo; demais limites permanecem.
+
+# Escopo vigente — candidato lesson-03-complete
+Autorizado em 28/09/2026: tracing OTel real, W3C, spans semânticos, Collector + Jaeger,
+métricas básicas e Demos6–9. Preservar start, core/regras Aulas1/2, HTTP/health/readiness.
+Não criar/mover tags, não publicar, não iniciar Aula4. Parar para revisão.
+Esta autorização substitui apenas as restrições históricas incompatíveis abaixo.
+
 # Escopo vigente — candidato lesson-03-start
 Autorizado pelo professor em 24/09/2026: somente API mínima, runtime/container, settings,
 health/readiness e contratos de telemetria/correlação. Sem tracing distribuído completo.

@@ -1,4 +1,4 @@
-# lesson-03-start — decisões e limites do runtime
+# Histórico do checkpoint anterior lesson-03-start — decisões e limites do runtime
 
 ## Arquitetura
 
@@ -154,3 +154,137 @@ Sem dashboard, auto-instrumentação massiva, K8s, CI/CD, autoscaling, FinOps ou
 - [Celery signals](https://docs.celeryq.dev/en/stable/userguide/signals.html).
 - [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/).
 - [OpenTelemetry Python instrumentation](https://opentelemetry.io/docs/languages/python/instrumentation/).
+
+---
+
+# Estado vigente — lesson-03-complete aprovado
+
+Esta seção substitui as limitações históricas do start **somente quando OTEL_ENABLED=true**.
+Endpoints, bodies/status, core, task, store, métricas financeiras e aprovação não foram redesenhados.
+Com OTel desligado, o contrato anterior X-Trace-ID/contexto continua funcionando.
+
+## Arquitetura final e decisão async
+
+```mermaid
+flowchart LR
+  HTTP[POST /incidents] --> P[Producer existente]
+  P -->|W3C headers| R[Redis]
+  R --> W[Celery prefork workers]
+  W --> G[Mesmo LangGraph]
+  G --> A[Agents / tools / LLM]
+  P --> DB[(PostgreSQL)]
+  W --> DB
+  HTTP -. OTLP HTTP .-> C[OpenTelemetry Collector]
+  W -. OTLP HTTP .-> C
+  C --> J[Jaeger UI]
+  C --> M[Debug exporter: métricas]
+```
+
+**Uma mensagem por task:** `SERVER HTTP → PRODUCER publish → CONSUMER process`.
+Consumer continua o contexto W3C de criação da mensagem como parent. Isso é permitido para consumo
+unitário pelas [convenções de messaging](https://opentelemetry.io/docs/specs/semconv/messaging/messaging-spans/).
+Parent-child expressa causa, não exige que o pai assíncrono permaneça aberto até o filho terminar.
+Não há batch consumer ou contexto ambiente conflitante que exija Span Links nesta topologia.
+Não adicionamos links artificiais para todas as arestas LangGraph: o join é uma operação irmã,
+observada depois dos especialistas; os testes verificam a barreira e a sobreposição real.
+
+- Publicação: wrapper envolve `apply_async` inteiro, incluindo falha de publicação. Injeta
+  `traceparent` e, quando recebido, `tracestate`. Não propaga baggage arbitrário.
+- Consumo: signal prerun extrai o contexto, cria novo span e postrun encerra/limpa.
+- Retry Celery: nova publicação é filha do processamento que decidiu retry; headers recebem o
+  **novo** contexto de publicação. Cada processamento tem novo span ID e tentativa durável.
+- Redelivery: a mesma mensagem preserva contexto de criação, mas cada entrega tem outro consumer
+  span (irmãos). O atributo redelivered ajuda a identificar. SIGKILL pode deixar spans não exportados;
+  não inventamos fim/duração da tentativa morta. ExecutionEvent mantém evidência de interrupted.
+- Duplicata HTTP: nova request tem trace próprio; o corpo mantém o trace canônico da primeira
+  associação aprovada no start. `X-Request-Trace-ID` indica a request atual. A execução lógica
+  pode ter entregas em múltiplos traces: execution_id é a ponte. O banco impede reexecução terminal.
+- CLI Aula2 sem runtime não gera publish spans; worker instrumentado cria trace raiz se não há
+  contexto W3C válido. Não fabricar um pai para histórico sem instrumentação.
+
+`execution_id != trace_id != correlation_id`: execução durável, história técnica observada,
+identidade externa de correlação. Uma tentativa de request LLM não incrementa a tentativa da task.
+A resposta de uma submissão nova contém trace_id real OTel; X-Trace-ID não escolhe o pai OTel.
+Header legado continua validado. Clientes distribuídos usam traceparent; não usam UUID isolado.
+
+## Modelo de spans e atributos
+
+| Nome estável | Tipo / fronteira |
+|---|---|
+| http POST /incidents (e demais rotas) | SERVER; um único middleware ASGI, sem autoinstrumentação duplicada |
+| messaging publish incident | PRODUCER; publicação confirmada ou erro |
+| messaging process incident | CONSUMER; uma entrega, inclusive duplicata sem trabalho |
+| workflow incident-investigation | Uma invocação real do grafo; fallback pode invocar novamente |
+| agent supervisor/supply/production/logistics/challenger/recommendation | Etapa medida pelo observer existente |
+| deterministic finance | Cálculos existentes, nenhum LLM |
+| workflow consolidation / human_approval / blocked | Coordenação/limite humano |
+| tool inventory.lookup / supplier.lookup / production.lookup / logistics.lookup | Consultas selecionadas durante nós; sem getters/CSV/DDL instrumentados |
+| llm completion | CLIENT real por tentativa; no mock, marcador INTERNAL do substituto determinístico |
+
+Atributos de domínio: control_tower.execution_id/incident_id/correlation_id/worker_id/attempt,
+quando conhecidos. HTTP: method/route/status; messaging: system/destination/operation/message.id,
+redelivered; agentes: agent.name/role; tools: tool.name; LLM: gen_ai.provider.name,
+gen_ai.request.model, gen_ai.usage.input_tokens/output_tokens quando disponíveis;
+execution.outcome; fallback.mode no evento; demo_delay_ms quando configurado.
+GenAI ainda evolui: adotamos um subconjunto, não afirmamos estabilidade universal das convenções.
+Modelo efetivamente respondido não é inferido do modelo solicitado: esse campo não é capturado
+pelo hook de evento existente. Não inventar response.model nem usage ausente.
+
+Mock conserva execução determinística original. Como não há chamada de síntese no mock congelado,
+`llm completion` é explicitamente um **marcador de fronteira**, com
+control_tower.llm.operation=deterministic_substitute. Sua duração não é inferência nem benchmark.
+Os spans de agentes e tools medem trabalho real. Tokens nunca são preenchidos em mock. Na continuidade autorizada, o marcador é
+provider=deterministic e mode=degraded, distinguindo fallback de mock de demonstração.
+
+Falhas usam ERROR + error.type/exception.type sanitizados, sem mensagem/stack brutos.
+Retry LLM é evento no Agent Span; cada request tem span próprio ERROR ou sucesso.
+Fallback/degraded/escalated são eventos no processamento; a segunda invocação do mesmo grafo é
+irmã da primária. Processamento pode concluir corretamente em degraded enquanto a tentativa LLM
+permanece ERROR. ExecutionEvent não é substituído ou reordenado por OTel.
+
+## Adaptação sem modificar o core congelado
+
+`telemetry/instrumentation.py` instala wrappers explícitos somente pelo bootstrap Aula3:
+run_workflow (incluindo alias da task), quatro tools, Session.event e execute.apply_async.
+Não faz patch genérico de cada função nem altera parâmetros/resultados de negócio.
+Observer existente delimita nós; LangGraph preserva ContextVars entre ramos; testes com barreira
+validam que instrumentação não serializa especialistas. Exceções encerram spans interrompidos.
+Trade-off: adapters dependem desses pontos de extensão congelados; mudanças futuras neles exigem
+regressão. Preferimos essa camada pequena a reescrever agentes ou criar outro grafo para tracing.
+SDK/exporters são criados **em cada filho prefork**, nunca herdando threads de exportação do pai.
+
+## Privacidade e falha da observabilidade
+
+OTEL_CAPTURE_CONTENT=false obrigatório nesta etapa. true é rejeitado explicitamente: captura de
+conteúdo ainda não é implementada. Nenhum prompt/resposta/payload/DSN/API key vira atributo/evento.
+Somente campos allowlist, IDs, nomes, tipos de erro e usage numérico. Incoming tracestate é metadado
+W3C propagado; não é um campo para segredos. Nunca incluir credenciais nos headers de trace.
+Logs dentro de spans recebem IDs reais OTel e span_id, além dos IDs de domínio conhecidos.
+
+Collector/Jaeger **não fazem parte de /ready**. Exportação em batch com fila limitada e timeout pode
+falhar/perder telemetria, sem impedir resultado de negócio. Isto não é auditoria exactly-once.
+Não há plataforma de logs; logs vão para stdout e precisam de captura antes de recriar containers.
+
+## Collector, Jaeger e métricas reais
+
+Compose override acrescenta otel-collector e jaeger. Aplicação exporta OTLP HTTP para Collector;
+Collector envia traces via OTLP ao Jaeger e métricas ao debug exporter. Aplicação não importa Jaeger.
+Porta nova no host: **127.0.0.1:16686**. OTLP fica apenas na rede Compose; portas antigas permanecem.
+Jaeger usa memória local: reinício perde traces. Salvar JSON/árvore/screenshot como fallback pré-aula.
+Imagens fixadas: Collector0.123.0, Jaeger2.11.0; compatibilidade validada pelo ensaio desta revisão,
+sem afirmar que são as versões mais recentes. Não há Grafana, Prometheus, HA ou armazenamento de traces durável.
+
+Instruments reais: executions.started/completed/failed (por tentativa efetiva, não por mensagem),
+execution.duration (segundos de tentativa), llm.calls/failures, llm.tokens.input/output.
+IDs individuais **não são labels**. Provider mock/openai/deterministic é dimensão pequena; mock conta marcadores
+de fronteira, não chamadas pagas. Falha simulada openai é marcada no span e não tem usage.
+Jaeger não visualiza métricas; validar no Collector/debug e in-memory reader dos testes.
+Não somar contadores reiniciados de workers como se fossem estado durável PostgreSQL.
+
+Novas configurações: OTEL_ENABLED (false no runtime isolado; true como default do Compose complete),
+OTEL_EXPORTER_OTLP_ENDPOINT (http://otel-collector:4318 no Compose), OTEL_CAPTURE_CONTENT=false,
+DEMO_AGENT_DELAY_MS=0 (0–2000, apenas com demo controls). O runbook começa false para comparar start/complete.
+Langfuse permanece uma possível ferramenta especializada, sem dependência instalada.
+
+**Workflow modela comportamento. Trace registra uma execução observada.**
+Aula4: qualidade, valor, economics/SLO, routing avançado, portfolio, Control Plane; não implementados.

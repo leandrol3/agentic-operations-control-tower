@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 @pytest.fixture
 def settings(monkeypatch):
     monkeypatch.setenv('LLM_MODE', 'mock')
-    return RuntimeSettings(_env_file=None, demo_controls_enabled=True)
+    return RuntimeSettings(_env_file=None, demo_controls_enabled=True, otel_enabled=False)
 
 
 @pytest.fixture

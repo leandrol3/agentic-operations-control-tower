@@ -1,6 +1,6 @@
 # Aula 3: merge automático com compose.yaml, que permanece congelado da Aula 2.
 x-app: &app
-  image: novacore-control-tower:lesson03-start
+  image: novacore-control-tower:lesson03-complete
   build: .
   init: true
   environment: &runtime
@@ -17,8 +17,10 @@ x-app: &app
     WORKER_CONCURRENCY: '${WORKER_CONCURRENCY:-1}'
     REQUEST_TIMEOUT: '${REQUEST_TIMEOUT:-3}'
     DEMO_CONTROLS_ENABLED: 'true'
-    OTEL_ENABLED: '${OTEL_ENABLED:-false}'
-    OTEL_EXPORTER_OTLP_ENDPOINT: '${OTEL_EXPORTER_OTLP_ENDPOINT:-}'
+    OTEL_CAPTURE_CONTENT: 'false'
+    DEMO_AGENT_DELAY_MS: '${DEMO_AGENT_DELAY_MS:-0}'
+    OTEL_ENABLED: '${OTEL_ENABLED:-true}'
+    OTEL_EXPORTER_OTLP_ENDPOINT: '${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}'
   stop_grace_period: 60s
 services:
   api:
@@ -62,3 +64,13 @@ services:
     depends_on:
       api: {condition: service_healthy}
     healthcheck: *worker-health
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.123.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: ['./deploy/otel/collector.yaml:/etc/otelcol/config.yaml:ro']
+    restart: unless-stopped
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.11.0
+    ports: ['127.0.0.1:16686:16686']
+    restart: unless-stopped

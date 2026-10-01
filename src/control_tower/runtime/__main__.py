@@ -3,7 +3,6 @@ import argparse
 from .settings import RuntimeSettings
 from .bootstrap import configure
 from .store import CorrelatedStore
-from ..telemetry.tracing import initialize_tracing
 
 
 def main():
@@ -22,15 +21,11 @@ def main():
             uvicorn.run('control_tower.api.app:create_app', factory=True,
                         host='0.0.0.0', port=8000, access_log=False)
         else:
-            provider = initialize_tracing(settings)
-            try:
-                app.worker_main(['worker', '--pool=prefork',
-                    f'--concurrency={settings.worker_concurrency}',
-                    f'--hostname={settings.worker_name}@%h', '--loglevel=WARNING',
-                    '--without-gossip', '--without-mingle'])
-            finally:
-                if provider:
-                    provider.shutdown()
+            # SDK/exporter belongs to each prefork child (runtime.signals).
+            app.worker_main(['worker', '--pool=prefork',
+                f'--concurrency={settings.worker_concurrency}',
+                f'--hostname={settings.worker_name}@%h', '--loglevel=WARNING',
+                '--without-gossip', '--without-mingle'])
     except Exception as error:
         # Não imprimir DSN, chave nem representação de settings em falha de startup.
         raise SystemExit(f'Runtime não iniciou ({type(error).__name__}). '

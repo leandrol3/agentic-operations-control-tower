@@ -1,4 +1,4 @@
-"""Identidade explícita, sem fingir que há spans ou traceparent W3C."""
+"""Identidades de domínio/runtime; W3C é transportado separadamente em propagation.py."""
 from contextlib import contextmanager
 from contextvars import ContextVar
 from uuid import UUID, uuid4

@@ -38,12 +38,18 @@ class RuntimeSettings(BaseSettings):
     openai_api_key_file: str | None = None
 
     # Telemetria: desligada por padrão, sem exporter implícito.
+    otel_capture_content: bool = False
+    demo_agent_delay_ms: int = Field(default=0, ge=0, le=2000)
     otel_enabled: bool = False
     otel_service_name: str = 'control-tower'
     otel_exporter_otlp_endpoint: str | None = None
 
     @model_validator(mode='after')
     def coherent_runtime(self):
+        if self.otel_capture_content:
+            raise ValueError('Content capture não é suportado neste laboratório; use false')
+        if self.demo_agent_delay_ms and not self.demo_controls_enabled:
+            raise ValueError('Delay de agente exige DEMO_CONTROLS_ENABLED')
         if self.llm_mode == 'openai' and self.visibility_timeout < 600:
             raise ValueError('OpenAI exige VISIBILITY_TIMEOUT >= 600 em API e workers')
         if self.app_env == 'production' and self.demo_controls_enabled:

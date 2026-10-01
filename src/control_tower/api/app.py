@@ -14,6 +14,9 @@ from ..runtime.store import CorrelatedStore
 from ..telemetry.context import ExecutionContext, bind_context, current_context
 from ..telemetry.logging import log_event
 from ..telemetry.tracing import initialize_tracing
+from ..telemetry import tracing
+from ..telemetry.http import HTTPTracing
+from opentelemetry import trace
 
 
 def create_app(settings=None, store=None, enqueue=None, readiness=None):
@@ -31,9 +34,9 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
         provider = initialize_tracing(settings)
         yield
         if provider:
-            provider.shutdown()
+            tracing.shutdown()
 
-    app = FastAPI(title=settings.app_name, version='lesson-03-start', lifespan=lifespan)
+    app = FastAPI(title=settings.app_name, version='lesson-03-complete', lifespan=lifespan)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, error):
@@ -73,7 +76,13 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
             raise HTTPException(422, 'Contexto/opções incompatíveis com o modo do runtime') from None
         if (body.demo_delay_ms or body.llm_failure != 'none' or body.fallback != 'human') and not settings.demo_controls_enabled:
             raise HTTPException(422, 'Demo controls desabilitados neste runtime')
+        real = tracing.identifiers()
+        if real:
+            context = context.model_copy(update={'trace_id': real['trace_id']})
         with bind_context(context):
+            trace.get_current_span().set_attributes({
+                'control_tower.operation': 'analyze-reference',
+                'control_tower.version': body.version})
             try:
                 execution, created = enqueue(body.envelope(), options, version=body.version, store=store)
             except ValueError:
@@ -84,6 +93,7 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
                 raise HTTPException(503, 'Publicação não confirmada. Reenvie o mesmo request/version; '
                                     'pode haver claim persistido.') from None
             context = current_context.get()
+            trace.get_current_span().set_attributes(tracing.attributes())
             response.headers['X-Trace-ID'] = context.trace_id
             response.headers['X-Correlation-ID'] = context.correlation_id
             response.headers['Location'] = f'/executions/{execution.execution_id}'
@@ -136,4 +146,5 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
             estimated_cost_brl=str(recommendation.estimated_cost_brl) if recommendation else None,
             approval_status='pending' if final else None)
 
+    app.add_middleware(HTTPTracing)  # Outer span also covers the existing HTTP log middleware.
     return app

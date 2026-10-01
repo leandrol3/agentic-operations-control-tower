@@ -4,6 +4,8 @@ import json
 import logging
 import sys
 from .context import current_context
+from .tracing import identifiers
+from opentelemetry import trace
 
 LOGGER = logging.getLogger('control_tower.runtime')
 
@@ -20,6 +22,7 @@ class ContextFormatter(logging.Formatter):
                    correlation_id=None, worker_id=None)
         if context:
             row.update(context.model_dump(mode='json'))
+        row.update(getattr(record, 'otel_ids', {}))
         row.update(event=getattr(record, 'event', 'runtime.log'), message=record.getMessage())
         row.update(getattr(record, 'safe_fields', {}))
         if self.log_format == 'json':
@@ -36,5 +39,11 @@ def configure_logging(service: str, log_format='human', level='INFO'):
 
 
 def log_event(event: str, message: str, *, level=logging.INFO, **safe_fields):
-    LOGGER.log(level, message, extra={'event': event, 'execution_context': current_context.get(),
+    span = trace.get_current_span()
+    domain = {key.removeprefix('control_tower.'): value
+              for key, value in (getattr(span, 'attributes', None) or {}).items()
+              if key in {f'control_tower.{name}' for name in
+                         ('execution_id', 'incident_id', 'correlation_id', 'worker_id')}}
+    safe_fields = domain | safe_fields
+    LOGGER.log(level, message, extra={'otel_ids': identifiers(), 'event': event, 'execution_context': current_context.get(),
                                     'safe_fields': safe_fields})

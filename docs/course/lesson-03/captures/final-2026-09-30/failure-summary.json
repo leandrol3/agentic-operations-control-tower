@@ -1,0 +1,11 @@
+{
+  "demo": "failure",
+  "execution_id": "5cd0e67e-8776-47c0-bcd6-4916fe4646bc",
+  "trace_id": "1284ab80f2ecabc6bde1226fe58217f8",
+  "worker": "worker-b@0288a50b048f:9",
+  "execution_duration_ms": 1289.060334000169,
+  "spans": 29,
+  "operational_seconds": 3.212,
+  "outcome": "degraded_recommendation",
+  "jaeger": "http://127.0.0.1:16686/trace/1284ab80f2ecabc6bde1226fe58217f8"
+}

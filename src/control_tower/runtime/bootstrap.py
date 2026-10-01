@@ -16,4 +16,6 @@ def configure(settings: RuntimeSettings):
         visibility_timeout=settings.visibility_timeout)
     from .signals import install_signals
     install_signals()
+    from ..telemetry.instrumentation import install
+    install()
     return app

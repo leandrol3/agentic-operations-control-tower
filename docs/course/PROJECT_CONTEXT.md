@@ -1,3 +1,28 @@
+# Escopo vigente — fechamento e congelamento lesson-03-complete
+
+Autorizado em 30/09/2026: somente evidências/documentação, regressão final, correções indispensáveis,
+commit final e tag anotada local `lesson-03-complete` após validação. Sem push, features, refatorações
+ou Aula 4. Professor aprovou arquitetura/demos, smoke OpenAI real e rehearsal integral.
+Esta autorização substitui restrições históricas incompatíveis abaixo; demais limites permanecem.
+
+## Aula 3 concluída — estado aprovado
+
+API → Queue → Workers → LangGraph + Telemetry. FastAPI, Docker/Compose, Redis, Celery,
+PostgreSQL, OpenTelemetry, OTLP e Jaeger; OpenAI opcional real validado pelo professor.
+Conceitos: Service Boundary, Async API, API contracts, runtime roles, configuration,
+health/readiness, correlation, W3C Trace Context, trace/span, distributed tracing,
+Agent/Tool/LLM Spans, observable bottleneck/failure, telemetry vs durable events.
+A lógica de negócio e aprovação humana permanecem intactas. As seções seguintes são histórico.
+
+Gancho, sem implementação: “Agora conseguimos observar uma força de trabalho agêntica.
+Como decidimos se ela está boa, cara, lenta ou gerando valor?”
+
+# Histórico — candidato lesson-03-complete
+Autorizado em 28/09/2026: tracing OTel real, W3C, spans semânticos, Collector + Jaeger,
+métricas básicas e Demos6–9. Preservar start, core/regras Aulas1/2, HTTP/health/readiness.
+Não criar/mover tags, não publicar, não iniciar Aula4. Parar para revisão.
+Esta autorização substitui apenas as restrições históricas incompatíveis abaixo.
+
 # Escopo vigente — Aula 3 / somente candidato lesson-03-start
 
 Autorizado em 24/09/2026: Runtime, Deployment & Production. Preservar Aulas 1/2 congeladas.

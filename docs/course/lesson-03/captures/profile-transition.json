@@ -1,0 +1,4 @@
+{
+  "transition": "failure profile -> mock, OTel enabled",
+  "seconds": 15.784
+}

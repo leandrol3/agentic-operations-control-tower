@@ -1,8 +1,8 @@
-# Aula 3 — candidato lesson-03-start (revisão local)
+# Aula 3 — lesson-03-complete
 
 **Runtime, Deployment & Production**: API → producer original → Redis → Celery workers → mesmo
 LangGraph → PostgreSQL. Nova camada operacional; agentes/tools/grafo/task/store anteriores preservados.
-Sem tag nova nem publicação. [Runbook completo](docs/course/lesson-03-runbook.md) ·
+Checkpoint final aprovado; fechamento local, publicação separada. [Runbook completo](docs/course/lesson-03-runbook.md) ·
 [Guia de observação](labs/03_runtime_production/README.md) ·
 [Contratos/arquitetura](docs/course/lesson-03/contracts.md) ·
 [Validação real](docs/course/lesson-03/validation.md).
@@ -12,7 +12,7 @@ Com Docker Desktop aberto, na raiz desta revisão:
 ```bash
 uv sync --locked --extra lesson03
 export LLM_MODE=mock
-export OTEL_ENABLED=false
+export OTEL_ENABLED=true
 docker compose config --quiet
 docker compose build
 docker compose up -d --wait
@@ -39,7 +39,10 @@ docker compose down
 ```
 
 `down` mantém os volumes. Logs stdout precisam ser salvos antes de remover containers.
-Start entrega correlação persistida e SDK OTel opcional, **sem spans end-to-end nem métricas coletadas**.
+Complete entrega correlação, W3C Trace Context, spans HTTP/producer/consumer/workflow/agentes/tools/LLM
+e oito instruments métricos reais. API e workers exportam OTLP → Collector → Jaeger.
+UI local: http://localhost:16686. [Evidências e fechamento](docs/course/lesson-03/validation.md).
+Smoke OpenAI real e ensaio integral aprovados pelo professor; mock permanece o caminho reproduzível.
 É um laboratório local, ainda sem autenticação/TLS/HA/deploy cloud. Mock funciona sem provider;
 OpenAI continua opcional e exige configuração explícita igual nos três papéis.
 

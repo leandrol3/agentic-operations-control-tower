@@ -1,1 +1,1 @@
-"""Contexto e logs hoje; spans distribuídos no complete."""
+"""Aula3: contexto, logs correlacionados, OTel spans e métricas opcionais."""
