@@ -1,446 +1,1018 @@
-# Aula 2 — Execução Distribuída e Escala
+# Aula 2 — runbook do professor sincronizado com a apresentação
 
-**De um workflow multiagente para uma operação concorrente e resiliente**
+**Execução Distribuída e Escala — De um workflow multiagente para uma operação concorrente e resiliente**
 
-## Candidato complete: roteiro do professor
-
-Alunos observam decisões, comportamento e trade-offs; **não programam**.
-O start aprovado continua disponível nos comandos batch/generate-incidents/idempotency-demo.
-Agora a segunda metade usa Redis, Celery e PostgreSQL reais. Aula 1 permanece preservada.
+Base: apresentação `Aula-2-Multi-Agent-Systems-Deployment-and-Scaling.pdf`, 50 páginas, recebida em
+18/09/2026. “Slide” abaixo significa a página do PDF, contando a capa como 1.
+Este roteiro usa a numeração **DEMO 1 a DEMO 7 da apresentação**. O PDF não foi alterado.
+Os alunos observam; o professor executa comandos preparados. Não há programação pelos alunos.
 
 > Escalar agentes não é aumentar o número de prompts. É controlar concorrência, estado, capacidade e falhas.
 
-Método: problema → princípio arquitetural → trecho pronto → experimento → conclusão.
-Reservar 65 min explícitos de contexto/teoria: 10 no bloco 1, 15 no 2, 10 no 4, 10 no 5,
-5 no 6, 5 na demo OpenAI, 5 na demo Fallback e 5 no bloco 10.
-Demais minutos são demonstração, discussão e reflexão. Nunca escrever infraestrutura ao vivo.
+## 1. Como usar este roteiro
 
-## Preparação (fora dos 240 min)
+1. Fazer toda a preparação **antes da aula**, uma vez por sessão.
+2. Usar três terminais na mesma raiz do repositório: **A = worker A**, **B = worker B**,
+   **C = producer/status**. Só C publica incidentes e consulta o histórico.
+3. Copiar os blocos em ordem. Os comandos de worker ocupam A/B; não colar comandos de consulta neles.
+4. Não executar um `enqueue` isolado sem `--version`. Cada demo usa uma versão diferente, derivada
+   da sessão. Apenas a verificação de duplicata repete intencionalmente a mesma versão.
+5. Não substituir `uv run --extra lesson02` por `uv run` nos comandos distribuídos. O extra inclui
+   Celery/Redis/psycopg. `--help` funciona sem o extra, mas execução distribuída precisa dele.
+6. Ao mudar mock ↔ OpenAI: concluir trabalhos, parar workers, alterar perfil, recarregar C,
+   recarregar e reiniciar A/B. Editar uma variável em C não altera os processos de A/B.
+7. Os blocos são para **zsh/bash no macOS**. `$AULA2_DIR` e `$AULA2_RUN` serão definidos na preparação.
+   As extrações com `awk` apenas copiam UUIDs da saída existente; não são código da aplicação.
 
-Inicialmente, nos três terminais: `export LLM_MODE=mock LESSON02_VISIBILITY_TIMEOUT=60`.
+**Critério antes de avançar:** execução da demo concluída, modo esperado, worker esperado e outcome
+verificado. Não interpretar `completed` sozinho como aprovação humana ou sucesso da inteligência.
+
+### Mapa da apresentação e das demonstrações
+
+| Slides | Conteúdo | Ação no terminal |
+|---|---|---|
+| 1–6 | Objetivos e foco | Nenhuma; estabelecer o problema |
+| 7–11 | Aula 1 → 500 incidentes → limites | Recomendação e generator; manter workers parados |
+| **12** | **DEMO 1 — 1 worker vs. 5 workers** | Batch local 10/1 e 10/5 |
+| 13–15 | Debrief; local ≠ distribuído; gargalo | Voltar aos slides |
+| **16** | **DEMO 2 — 5 vs. 20 vs. 50 workers** | Batch 50 incidentes, capacidade 5 |
+| 17–23 | Resultado, backlog, queue, workers, implementação | Slides e ressalva técnica do slide 23 |
+| **24** | **DEMO 3 — Queue + Workers** | Publicar 20 antes de iniciar A/B |
+| 25–27 | Identidade; mock → provider real | Consultar identidade; preparar troca de perfil |
+| **28** | **DEMO 4 — Distributed Workers with Real Intelligence** | 3 incidentes OpenAI, 2 workers |
+| 29–33 | Capacidade real; tipos de recuperação | Debater antes de injetar falha |
+| **34** | **DEMO 5 — LLM Failure and Fallback** | Falha artificial; degraded e human review |
+| 35–36 | Worker perdido e redelivery | Voltar explicitamente para mock |
+| **37** | **DEMO 6 — Worker Failure + Redelivery** | Encerrar somente A; iniciar B; mesmo UUID |
+| 38–40 | Duplicatas, idempotência e at-least-once | Verificação curta de duplicata; não renumerar como Demo 7 |
+| 41–42 | Estado durável versus eventos | Preparar consultas com workers desligados |
+| **43** | **DEMO 7 — Durable History** | execution → events → result sem workers |
+| 44–50 | Arquitetura, síntese e transição | Encerramento; slide 50 é apenas anúncio da Aula 3 |
+
+### Agenda de condução — 240 minutos
+
+| Horário | Slides / bloco | Minutos | Teoria/contexto reservados |
+|---|---|---:|---:|
+| 00:00–00:15 | 1–6: abertura e objetivos | 15 | 10 |
+| 00:15–00:30 | 7–11: retomada e escala | 15 | 10 |
+| 00:30–00:45 | 12–14: Demo 1 + debrief | 15 | 5 |
+| 00:45–01:05 | 15–17: Demo 2 + gargalo | 20 | 5 |
+| 01:05–01:25 | 18–23: fila e workers | 20 | 15 |
+| 01:25–01:40 | Intervalo; sem instalação de infraestrutura | 15 | — |
+| 01:40–02:00 | 24–27: Demo 3 e transição | 20 | 5 |
+| 02:00–02:20 | 28–29: Demo 4, provider real | 20 | 5 |
+| 02:20–02:40 | 30–34: recuperação + Demo 5 | 20 | 5 |
+| 02:40–03:05 | 35–37: Demo 6, incluindo espera de redelivery | 25 | — |
+| 03:05–03:20 | 38–40: idempotência / duplicata | 15 | — |
+| 03:20–03:40 | 41–43: Demo 7, estado e eventos | 20 | — |
+| 03:40–03:50 | Margem para atrasos / perguntas acumuladas | 10 | — |
+| 03:50–04:00 | 44–50: síntese e perguntas de saída | 10 | 5 |
+| **Total** | | **240** | **65** |
+
+Tempos de aula incluem hipótese, comando, leitura e discussão. Não são duração de processamento.
+Os números dos slides 17, 28 e 34 são de ensaios anteriores, não metas de performance. Não tentar
+“reproduzir o número exato” ao vivo. Se houver atraso, reduzir inspeção de código, não a teoria.
+
+### Ressalvas a fazer na fala, sem mudar a arquitetura para combinar com o slide
+
+- **Slide 23 / Redis:** neste projeto Redis é o broker. O backend de resultado Celery é desativado;
+  resultado final e histórico ficam no PostgreSQL, não no Redis.
+- **Slide 23 / PostgreSQL:** guarda Execution, ExecutionEvent, resultado final e claim de idempotência.
+  Não persiste todas as estruturas internas do grafo e não há checkpoint/resume por nó.
+- **Slide 35:** o worker é consumidor, não a entrada do usuário. O producer representa a chegada.
+- **Slide 44:** o desenho resume responsabilidades. PostgreSQL é escrito já no claim e durante a
+  execução, não somente após o LLM. Finance, cálculos e validação continuam determinísticos.
+- **Slide 34 / Caminho B:** o comando `--fallback human` demonstra a decisão conservadora de não
+  autorizar degradação automática. Não afirmar que o LLM “provou” a ausência de alternativa segura.
+- **Slides 8/28:** múltiplas categorias são simulação de carga. Cada envelope reaplica o case técnico
+  INCIDENT-001; não existem cinco novos workflows empresariais implementados.
+
+## 2. Preparação do professor — fora das quatro horas
+
+### 2.1 Abrir três terminais e entrar no repositório
+
+**Em A, B e C**, executar (ajustar somente se o checkout estiver em outro diretório):
+
+```bash
+cd "/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower"
+pwd
+git branch --show-current
+```
+
+Esperado: raiz que contém `pyproject.toml` e `compose.yaml`; branch `codex/lesson-02-complete`.
+Se estiver em outra branch, conferir `git status` antes de trocar. Não descartar alterações locais.
+Não fazer checkout de uma tag da Aula 1 para executar as demos da Aula 2.
+
+### 2.2 Criar identidade da sessão — somente Terminal C, uma vez
 
 ```bash
 uv sync --locked --extra lesson02
-uv run --extra lesson02 pytest -q
-LLM_MODE=mock uv run control-tower smoke
-LLM_MODE=mock uv run control-tower run INCIDENT-001
+set -o pipefail
+export AULA2_RUN="aula2-$(date +%Y%m%d-%H%M%S)"
+export AULA2_DIR="$PWD/artifacts/$AULA2_RUN"
+mkdir -p "$AULA2_DIR"
+printf 'export AULA2_RUN=%q\nexport AULA2_DIR=%q\n' \
+  "$AULA2_RUN" "$AULA2_DIR" > artifacts/aula2-session.env
+printf 'Sessão: %s\nArquivos: %s\n' "$AULA2_RUN" "$AULA2_DIR"
+```
 
+`artifacts/` é ignorado pelo Git. Esse arquivo guarda somente nomes/caminhos, nunca a chave OpenAI.
+**Não recriar a sessão entre demos.** Uma nova aula/dry run recebe uma nova sessão; repetir uma demo
+na mesma sessão exige trocar sua versão, conforme seção de recuperação abaixo.
+
+### 2.3 Definir perfil inicial mock — somente Terminal C
+
+```bash
+cat > "$AULA2_DIR/profile.env" <<'ENV'
+export LLM_MODE=mock
+export OPENAI_MODEL=gpt-4.1-mini
+export LESSON02_VISIBILITY_TIMEOUT=60
+ENV
+source "$AULA2_DIR/profile.env"
+export CONTROL_TOWER_ROOT="$PWD"
+```
+
+### 2.4 Carregar a mesma sessão — Terminais A e B
+
+**Em cada um dos dois terminais**, executar:
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+export CONTROL_TOWER_ROOT="$PWD"
+printf 'sessão=%s | modo=%s | visibility=%ss\n'   "$AULA2_RUN" "$LLM_MODE" "$LESSON02_VISIBILITY_TIMEOUT"
+```
+
+Esperado nos três terminais: a mesma sessão, `mock`, `60`. **Ainda não iniciar workers.**
+As variáveis da sessão e o arquivo de perfil não reconfiguram workers que já estejam executando.
+
+### 2.5 Infraestrutura e banco — Terminal C
+
+Abrir Docker Desktop antes destes comandos. Docker não é assunto da aula; deixar tudo instalado.
+
+```bash
 docker compose config --quiet
 docker compose up -d --wait
 docker compose ps
+docker compose exec -T redis redis-cli ping
+docker compose exec -T postgres pg_isready -U novacore -d novacore
 uv run --extra lesson02 control-tower db-init
+uv run --extra lesson02 control-tower executions --limit 5
+```
+
+Esperado: Redis/PostgreSQL `healthy`, `PONG`, `accepting connections`, tabelas prontas.
+`db-init` é idempotente, não remove o histórico. `executions` pode mostrar completed de outros ensaios.
+**Antes da Demo 3, queued e running de trabalhos antigos devem estar resolvidos.** Se houver trabalhos
+pendentes, identificar seus UUIDs/modos e terminar o ensaio anterior com o perfil correto. Não iniciar
+workers às cegas nem usar purge/flush/down -v como limpeza. O banco e o broker são compartilhados
+pela mesma queue `lesson02`; não devem existir consumidores antigos em outros terminais.
+
+### 2.6 Verificação técnica, sem projetar a suíte em sala — Terminal C
+
+```bash
+uv run --extra lesson02 pytest -q
+LLM_MODE=mock uv run --extra lesson02 control-tower smoke
+LLM_MODE=mock uv run --extra lesson02 control-tower run INCIDENT-001
 LESSON02_INTEGRATION=1 uv run --extra lesson02 pytest tests/integration -q
+uv run --extra lesson02 control-tower enqueue --help
+uv run --extra lesson02 control-tower executions --help
 ```
 
-Docker Desktop deve estar aberto. Docker é usado apenas para reproduzir infraestrutura local.
-**Docker não é assunto da aula.** Redis/Postgres são os únicos containers; aplicação e workers são locais.
-A instalação com extra lesson02 é obrigatória para comandos distribuídos. Sem extra, Aula 1 e batch
-continuam funcionando. As demos originais continuam em mock. Somente os dois blocos LLM usam modo openai; a falha artificial
-é interceptada antes da rede. Configurar credencial fora da projeção, conforme Aula 1.
+Não transformar contagem de testes em aula de pytest. Os testes unitários não chamam OpenAI.
+A integração exige os serviços acima. O fluxo da Aula 1 deve terminar com aprovação humana pendente.
 
-Em **todos os terminais**, entrar na raiz do repositório. Opcionalmente configurar `CONTROL_TOWER_ROOT`
-para esse caminho absoluto nos terminais dos workers. Variáveis opcionais, iguais entre producer/workers:
-`LESSON02_DATABASE_URL`, `LESSON02_BROKER_URL`; defaults correspondem ao Compose local, Redis DB 2.
-Se mudar portas/senha do Compose, configurar também variáveis `LESSON02_*_PORT`/`LESSON02_POSTGRES_PASSWORD`.
+### 2.7 Preparar credencial OpenAI sem exibi-la — antes da aula
 
-Ter abertos: [guia](../../labs/02_distributed_execution/README.md), [snippets](lesson-02/distributed-snippets.md),
-[outputs reais](lesson-02/complete-demo-outputs.md) e [contratos/limites](lesson-02/distributed-contracts.md).
-Fonte grande, aproximadamente 100 colunas; não projetar logs verbosos/JSON completos por padrão.
+Reutilizar a credencial autorizada da Aula 1. Não colar chave no runbook, em logs ou na projeção.
+Settings aceita `OPENAI_API_KEY` no ambiente, `.env` ou o arquivo indicado por `OPENAI_API_KEY_FILE`.
 
-**Reprodução:** usar uma versão por experimento. Repetir a mesma versão/seed/count/opções demonstra
-idempotência. Para um novo experimento, mudar `--version`. O gerador usa os mesmos IDs para um mesmo
-seed; mudar count pode mudar payloads, então também mudar version. Não apagar banco para "fazer funcionar".
-
-Os envelopes representam cinco categorias de chegada; tanto batch quanto Celery repetem o caso técnico
-INCIDENT-001. Não são cinco novas análises de negócio. Datas fictícias de created_at são separadas dos
-horários reais das execuções. completed significa workflow terminou; aprovação humana continua pending.
-
-## Agenda — 240 minutos
-
-| Horário | Bloco | Tempo |
-|---|---|---:|
-| 00:00–00:15 | 1. Retomada + escala | 15 min |
-| 00:15–00:35 | 2. Concorrência e limites | 20 min |
-| 00:35–00:50 | 3. Demo local 1 vs 5 | 15 min |
-| 00:50–01:10 | 4. Capacidade e gargalo | 20 min |
-| 01:10–01:25 | 5. Necessidade de fila | 15 min |
-| 01:25–01:40 | Intervalo | 15 min |
-| 01:40–02:00 | 6. Queue + Workers (mock) | 20 min |
-| 02:00–02:20 | Demo — Distributed workers with real intelligence | 20 min |
-| 02:20–02:35 | Demo — LLM Failure and Fallback | 15 min |
-| 02:35–03:00 | 7. Worker failure + retry (mock) | 25 min |
-| 03:00–03:15 | 8. Duplicate delivery (mock) | 15 min |
-| 03:15–03:35 | 9. Estado e Execution Events | 20 min |
-| 03:35–03:45 | 10. Garantias e limites | 10 min |
-| 03:45–03:50 | Margem | 5 min |
-| 03:50–04:00 | 11. Síntese | 10 min |
-
-Total: 240 min, 65 min de contexto/teoria e 5 min de margem. Código pronto, sem live coding.
-
-## 1. Retomada e provocação — 15 min
-
-- **Objetivo:** mudar a unidade de raciocínio de um grafo para muitas execuções.
-- **Conceito:** agentes dentro do workflow versus workflows independentes; 10 min contexto/teoria.
-- **Fala-chave:** “Funcionou para 1 incidente. O que acontece quando chegam 500?”
-- **Comandos:**
+**Neste workspace**, o arquivo autorizado fica um diretório acima da raiz do repositório.
+Em C, registrar somente o caminho para ser compartilhado com A/B:
 
 ```bash
-LLM_MODE=mock uv run control-tower show INCIDENT-001 recommendation
-uv run control-tower generate-incidents --count 500
+export OPENAI_API_KEY_FILE="$PWD/../.keys"
+test -f "$OPENAI_API_KEY_FILE" && printf 'Arquivo privado localizado; conteúdo não exibido.\n'
+printf 'export OPENAI_API_KEY_FILE=%q\n' "$OPENAI_API_KEY_FILE"   > "$AULA2_DIR/credential-path.env"
 ```
 
-- **Output:** recomendação pendente; mix 120/85/140/65/90.
-- **Pergunta:** “Onde esperam os outros 499?”
-- **Fallback:** resultados do start em `lesson-02/demo-outputs.md` e Aula 1 em `examples/`.
+Se seu arquivo estiver na raiz, usar `"$PWD/.keys"` na primeira linha. Se a chave já estiver em
+`OPENAI_API_KEY`, manter essa configuração privada nos três terminais; ela tem precedência. Um
+arquivo ausente não é motivo para copiar a chave para o código. Ajustar o caminho fora da projeção.
 
-## 2. Concorrência e limites — 20 min
-
-- **Objetivo:** separar concorrência local, paralelismo interno e distribuição; 15 min teoria.
-- **Conceito:** memória do processo, slots de processamento, chegada e espera.
-- **Fala-chave:** “LangGraph coordena agentes dentro de uma execução. A fila coordena múltiplas execuções.”
-- **Comando:** nenhum; usar os dois diagramas do guia.
-- **Output:** alunos identificam as duas camadas de coordenação.
-- **Pergunta:** “Três especialistas significam três workers Celery?”
-- **Fallback:** quadro. Não explicar configurações Celery neste bloco.
-
-## 3. Demo 1 — Local concurrency — 15 min
-
-- **Objetivo:** comparar mesma carga com 1 e 5 threads.
-- **Conceito:** sobrepor espera melhora throughput até o gargalo.
-- **Fala-chave:** “Concorrência não é ausência de limite.”
-- **Comandos:**
+Pré-checagem em C, **sem request pago e sem alterar o perfil mock do terminal**:
 
 ```bash
-uv run control-tower batch --incidents 10 --workers 1 --demo-delay-ms 500
-uv run control-tower batch --incidents 10 --workers 5 --demo-delay-ms 500
+LLM_MODE=openai LESSON02_VISIBILITY_TIMEOUT=900 uv run --extra lesson02 python - <<'PYCODE'
+from pathlib import Path
+from control_tower.settings import Settings
+settings = Settings.load(Path.cwd())
+print(f"Configuração válida: mode={settings.mode}, model={settings.model}, chave presente.")
+PYCODE
 ```
 
-- **Output:** 10 completed, 0 failed, pico ativo 1/5; interpretar tempos medidos, não prometer tempos fixos.
-- **Trecho pronto:** `distributed/batch.py`; mostrar apenas o limite de concorrência.
-- **Pergunta:** “O que foi sobreposto? O que continua compartilhado?”
-- **Fallback:** tabela real do start. Comandos levam segundos; usar o restante em hipótese e discussão.
+Isso confirma configuração local, não saldo/permissão/disponibilidade do provider. Se a credencial
+não estiver pronta, preparar o fallback gravado da Demo 4, sem tentar corrigir autenticação na aula.
 
-## 4. Demo 2 — Provider capacity — 20 min
+### 2.8 Preparar a projeção
 
-- **Objetivo:** observar saturação; 10 min teoria de throughput, backlog e backpressure.
-- **Conceito:** semáforo limita workflows simultâneos, não requests/s OpenAI.
-- **Fala-chave:** “O throughput do sistema é limitado pelo gargalo, não pelo número de workers.”
-- **Comandos:**
+- Slides abertos; terminal de aproximadamente 100 colunas por 24 linhas, fonte grande.
+- A/B ficam visíveis para mostrar consumidores, mas o foco projetado é C e suas views curtas.
+- Abrir os outputs gravados referenciados ao final de cada demo.
+- Não mostrar `.keys`, `.env`, `env`, `printenv`, prompts ou JSON completo por padrão.
+- Comandos com `tee` preservam a saída local para recuperar UUIDs sem digitar; não ocultam o output.
+
+## 3. Slides 1–11 — abertura e problema de escala
+
+**Objetivo:** mudar a unidade de raciocínio: de uma decisão coordenada para muitas execuções.
+**Fala:** “Funcionou para 1 incidente. Onde esperam os outros 499?”
+
+No **slide 7**, Terminal C:
 
 ```bash
-uv run control-tower batch --incidents 50 --workers 5 --provider-limit 5 --demo-delay-ms 500
-uv run control-tower batch --incidents 50 --workers 20 --provider-limit 5 --demo-delay-ms 500
-uv run control-tower batch --incidents 50 --workers 50 --provider-limit 5 --demo-delay-ms 500
+uv run --extra lesson02 control-tower show INCIDENT-001 recommendation
 ```
 
-- **Output:** pico ativo até 5; espera cresce, throughput não cresce proporcionalmente.
-- **Pergunta:** “Aceitar trabalho sem limite faz a espera desaparecer?”
-- **Fallback:** outputs gravados; não apresentar como benchmark de produção.
-- **Precisão:** a simulação limita processamento, não admissão. No Celery, prefetch=1 controla reserva;
-  o broker armazena backlog, mas producer ainda não tem limite de admissão. Fila infinita não é solução.
-
-## 5. Necessidade de fila — 15 min
-
-- **Objetivo:** explicar onde o trabalho deve esperar antes de introduzir o broker.
-- **Conceito:** desacoplar chegada e capacidade; 10 min de teoria/contexto.
-- **Fala-chave:** “A fila organiza a espera; não fabrica capacidade.”
-- **Comando:** nenhum; desenhar producer → espera → consumidores.
-- **Output:** hipótese sobre publicar trabalho sem workers ativos, a testar depois do intervalo.
-- **Pergunta:** “Se chegam 500 e cabem 5, onde ficam os outros?”
-- **Fallback:** diagrama pronto. Idempotência será demonstrada depois de retry/redelivery.
-
-## Intervalo — 15 min
-
-- **Objetivo:** pausa; **conceito:** separar preparação operacional da explicação.
-- **Fala-chave:** “Na volta veremos onde o trabalho espera e onde o estado permanece.”
-- **Comando:** nenhum obrigatório; conferir terminais preparados.
-- **Output:** três terminais prontos; **pergunta:** reservar dúvidas de configuração para depois.
-- **Fallback:** outputs reais abertos. Dependências já devem estar instaladas antes da aula.
-
-## 6. Demo 3 — Queue + Workers — 20 min
-
-- **Objetivo:** enfileirar antes dos consumidores; 5 min teoria producer/consumer e desacoplamento.
-- **Conceito:** broker retém trabalho, workers disputam tarefas, cada task invoca um LangGraph.
-- **Fala-chave:** “A fila não necessariamente acelera o sistema. Ela desacopla produtores e consumidores e absorve picos.”
-
-**Terminal 3 — producer, inicialmente sem workers:**
+Esperado: cenário, custos determinísticos, riscos e aprovação obrigatória. Não abrir todo o estado JSON.
+No **slide 8**:
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 20 --version demo3-v1 --demo-delay-ms 500
-uv run --extra lesson02 control-tower executions
+uv run --extra lesson02 control-tower generate-incidents --count 500 --seed 42
 ```
 
-**Terminal 1 — worker A:**
+Esperado:
 
-```bash
-uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-A@%h' --loglevel=INFO --without-gossip --without-mingle
+```text
+count: 500 | seed: 42
+supplier_delay: 120
+production_deviation: 85
+logistics_delay: 140
+sla_risk: 65
+inventory_shortage: 90
 ```
 
-**Terminal 2 — worker B:**
+Esse comando **gera envelopes; não publica 500 tarefas nem chama OpenAI**.
+Nos slides 9–11, perguntar qual recurso limita a capacidade. O “10 jobs → 50 workers” do slide 11 é
+uma provocação; a comparação controlada de saturação usa 50 incidentes no slide 16.
+**Fallback:** recomendação e mix já gravados em [outputs do start](lesson-02/demo-outputs.md).
+
+## 4. DEMO 1 — 1 worker vs. 5 workers — slide 12
+
+**Antes:** A/B parados; C em mock; Docker não é necessário para este batch.
+**Conceito:** sobrepor espera em um processo. “workers” aqui são threads locais, não Celery.
+**Tempo:** bloco de 15 min incluindo slides 13–14; comandos costumam levar segundos.
+
+### 4.1 Terminal C — executar sequencial
 
 ```bash
-uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker --pool=solo --concurrency=1 --hostname='lesson02-B@%h' --loglevel=INFO --without-gossip --without-mingle
+uv run --extra lesson02 control-tower batch \
+  --incidents 10 --workers 1 --demo-delay-ms 500
 ```
 
-**Terminal 3 — consultar enquanto processam:**
+### 4.2 Terminal C — executar com cinco threads
 
 ```bash
-uv run --extra lesson02 control-tower executions
+uv run --extra lesson02 control-tower batch \
+  --incidents 10 --workers 5 --demo-delay-ms 500
 ```
 
-- **Output:** queued diminui, running até 2, completed cresce; worker_id mostra A e B.
-  Contadores são cumulativos do banco, não somente o lote atual. `queued` é estado persistido;
-  não é medição exata do comprimento Redis durante reserva/retry.
-- **Trecho pronto:** task de 10–30 linhas em snippets. Não explicar todo o SQL.
-- **Pergunta:** “Quem decide o especialista Supply: Celery ou LangGraph?”
-- **Fallback:** transcrição real; confirmar nome da queue/defaults e diretório antes de tentar corrigir ao vivo.
+Os comandos abreviados do slide omitem o prefixo CLI e o delay. O delay de 500 ms é acrescentado
+para tornar a comparação observável; não representa latência real medida de OpenAI.
 
-## Demo — Distributed workers with real intelligence — 20 min
+### 4.3 O que apontar na saída
 
-- **Objetivo:** observar um provider real como recurso externo, variável e finito; 5 min contexto.
-- **Conceito:** mesmos dados/tools/cálculos e mesmo LangGraph; muda o ambiente operacional.
-- **Falas-chave:** “A inteligência não mudou. Mudou o ambiente operacional ao redor dela.”
-  “Um LLM é também uma dependência externa com latência, capacidade, falhas e custo.”
-- **Slide antes:** provider-limit=5 era um semáforo simulado. Dois workers podem gerar até seis
-  requests simultâneas nos três especialistas; worker count não equivale à capacidade do provider.
-- **Condução:** 5 min contexto, 5 min executar/observar, 7 min debate, 3 min transição.
+```text
+Batch execution | mock | threads locais, sem Celery
+incidents: 10
+workers: 1                 # depois 5
+completed: 10
+failed: 0
+duration: <medido>
+throughput: <medido> incidents/s
+```
 
-Depois de concluir o lote mock, parar A/B com Ctrl-C. Credencial já configurada nos terminais dos
-workers e producer via OPENAI_API_KEY (ou arquivo privado autorizado via OPENAI_API_KEY_FILE,
-conforme Aula 1). Nunca projetar chave, prompts ou respostas extensas. Sem chave, enqueue falha
-claramente antes de publicar. Não criar chave nem depurar permissão ao vivo.
+Os comentários/valores entre `<...>` acima são explicativos, não saída literal nem comandos.
+Conferir pico ativo 1 versus até 5; completed=10/failed=0. Não comparar somente a última casa decimal.
+Voltar ao **slide 13**: “melhorou throughput, mas continuamos em um único processo”.
+No **slide 14**: “na distribuição, os processos podem falhar independentemente; neste laboratório
+eles ainda rodam na mesma máquina”.
 
-**Nos três terminais:**
+**Pergunta:** “Aumentar threads mantém o estado vivo se esse processo morrer?”
+**Código opcional:** só o trecho ThreadPoolExecutor de `distributed/batch.py`, até 1 min.
+**Fallback:** tabela em [ensaio final](lesson-02/final-rehearsal-outputs.md). Não depurar durante mais de 2 min.
+**Nota de leitura:** a última linha do batch diz que fila durável/deduplicação/retry “ainda não existem”.
+Ela descreve somente o runner local usado nesta demo, não o candidato distribuído completo.
+**Saída para a próxima demo:** ainda em mock; A/B continuam parados.
+
+## 5. DEMO 2 — 5 vs. 20 vs. 50 workers — slides 15–17
+
+**Antes:** mesmas condições da Demo 1. **Hipótese no slide 15:** “Se multiplicarmos workers por 10,
+o throughput cresce 10 vezes?”. **Tempo:** 20 min de bloco; executar as três rodadas sem mudar a carga.
+
+No **slide 16**, Terminal C:
 
 ```bash
+uv run --extra lesson02 control-tower batch \
+  --incidents 50 --workers 5 --provider-limit 5 --demo-delay-ms 500
+uv run --extra lesson02 control-tower batch \
+  --incidents 50 --workers 20 --provider-limit 5 --demo-delay-ms 500
+uv run --extra lesson02 control-tower batch \
+  --incidents 50 --workers 50 --provider-limit 5 --demo-delay-ms 500
+```
+
+**Apontar:** completed=50, failed=0, provider_limit=5, pico ativo ≤5, duração/throughput e `waited`.
+No slide 17, explicar que ~9,03/~8,96/~9,05 são observações de um ensaio, não valores hard-coded.
+Mais threads podem aumentar espera sem aumentar capacidade. `provider_wait_total` soma tempo de
+espera de várias threads; não é o tempo de relógio do lote.
+
+**Fala:** “O throughput é limitado pelo gargalo, não pelo número de workers.”
+**Precisão:** semáforo local simula slots por workflow. Não é rate limit real de OpenAI nem requests/s.
+**Pergunta:** “Se continuarmos recebendo mais do que processamos, onde a espera vai crescer?”
+**Código:** dispensável; não abrir implementação do semáforo a menos que responda uma dúvida concreta.
+**Fallback:** valores e saídas completas em [outputs do start](lesson-02/demo-outputs.md).
+
+## 6. Slides 18–23 — por que fila e workers
+
+- **18:** chegada 100/min, processamento 30/min → backlog +70/min; capacidade insuficiente vira espera.
+- **19:** Producer → Queue → Consumer. A fila organiza espera e separa os ritmos.
+- **20:** não elimina gargalos, duplicatas ou necessidade de persistência.
+- **21:** LangGraph coordena agentes dentro da execução; fila coordena várias execuções.
+- **22:** cada worker recebe uma task e executa um workflow. Falha de A não exige queda de B.
+- **23:** Redis/Celery/PostgreSQL concretizam o padrão. Fazer as ressalvas da seção 1 sobre resultado e
+  ausência de checkpoint por nó. Não ensinar configuração dessas ferramentas.
+
+**Pergunta antes do intervalo:** “Podemos publicar trabalho antes de existir consumidor?”
+Intervalo de 15 min. Infraestrutura já deve estar pronta; não instalar pacotes durante a pausa.
+Ao voltar, A/B ainda parados e C no perfil mock.
+
+## 7. DEMO 3 — Queue + Workers — slide 24
+
+**Objetivo:** tornar visível `enqueue 20 → queued → iniciar workers → running → completed`.
+**Tempo:** 20 min incluindo slides 25–27. **Modo:** mock, visibility=60.
+Usar 2 s de delay por execução nesta demo para dar tempo de iniciar B e observar o consumo; isso não
+é benchmark e não muda o workflow. A comparação local anterior conserva 500 ms.
+
+### 7.1 Terminal C — conferir perfil e contagem inicial
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | visibility=%ss\n' "$LLM_MODE" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 control-tower executions --limit 5
+```
+
+Esperado: mock/60, sem queued/running antigos. Anotar a contagem inicial de completed; ela é cumulativa.
+
+### 7.2 Terminal C — publicar antes de iniciar A/B
+
+```bash
+D3_VERSION="$AULA2_RUN-d3-queue"
+uv run --extra lesson02 control-tower enqueue \
+  --count 20 --seed 42 --version "$D3_VERSION" --demo-delay-ms 2000 \
+  | tee "$AULA2_DIR/demo3-enqueue.txt"
+D3_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo3-enqueue.txt")"
+printf 'Execution de referência da Demo 3: %s\n' "$D3_ID"
+uv run --extra lesson02 control-tower executions --limit 8
+uv run --extra lesson02 control-tower execution "$D3_ID"
+```
+
+Esperado: `Publicadas: 20 | novas executions: 20 | existentes: 0`; queued aumenta em 20;
+execution de referência está queued, sem worker/início. A CLI imprime só os primeiros 8 UUIDs,
+mas publicou os 20. **Se D3_ID estiver vazio ou houver erro, não avançar.**
+
+### 7.3 Terminal A — iniciar worker A
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-A@%h' \
+  --pidfile="$AULA2_DIR/worker-A.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
+```
+
+Esperar `lesson02-A@... ready.`. O nome do host varia. Não explicar todas as linhas do log.
+
+### 7.4 Terminal B — iniciar worker B logo em seguida
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-B@%h' \
+  --pidfile="$AULA2_DIR/worker-B.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
+```
+
+Deixar ambos os comandos preparados para iniciar em sequência. Se B só iniciar depois de A concluir
+o lote, não há evidência de consumo compartilhado; repetir com outra versão, mantendo o mesmo perfil.
+
+### 7.5 Terminal C — observar consumo e conclusão
+
+```bash
+uv run --extra lesson02 control-tower executions --limit 8
+uv run --extra lesson02 control-tower execution "$D3_ID"
+```
+
+Reexecutar `executions` usando seta para cima conforme necessário. O lote leva dezenas de segundos
+com o delay didático. Confirmar `worker` A e B em linhas recentes, running até 2 e completed crescendo.
+Ao final: queued/running voltam a zero para a carga concluída e completed cresceu em 20.
+
+**Não afirmar:** counters são tamanho exato da lista Redis. São estados duráveis do banco, incluindo
+reservas, trabalhos anteriores e retries. Prefetch=1 reduz reserva; não limita a admissão do producer.
+
+No **slide 25**, mostrar:
+
+```bash
+uv run --extra lesson02 control-tower execution "$D3_ID"
+uv run --extra lesson02 control-tower events "$D3_ID" --lifecycle
+```
+
+Esperado: `status: completed`, `attempt: 1`, worker A ou B, duration e
+`result: recommendation; actions_executed=false`.
+**Pergunta:** “Quem escolheu Supply/Production/Logistics: Celery ou LangGraph?”
+**Código opcional:** uma chamada `run_workflow(...)` dentro da task; não o módulo completo.
+**Fallback:** [outputs da fila](lesson-02/complete-demo-outputs.md); no máximo 2 min de diagnóstico.
+**Checkpoint:** esperar todos concluírem antes de trocar para OpenAI.
+
+## 8. Slides 26–27 — transição para provider real
+
+**Fala:** “Até agora isolamos o sistema com mock. Agora recolocamos o provider real.”
+“A inteligência não mudou. Mudou o ambiente operacional ao redor dela.”
+“Um LLM é também uma dependência externa com latência, capacidade, falhas e custo.”
+
+Explicar primeiro; só então operar os terminais. Dois workers não significam só duas requests:
+os três especialistas de cada workflow podem chamar o provider em paralelo.
+
+## 9. DEMO 4 — Distributed Workers with Real Intelligence — slides 28–29
+
+**Objetivo:** 3 envelopes, 2 workers, gpt-4.1-mini, mesmo LangGraph. **Tempo:** 20 min.
+Os 13,27/19,31/11,74 s do slide 28 são ensaio anterior, não SLA. Não publicar 20 ou 500 aqui.
+
+### 9.1 A e B — parar workers mock normalmente
+
+Conferir queued/running=0 em C. Em A e B, pressionar **Ctrl-C uma vez** e aguardar o prompt voltar.
+Não usar kill para mudar de modo. Só continuar quando ambos estiverem parados.
+
+### 9.2 Terminal C — escrever perfil OpenAI e recarregar
+
+```bash
+cat > "$AULA2_DIR/profile.env" <<'ENV'
 export LLM_MODE=openai
 export OPENAI_MODEL=gpt-4.1-mini
 export LESSON02_VISIBILITY_TIMEOUT=900
+ENV
+source "$AULA2_DIR/profile.env"
+source "$AULA2_DIR/credential-path.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n'   "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
 ```
 
-Reutilizar exatamente os comandos Celery A/B da Demo 3, **reiniciando ambos**. Nenhum worker mock
-antigo deve continuar consumindo esta queue. 900 s evita tratar requests mais lentas como perda de
-worker; os 60 s da demo mock não são uma configuração apropriada para o provider real.
+Esperado: openai / gpt-4.1-mini / 900. Se usa somente OPENAI_API_KEY no ambiente, manter a chave
+privada configurada e dispensar o source de credential-path.env. Não imprimir variáveis de credencial.
 
-**Terminal 3 — somente 3 envelopes:**
+### 9.3 Terminal C — validar configuração e publicar uma identidade nova
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 3 --version demo-llm-v1
+uv run --extra lesson02 python - <<'PYCODE'
+from pathlib import Path
+from control_tower.settings import Settings
+from control_tower.distributed.config import visibility_timeout
+s = Settings.load(Path.cwd())
+assert s.mode == 'openai', 'Perfil precisa ser openai'
+assert visibility_timeout() >= 600, 'Visibility insuficiente para OpenAI'
+print(f"Pronto: mode={s.mode}, model={s.model}, visibility={visibility_timeout()}s; chave não exibida.")
+PYCODE
+D4_VERSION="$AULA2_RUN-d4-openai"
+uv run --extra lesson02 control-tower enqueue \
+  --count 3 --seed 42 --version "$D4_VERSION" \
+  | tee "$AULA2_DIR/demo4-enqueue.txt"
+awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print}'   "$AULA2_DIR/demo4-enqueue.txt" > "$AULA2_DIR/demo4-ids.txt"
+D4_ID="$(head -n 1 "$AULA2_DIR/demo4-ids.txt")"
 uv run --extra lesson02 control-tower executions --limit 3
-uv run --extra lesson02 control-tower execution <UUID_LLM>
 ```
 
-Para projetar queued, publicar o lote antes de reiniciar A/B. Depois observar running/completed,
-worker e duration na CLI. A duração mede processamento da tentativa, exclui espera na fila.
+Esperado: novas=3/existentes=0, modo openai, três UUIDs, queued antes dos workers.
+Não reutilizar D3_VERSION: count/opções/payloads mudaram. Não prosseguir se houver erro de chave,
+modelo, visibility ou idempotência. A opção `--version` já elimina o conflito do `v1` padrão.
 
-- **Output:** queued → running → completed; modo openai, modelo configurado, duração variável.
-  As três execuções reais do ensaio duraram 13,27 / 19,31 / 11,74 s. Não são garantia nem benchmark.
-- **Pergunta:** “Se dobrarmos workers, a capacidade contratada do provider dobra?”
-- **Debate:** rate limit, timeout, custo por request e backpressure. Tokens retornados naturalmente
-  ficam em ExecutionEvent; não implementar cálculo de custo nem tracing.
-- **Precisão:** envelopes de múltiplas categorias continuam simulando carga. Não existem cinco
-  workflows empresariais novos. A recomendação continua exigindo aprovação humana.
-- **Fallback de sala:** se credencial/rede falhar, mostrar [captura real](lesson-02/llm-demo-outputs.md).
-  Identificar como gravação; não apresentar mock como OpenAI. Limitar diagnóstico a 2 min.
-- **Código:** apenas a chamada ao workflow com interpreter; não abrir prompts.
+### 9.4 Terminal A — recarregar perfil/credencial e iniciar
 
-## Demo — LLM Failure and Fallback — 15 min
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/credential-path.env"
+```
 
-- **Objetivo:** separar retry/redelivery/fallback/escalation, com 5 min de teoria/contexto.
-- **Conceito:** uma repetição por request transitória, depois continuidade explicitamente limitada.
-- **Slide obrigatório:**
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-A@%h' \
+  --pidfile="$AULA2_DIR/worker-A.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
+```
+
+### 9.5 Terminal B — recarregar perfil/credencial e iniciar imediatamente
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/credential-path.env"
+```
+
+```bash
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-B@%h' \
+  --pidfile="$AULA2_DIR/worker-B.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
+```
+
+O bloco de worker já recarrega profile.env. Conferir openai/900 em ambos antes de iniciar.
+Não misturar workers mock e OpenAI consumindo a mesma queue. Não usar SIGKILL neste bloco.
+
+### 9.6 Terminal C — mostrar estado, worker e duração
+
+```bash
+uv run --extra lesson02 control-tower executions --limit 3
+uv run --extra lesson02 control-tower execution "$D4_ID"
+```
+
+Repetir `executions` até os três ficarem terminais. Mostrar queued → running → completed;
+a duração aparece no término e mede a tentativa, sem espera de fila. O tempo de OpenAI pode variar.
+Depois, se quiser conferir os três individualmente sem copiar UUID:
+
+```bash
+while IFS= read -r DEMO_ID; do
+  uv run --extra lesson02 control-tower execution "$DEMO_ID"
+done < "$AULA2_DIR/demo4-ids.txt"
+```
+
+Não projetar o loop completo se provocar muita rolagem; `executions --limit 3` é a view principal.
+Conferir `mode: openai` e `result: recommendation` nos casos bem-sucedidos. Se houver
+`human_review_required`, isso não é uma recomendação bem-sucedida: mostrar motivo e discutir o limite.
+Não repetir automaticamente a carga para “obter sucesso” e aumentar custo.
+
+No **slide 29**, perguntar: “Dobrar workers dobra a capacidade contratada do provider?”
+Lembrar que `provider-limit=5` era simulação; esta demo não provoca rate limit real nem mede quota.
+Tokens, quando retornados, estão em eventos; não projetar prompts/respostas nem implementar custo.
+**Fallback:** [captura OpenAI real](lesson-02/llm-demo-outputs.md). Se rede/chave falhar, identificar
+claramente que está mostrando captura. Mock não deve ser apresentado como provider real.
+**Se não houver credencial/configuração válida:** use as capturas das Demos 4 **e 5**. A falha
+artificial da Demo 5 não faz request de rede, mas ainda exige configuração OpenAI válida.
+Retome os comandos ao vivo na seção 12, em mock.
+**Checkpoint:** todas as três execuções terminais antes da Demo 5; A/B permanecem openai/900.
+
+## 10. Slides 30–33 — preparar a distinção entre mecanismos
+
+Antes dos comandos da Demo 5, explicar:
+
+| Mecanismo | O que muda | Evidência |
+|---|---|---|
+| Retry | Repete request à mesma capacidade | llm.retry; Execution.attempt não aumenta |
+| Redelivery | Outro worker recebe trabalho não confirmado | Mesmo execution_id; nova tentativa da task |
+| Fallback | Muda o caminho de continuidade | llm.fallback_activated e modo/outcome explícitos |
+| Escalation | Para a recomendação automática | llm.escalated; human_review_required |
+
+**Retry ≠ Redelivery ≠ Fallback ≠ Escalation.**
 
 ```mermaid
 flowchart TD
-  R[LLM request] --> P[Primary Provider]
-  P -->|success| C[Continue]
-  P -->|transient failure| T[Retry: mesma capacidade, uma repetição]
-  T -->|still failing| F[Fallback decision]
-  F -->|Case de referência validado e opção explícita| D[Degraded recommendation]
-  F -->|Sem degradação segura| H[Human review required]
+  R[LLM request] --> P[Primary provider]
+  P -->|success| C[Continuar]
+  P -->|falha transitória| T[Uma repetição da request]
+  T -->|continua falhando| F[Decisão de fallback]
+  F -->|Degradação explicitamente autorizada e validada| D[degraded_recommendation]
+  F -->|Sem caminho automático autorizado e seguro| H[human_review_required]
 ```
 
-**Retry ≠ Redelivery ≠ Fallback ≠ Escalation**
+Timeout/conexão/408/429/5xx são tratados como transitórios. Chave/configuração inválida deve falhar
+claramente; não “resolver” autenticação com fallback silencioso. Resposta fora do contrato exige
+revisão, não invenção de conteúdo. Este bloco não ensina circuit breakers ou roteamento de modelos.
 
-| Conceito | Mensagem |
-|---|---|
-| Retry | Tenta novamente a mesma capacidade |
-| Redelivery | Recupera trabalho de um worker perdido |
-| Fallback | Muda a forma de executar |
-| Escalation | Reconhece que a automação chegou ao seu limite |
+## 11. DEMO 5 — LLM Failure and Fallback — slide 34
 
-“Fallback não é apenas trocar de modelo. É desenho de continuidade operacional.”
+**Antes:** A/B e C em openai/900; trabalho real anterior concluído.
+**Objetivo:** falha artificial → uma repetição → decisão explícita. **Tempo:** 20 min com slides 30–33.
+A flag timeout falha **antes da rede**, desde o Supervisor. Usa configuração válida, mas não chama
+OpenAI nesses dois experimentos; resultados após a falha são determinísticos.
 
-**Após a carga OpenAI funcionar, com A/B ainda no perfil openai:**
+### 11.1 Caminho A — Terminal C, degradação autorizada para o case
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo-llm-degraded-v1 --llm-failure timeout --fallback deterministic_reference
-uv run --extra lesson02 control-tower events <UUID_DEGRADED> --llm
-uv run --extra lesson02 control-tower result <UUID_DEGRADED>
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo-llm-human-v1 --llm-failure timeout --fallback human
-uv run --extra lesson02 control-tower events <UUID_HUMAN> --llm
-uv run --extra lesson02 control-tower result <UUID_HUMAN>
+D5A_VERSION="$AULA2_RUN-d5-degraded"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$D5A_VERSION"   --llm-failure timeout --fallback deterministic_reference \
+  | tee "$AULA2_DIR/demo5a-enqueue.txt"
+D5A_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo5a-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$D5A_ID"
+uv run --extra lesson02 control-tower events "$D5A_ID" --llm
+uv run --extra lesson02 control-tower result "$D5A_ID"
 ```
 
-- **Output determinístico após falha artificial:** llm.requested → llm.failed → llm.retry →
-  llm.requested → llm.failed → llm.fallback_activated → llm.degraded **ou** llm.escalated.
-  A falha artificial ocorre antes da rede; não gasta tokens do provider.
-- **Degraded:** descarta sínteses parciais e executa o mesmo grafo com capacidades determinísticas.
-  Permitido explicitamente apenas para o case de referência validado; resultado tem mode=degraded,
-  outcome=degraded_recommendation, reason e aprovação pendente. Não é mock disfarçado nem fallback
-  genérico de produção. Se validação falhar ou o case não for elegível, escalar.
-- **Human:** outcome=human_review_required, sem recomendação automática. completed significa que a
-  decisão de continuidade terminou; não que o incidente foi resolvido. Approval continua pendente.
-- **Falhas não transitórias:** autenticação/contrato inválido não recebem retry indiscriminado nem
-  degradação que esconda o problema. Erro de configuração de chave falha claramente.
-- **Pergunta:** “Quando é mais correto parar a automação do que produzir uma resposta alternativa?”
-- **Código:** retry curto, decisão explícita de continuidade e evento; sem model routing.
-- **Fallback de sala:** transcrição gravada dos dois outcomes. Não fazer SIGKILL com OpenAI.
+Se a consulta chegou antes do término, repetir `execution/events/result`. Não reenfileirar para consultar.
+Esperado:
 
-**Voltar obrigatoriamente ao mock antes da Demo 4 original:**
+```text
+llm.requested
+llm.failed
+llm.retry
+llm.requested
+llm.failed
+llm.fallback_activated
+llm.degraded
+```
 
-1. Aguardar estas execuções terminarem; parar ambos os workers com Ctrl-C.
-2. Nos três terminais:
+Resultado: `mode=degraded`, `outcome=degraded_recommendation`, `reason=simulated_timeout`, approval pending,
+actions_executed=false. Execution.attempt permanece 1; request_attempt é detalhe dos eventos de LLM.
+Não confundir retry de request com tentativa Celery. Tempo de ~1,12 s no slide é referência anterior.
+
+**Fala:** “Descartamos sínteses parciais e usamos o caminho determinístico validado do mesmo case.
+Não chamamos mock de fallback de produção; declaramos a degradação e exigimos aprovação humana.”
+
+### 11.2 Caminho B — Terminal C, encaminhamento humano
 
 ```bash
+D5B_VERSION="$AULA2_RUN-d5-human"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$D5B_VERSION"   --llm-failure timeout --fallback human \
+  | tee "$AULA2_DIR/demo5b-enqueue.txt"
+D5B_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo5b-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$D5B_ID"
+uv run --extra lesson02 control-tower events "$D5B_ID" --llm
+uv run --extra lesson02 control-tower result "$D5B_ID"
+```
+
+Esperado: sequência análoga, terminando em `llm.escalated`; resultado `human_review_required`, sem
+Recommendation automática. O status externo pode ser completed: terminou a **decisão de encaminhar**,
+não uma recomendação bem-sucedida nem a revisão feita por um humano. Tempo de ~1,04 s é ensaio anterior.
+
+**Pergunta:** “Quando é mais correto reconhecer o limite do que produzir uma resposta alternativa?”
+**Código opcional:** ramo curto de retry e decisão de continuidade em `llm_runtime.py`/`tasks.py`.
+**Fallback:** [trilhas gravadas de degraded e human](lesson-02/llm-demo-outputs.md).
+**Checkpoint:** confirmar D5A/D5B terminais. Próxima demonstração é obrigatoriamente mock.
+
+## 12. Retorno obrigatório para mock — antes dos slides 35–37
+
+**Terminal C:** confirme que as execuções OpenAI anteriores terminaram. **A e B:** pressione Ctrl+C
+uma vez em cada worker e aguarde o prompt. Não misture workers com perfis diferentes na mesma fila.
+
+**Terminal C:**
+
+```bash
+cat > "$AULA2_DIR/profile.env" <<'EOF'
 export LLM_MODE=mock
+export OPENAI_MODEL=gpt-4.1-mini
 export LESSON02_VISIBILITY_TIMEOUT=60
+EOF
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | visibility=%ss\n' "$LLM_MODE" "$LESSON02_VISIBILITY_TIMEOUT"
 ```
 
-3. Reiniciar A/B com os comandos originais. As demos de worker failure, retry de especialista e
-   idempotência usam somente mock. Não matar worker com requests reais em andamento.
-
-Reservado à Aula 4: multi-provider/model routing, seleção por custo/qualidade, model health,
-circuit breakers avançados, SLO, policies/governance e portfolio-level fallback. Nada disso é
-implementado nesta etapa.
-
-## 7. Demo 4 — Falha tratada e desaparecimento do worker — 25 min
-
-- **Objetivo:** distinguir retry explícito de redelivery pelo broker.
-- **Conceito:** late ack, tentativa durável, lock liberado com morte do processo, repetição completa do grafo.
-- **Fala-chave:** “Processos são descartáveis. A execução não pode ser.”
-
-**Parte A — falha tratada, Terminal 3, ambos workers disponíveis:**
+**Terminal A:** inicie somente A com o comando abaixo. **Terminal B:** permaneça parado.
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo4-retry-v1 --fail-specialist logistics
-uv run --extra lesson02 control-tower execution <execution_id>
-uv run --extra lesson02 control-tower events <execution_id> --lifecycle
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-A@%h' \
+  --pidfile="$AULA2_DIR/worker-A.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
 ```
 
-Substituir `<execution_id>` pelo UUID impresso. Primeira tentativa falha no Logistics, espera 2 s,
-segunda conclui. Para demonstrar orçamento esgotado opcionalmente usar outra version e `--fail-always`:
-três tentativas, esperas 2/4 s, failed terminal. Não fazer essa extensão se o bloco estiver atrasado.
+**Slides antes da demo:** no slide 35, esclareça que o producer recebe/publica o trabalho e o worker
+é consumidor. A legenda que apresenta Worker A como entrada do usuário não representa este código.
+No slide 36, explique ack tardio: perder o processo antes do ack permite redelivery. O broker não sabe
+se o efeito de negócio aconteceu; precisamos também de idempotência no store.
 
-**Parte B — perda do processo inteiro:**
+## 13. DEMO 6 — Worker Failure + Redelivery — slide 37
 
-1. Após terminar o lote, parar B com Ctrl-C no Terminal 2. Manter A pronto.
-2. No Terminal 3:
+**Objetivo:** mesmo execution_id, outro worker, tentativa 2. **Tempo:** 25 min incluindo discussão.
+**Condições:** mock/60 nos terminais; A ativo, B parado; nenhuma carga anterior pendente.
+O atraso de 30 s é artificial e oferece tempo para interromper o processo. Não representa latência do LLM.
+
+### 13.1 Terminal C — identificar A antes de publicar
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo4-crash-v1 --demo-delay-ms 10000
-uv run --extra lesson02 control-tower execution <execution_id>
+A_PID="$(cat "$AULA2_DIR/worker-A.pid")"
+ps -p "$A_PID" -o pid=,command=
 ```
 
-3. Confirmar `running` e copiar **o PID final do worker_id de A** (formato `lesson02-A@host:PID`).
-   Dentro dos 10 s de delay, no Terminal 3:
+Confirme que a linha corresponde ao worker `lesson02-A` desta sessão. Não use `pkill` nem mate todos
+os processos Python/Celery da máquina.
+
+### 13.2 Terminal C — publicar uma execução e capturar sua identidade
 
 ```bash
-kill -KILL <PID_DE_A>
+D6_VERSION="$AULA2_RUN-d6-loss"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$D6_VERSION" --demo-delay-ms 30000 \
+  | tee "$AULA2_DIR/demo6-enqueue.txt"
+D6_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo6-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$D6_ID"
 ```
 
-4. Reiniciar B no Terminal 2 usando exatamente o comando da Demo 3. Não reiniciar A ainda.
-5. No Terminal 3:
+Espere aparecer `running`, attempt 1, worker A. Se ainda queued, repita somente a última consulta.
+Execute o próximo bloco imediatamente; se já completed, a janela passou: refaça com versão `-r2`.
+
+### 13.3 Terminal C — interromper somente o processo confirmado
 
 ```bash
-uv run --extra lesson02 control-tower execution <execution_id>
-uv run --extra lesson02 control-tower events <execution_id> --lifecycle
+uv run --extra lesson02 control-tower execution "$D6_ID" --json > "$AULA2_DIR/demo6-before-kill.json"
+D6_STATUS="$(uv run --extra lesson02 python -c 'import json,sys; print(json.load(open(sys.argv[1]))["status"])' "$AULA2_DIR/demo6-before-kill.json")"
+D6_WORKER="$(uv run --extra lesson02 python -c 'import json,sys; print(json.load(open(sys.argv[1]))["worker_id"] or "")' "$AULA2_DIR/demo6-before-kill.json")"
+if [ "$D6_STATUS" = running ] && [ "${D6_WORKER##*:}" = "$A_PID" ] && [ "${D6_WORKER%%@*}" = lesson02-A ]; then
+  kill -KILL "$A_PID"
+else
+  printf 'Não interrompido: confirme running em A; se já terminou, use uma nova versão.\n'
+fi
 ```
 
-- **Output:** running com A permanece até recuperação; B recebe redelivery, attempt=2, completed.
-  Trilha inclui execution.interrupted, novo execution.started e execution.completed.
-- **Tempo:** reservar 2–3 min para observar recuperação. Visibility timeout=60 s mais varredura Redis
-  e execução; não prometer recuperação imediata. Usar a espera para discutir “running significa vivo?”.
-- **Precisão:** solo mata o worker inteiro; `reject_on_worker_lost` sozinho não faz redelivery imediato.
-  Em prefork, pai vivo pode rejeitar mensagem do filho perdido. Não confundir os dois experimentos.
-- **Pergunta:** “E se o commit do resultado aconteceu antes da queda, mas o ack ainda não?”
-- **Fallback:** outputs gravados. Se completou antes do kill, não alegar falha: repetir com outra version.
-  Se exceder o tempo de sala, preservar o UUID e usar a trilha gravada; não apagar o banco.
+A saída do Terminal A indica término abrupto. Isso é **perda do processo inteiro**; `solo` e
+concurrency 1 tornam a demonstração previsível. Não é o retry de uma exceção tratada pela task.
 
-## 8. Demo 5 — Duplicate delivery — 15 min
-
-- **Objetivo:** observar duas publicações, uma identidade e uma tentativa efetiva.
-- **Conceito:** UNIQUE protege identidade; advisory lock protege processamento concorrente.
-- **Fala-chave:** “Retry é inevitável. Duplicidade precisa ser planejada.”
-- **Comandos (Terminal 3; reiniciar A para ter dois workers):**
+### 13.4 Terminal B — iniciar o consumidor que recuperará a mensagem
 
 ```bash
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
-uv run --extra lesson02 control-tower enqueue --count 1 --version demo5-v1 --demo-delay-ms 3000
-uv run --extra lesson02 control-tower execution <execution_id>
-uv run --extra lesson02 control-tower events <execution_id> --lifecycle
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+printf 'modo=%s | modelo=%s | visibility=%ss\n' "$LLM_MODE" "$OPENAI_MODEL" "$LESSON02_VISIBILITY_TIMEOUT"
+uv run --extra lesson02 celery -A control_tower.distributed.celery_app worker \
+  --pool=solo --concurrency=1 \
+  --hostname='lesson02-B@%h' \
+  --pidfile="$AULA2_DIR/worker-B.pid" \
+  --loglevel=INFO --without-gossip --without-mingle
 ```
 
-- **Output:** primeira publicação novas=1, segunda existentes=1, mesmo UUID, attempt=1, um started/completed.
-  Uma duplicata durante processamento retorna sem executar; após completed também é no-op.
-- **Trecho:** claim/constraint e lock nos snippets; não escrever SQL ao vivo.
-- **Pergunta:** “Uma mensagem entregue duas vezes é o mesmo que uma compra executada duas vezes?”
-- **Fallback:** teste concorrente + transcrição real. Payload/opções diferentes sob mesma chave geram erro;
-  isso exige escolher nova versão, não ignorar conflito.
-- **Precisão:** At-least-once delivery + idempotent processing. Não afirmar exactly-once.
-
-## 9. Demo 6 — Durable execution history — 20 min
-
-- **Objetivo:** consultar dados após workers encerrarem.
-- **Conceito:** estado atual, resultado final e sequência de eventos são coisas distintas.
-- **Fala-chave:** “Estado crítico não deve depender da memória de um processo. Toda execução deve deixar uma trilha.”
-- **Comandos:** parar workers com Ctrl-C e, no Terminal 3:
+### 13.5 Terminal C — observar a recuperação
 
 ```bash
-uv run --extra lesson02 control-tower execution <execution_id>
-uv run --extra lesson02 control-tower events <execution_id>
-uv run --extra lesson02 control-tower result <execution_id>
+uv run --extra lesson02 control-tower execution "$D6_ID"
+uv run --extra lesson02 control-tower events "$D6_ID" --lifecycle
 ```
 
-- **Output:** dados continuam consultáveis; resultado exige aprovação humana. `--json` opcional para
-  inspeção posterior, não para projeção. `events --lifecycle` destaca retries/perdas.
-- **Trecho:** Execution, Event e persistência nos snippets. Campos futuros permanecem null.
-- **Pergunta:** “Isso permite continuar do nó Finance ou apenas começar outra tentativa?”
-- **Fallback:** exemplos persistidos em complete-demo-outputs; explicar ausência de checkpoint por nó.
+Repita as duas consultas a cada 10–15 s. Explique enquanto espera:
 
-## 10. Arquitetura e trade-offs — 10 min
+- inicialmente o store ainda pode mostrar running em A: o processo morreu sem gravar sua conclusão;
+- visibility timeout de 60 s não é promessa de recuperação exatamente em 60 s; há varredura do broker;
+- quando B recupera e obtém o claim, o histórico registra interrupção e nova tentativa;
+- a segunda tentativa repete também os 30 s de atraso didático;
+- espera prática reservada: cerca de 2–3 min, variável com o ambiente.
 
-- **Objetivo:** consolidar fronteiras; 5 min teoria das garantias e janelas de falha.
-- **Conceito:** Redis entrega, PostgreSQL registra, Celery executa, LangGraph coordena agentes.
-- **Fala-chave:** “A fila coordena múltiplas execuções; o grafo coordena agentes.”
-- **Comando:** nenhum; diagrama do guia + janela commit/publicação nos contratos.
-- **Output:** alunos reconhecem limitação: não há transação única Postgres/Redis; reenviar mesmo enqueue
-  recupera claim sem mensagem, mas não implementa transactional outbox.
-- **Pergunta:** “Que garantia temos se o produtor morreu entre commit e publicação?”
-- **Fallback:** quadro; não introduzir DLQ avançada, telemetria ou Control Plane.
+**Output a projetar, forma resumida (UUID/hostname/tempo variam):**
 
-## 11. Síntese — 10 min
+```text
+execution_id: <o mesmo UUID>
+status: completed
+attempt: 2
+worker_id: lesson02-B@<host>:<pid>
+```
 
-- **Objetivo:** responder às cinco perguntas iniciais e distinguir garantias observadas das ausentes.
-- **Conceito:** limite de concorrência, fila, estado durável, idempotência, retry.
-- **Fala-chave:** “Escalar agentes não é aumentar prompts. É controlar concorrência, estado, capacidade e falhas.”
-- **Comando de encerramento, depois de parar workers:**
+Mostre no histórico início em A, interrupção reconhecida na recuperação, início em B e conclusão.
+A duração não deve ser apresentada como tempo exclusivo de inferência.
+
+**Pergunta:** “Se A tivesse produzido um efeito externo antes de morrer, o que impediria duplicá-lo?”
+**Mensagem:** “Redelivery recupera trabalho de um worker perdido; não garante exactly-once.”
+**Fallback após 3 min sem recuperação:** use [ensaio gravado](lesson-02/final-rehearsal-outputs.md).
+Não publique repetidamente nem limpe Redis/PostgreSQL. Continue a explicação com a captura; antes de
+retomar demos ao vivo, resolva a execução pendente e confirme o perfil mock.
+
+## 14. Verificação de idempotência — slides 38–40
+
+Este é o desdobramento da Demo 6, **não uma Demo 8**. **Tempo:** 15 min.
+Explique o slide 39 antes do comando: incident_id + operation + version identificam a operação;
+mesma identidade exige mesmo payload/opções. Claim atômico no store impede dois donos simultâneos.
+PostgreSQL combina unicidade e lock de sessão; não é um `if` em memória do worker.
+
+**Preparação:** B ativo; D6 terminal. Para reiniciar A, no Terminal C remova apenas seu pidfile
+obsoleto, após verificar que o processo anterior morreu:
+
+```bash
+if ! kill -0 "$A_PID" 2>/dev/null; then
+  rm -f -- "$AULA2_DIR/worker-A.pid"
+fi
+```
+
+No Terminal A, repita o comando de iniciar A da seção 12. Ambos continuam mock/60.
+
+### 14.1 Terminal C — publicar duas vezes a mesma operação
+
+Cole o bloco inteiro. Mantenha count, seed, version e opções **idênticos** entre as duas publicações.
+
+```bash
+IDEM_VERSION="$AULA2_RUN-idempotency"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$IDEM_VERSION" --demo-delay-ms 5000 \
+  | tee "$AULA2_DIR/idempotency-first.txt"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$IDEM_VERSION" --demo-delay-ms 5000 \
+  | tee "$AULA2_DIR/idempotency-second.txt"
+IDEM_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/idempotency-first.txt")"
+IDEM_SECOND_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/idempotency-second.txt")"
+if [ -n "$IDEM_ID" ] && [ "$IDEM_ID" = "$IDEM_SECOND_ID" ]; then
+  printf 'Mesma identidade: %s\n' "$IDEM_ID"
+fi
+uv run --extra lesson02 control-tower execution "$IDEM_ID"
+uv run --extra lesson02 control-tower events "$IDEM_ID" --lifecycle
+```
+
+**Esperado:** primeira publicação novas executions: 1; segunda existentes: 1; UUID igual.
+Após concluir, attempt 1 e uma execução efetiva. A segunda entrega não cria nova execução efetiva.
+Se já estava completed quando a duplicata chegou, o no-op continua válido, mas não é prova visual
+de concorrência simultânea; explique a diferença sem alterar o resultado observado.
+
+**Pergunta:** “Publicar duas mensagens significa executar duas vezes?”
+**Mensagem:** at-least-once com idempotência no store, sem promessa de exactly-once universal.
+**Código que vale mostrar:** restrição de unicidade/claim em `store.py`, sem escrever SQL ao vivo.
+**Fallback:** [saídas do candidato](lesson-02/complete-demo-outputs.md).
+
+## 15. DEMO 7 — Durable History — slides 41–43
+
+**Tempo:** 20 min incluindo os slides 41–42. **Objetivo:** o histórico sobrevive aos workers.
+**Antes:** todas as execuções terminais. Ctrl+C uma vez em A e B; aguarde os prompts.
+**Mantenha Redis/PostgreSQL em execução.** Parar workers não significa parar o banco.
+
+Explique primeiro: estado responde “como está agora”; eventos respondem “como chegou aqui”.
+`completed` descreve a execução técnica. Aprovação humana continua obrigatória e nenhuma compra,
+transferência ou contratação de transporte é executada.
+
+### 15.1 Terminal C — sequência exata do slide: execution → events → result
+
+Recupere o UUID salvo, inclusive se perdeu a variável:
+
+```bash
+D6_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo6-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$D6_ID"
+uv run --extra lesson02 control-tower events "$D6_ID" --lifecycle
+uv run --extra lesson02 control-tower result "$D6_ID"
+```
+
+Projete: mesmo UUID; completed/attempt 2/worker B; sequência de recuperação; resultado e aprovação
+pendente. Para examinar eventos dos nós, opcionalmente:
+
+```bash
+uv run --extra lesson02 control-tower events "$D6_ID" --limit 100
+```
+
+Não projete JSON extenso. Se a Demo 6 usou fallback, escolha uma execução **realmente concluída**
+da Demo 3 e explique que ela tem attempt 1, sem inventar histórico de recuperação:
+
+```bash
+D3_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/demo3-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$D3_ID"
+uv run --extra lesson02 control-tower events "$D3_ID" --lifecycle
+uv run --extra lesson02 control-tower result "$D3_ID"
+```
+
+**Pergunta:** “O que perderíamos se o resultado estivesse apenas na memória do worker?”
+**Mensagem:** execução, eventos e resultado são duráveis; não há checkpoint de cada nó do LangGraph.
+**Fallback:** [histórico gravado](lesson-02/final-rehearsal-outputs.md).
+
+## 16. Fechamento — slides 44–50
+
+Reserve 10 min finais, preservando a margem anterior de 10 min.
+
+- Slide 44: percorra Producer → Redis → Workers → mesmo LangGraph → LLM/continuidade → PostgreSQL.
+  O banco participa também do claim e dos eventos durante a execução; o desenho simplifica isso.
+- Slides 45–46: separe coordenação cognitiva (grafo), operacional (fila/workers) e persistência (store).
+- Slides 47–48: peça respostas às perguntas de saída; conecte capacidade, redelivery e idempotência.
+- Slides 49–50: delimite o que foi demonstrado. Aula 3 aparece apenas como próxima aula.
+
+**Frases de fechamento:**
+
+> A inteligência não mudou. Mudou o ambiente operacional ao redor dela.
+>
+> Um LLM é também uma dependência externa com latência, capacidade, falhas e custo.
+>
+> Fallback não é apenas trocar de modelo. É desenho de continuidade operacional.
+
+Após encerrar as consultas, opcionalmente pare os serviços de demonstração:
 
 ```bash
 docker compose down
 ```
 
-- **Output:** containers encerrados, volumes mantidos. Não usar `down -v`.
-- **Pergunta:** “Qual gargalo você mediria antes de adicionar workers?”
-- **Fallback:** quadro de aprendizados; próxima aula fica fora desta entrega.
+Não use `down -v`: os volumes guardam o histórico. Não execute este encerramento se outro trabalho
+estiver usando os mesmos serviços.
 
-## Mensagens que devem permanecer na discussão
+## 17. Recuperação rápida durante o dry run
 
-- Escalar agentes não é aumentar o número de prompts. É controlar concorrência, estado, capacidade e falhas.
-- LangGraph coordena agentes dentro de uma execução. A fila coordena múltiplas execuções.
-- Concorrência não é ausência de limite.
-- A fila não necessariamente acelera o sistema. Ela desacopla produtores e consumidores e absorve picos.
-- Retry é inevitável. Duplicidade precisa ser planejada.
-- O throughput do sistema é limitado pelo gargalo, não pelo número de workers.
-- Estado crítico não deve depender da memória de um processo.
-- Toda execução deve deixar uma trilha.
+### 17.1 Conflito de identidade — erro “Mesma chave com payload/opções diferentes”
+
+Não é necessário apagar o banco. Uma execução anterior usou a mesma identidade com opções diferentes.
+Para repetir a Demo 4 como **nova operação**, altere a primeira linha do bloco da Demo 4 para:
+
+```bash
+D4_VERSION="$AULA2_RUN-d4-openai-r2"
+```
+
+Depois execute o restante daquele bloco, mantendo `--version "$D4_VERSION"`, e capture os novos UUIDs.
+Na próxima repetição use r3. Não execute novamente a atribuição antiga, pois ela restaura a identidade
+anterior. Para demonstrar idempotência, ao contrário, mantenha a mesma versão **e as mesmas opções**.
+
+### 17.2 Diagnóstico objetivo
+
+| Sintoma | Ação do professor |
+|---|---|
+| `No module named celery/psycopg` | Execute `uv sync --locked --extra lesson02`; use `uv run --extra lesson02` nos comandos distribuídos e testes. |
+| OpenAI exige visibility >= 600 | Pare workers após concluir pendências; aplique perfil openai/900 em C e reinicie A/B com esse perfil. Alterar somente o producer não basta. |
+| UUID vazio / erro ao consultar execution | Confira se enqueue terminou sem erro e se o arquivo contém UUID. Não consulte ID vazio nem suponha que a publicação inteira foi revertida. |
+| Publicação parcialmente concluída | Corrija a causa e repita com exatamente a mesma identidade/opções para recuperar o que falta; inspecione as execuções já criadas. |
+| Todos queued | Confirme worker `ready`, banco inicializado, diretório/configuração iguais e perfil correto. |
+| Chave ausente | Confira caminho privado e Settings.load da preparação; não use echo/cat para projetar a chave. |
+| Worker com modo/modelo divergente | Pare o consumidor inadequado, confira pendências e reinicie com o perfil correspondente à carga. |
+| OpenAI termina em human_review_required | Consulte `events --llm` e `result`; é encaminhamento explícito, não sucesso da recomendação. Não repita chamadas pagas indefinidamente. |
+| pidfile já existe | Examine PID com `ps`; se vivo, não remova. Se pertence ao worker encerrado desta sessão, remova apenas esse pidfile. |
+| SIGKILL não produz recuperação imediata | Visibility timeout + varredura + atraso da task; use captura após o limite pedagógico, sem prometer 60 s exatos. |
+| Contadores maiores que a carga atual | `executions` inclui histórico; compare o baseline e consulte os UUIDs capturados. |
+| Datas do case diferentes do relógio | Dataset tem referência temporal própria; timestamps da execução registram o processamento atual. Não confunda as duas linhas do tempo. |
+
+### 17.3 Recuperar um terminal fechado
+
+```bash
+cd '/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower'
+source artifacts/aula2-session.env
+source "$AULA2_DIR/profile.env"
+export CONTROL_TOWER_ROOT="$PWD"
+```
+
+Se estiver em OpenAI com arquivo privado, carregue também o arquivo que contém **somente o caminho**:
+
+```bash
+source "$AULA2_DIR/credential-path.env"
+```
+
+Os UUIDs permanecem nos arquivos `*-enqueue.txt`; recapture-os com o `awk` da respectiva demo.
+Não recrie AULA2_RUN no meio da aula e não inicie worker adicional sem verificar os que já estão vivos.
+
+## 18. Código a mostrar e infraestrutura que deve estar pronta
+
+Limite leitura de código a trechos curtos, cerca de 10–12 min distribuídos entre as demos.
+Nenhuma implementação é exercício para os alunos.
+
+| Quando | Trecho | Conceito a destacar |
+|---|---|---|
+| Demo 3 | [tasks.py](../../src/control_tower/distributed/tasks.py) | Task chama o workflow existente; Celery não substitui LangGraph. |
+| Demo 4 | [llm_runtime.py](../../src/control_tower/distributed/llm_runtime.py) | Provider como dependência externa; contratos e evidências determinísticas permanecem. |
+| Demo 5 | [llm_runtime.py](../../src/control_tower/distributed/llm_runtime.py) e ramo de continuidade da task | Retry limitado, evento explícito e decisão degraded/human; sem routing avançado. |
+| Slides 39–40 | [store.py](../../src/control_tower/distributed/store.py) | Identidade única + claim/lock no store; não um conjunto em memória. |
+| Demo 7 | [remote_cli.py](../../src/control_tower/distributed/remote_cli.py) | Três consultas: estado, eventos, resultado; leitura independente do worker. |
+
+**Preparar antes, sem live coding:** ambiente uv, extras, Docker/serviços, schema, credenciais,
+configuração Celery, pidfiles, perfis de ambiente, dataset, contratos Pydantic, tools, testes e capturas.
+Não gastar a aula explicando instalação, SQL/DDL, flags internas de Celery, YAML ou JSON completo.
+
+**Fora do escopo:** novo grafo, cinco workflows empresariais, execução automática de ações,
+monitoramento completo, routing multi-provider, circuit breakers avançados, SLO e governança.
+
+## 19. Anexo opcional — retry de task, fora da sequência principal
+
+Use apenas se houver tempo; não substitui a Demo 6. Workers mock/60 ativos, carga anterior concluída.
+Falha transitória simulada no especialista permite comparar retry tratado com perda abrupta de processo.
+
+```bash
+RETRY_VERSION="$AULA2_RUN-optional-retry"
+uv run --extra lesson02 control-tower enqueue \
+  --count 1 --seed 42 --version "$RETRY_VERSION" --fail-specialist supply \
+  | tee "$AULA2_DIR/retry-enqueue.txt"
+RETRY_ID="$(awk 'length($0)==36 && $0 ~ /^[0-9a-f-]+$/ {print; exit}' "$AULA2_DIR/retry-enqueue.txt")"
+uv run --extra lesson02 control-tower execution "$RETRY_ID"
+uv run --extra lesson02 control-tower events "$RETRY_ID" --lifecycle
+```
+
+Repita consultas após alguns segundos. Esperado: falha da primeira tentativa, retry tratado e conclusão
+na tentativa 2. Não houve SIGKILL. Esse retry da task é diferente do retry interno de uma requisição LLM,
+que permanece dentro de Execution.attempt 1 na Demo 5.
+
+## 20. Checklist do professor e evidências
+
+- [ ] Serviços saudáveis, db-init feito, nenhuma execução antiga queued/running.
+- [ ] Três terminais no mesmo checkout; extras instalados; sessão/perfil compartilhados.
+- [ ] Capturas locais acessíveis caso rede/provider/infra falhem.
+- [ ] Cada demo usa sua version; repetições deliberadas usam sufixo r2/r3.
+- [ ] Demo 3 mostra queued antes de ligar workers.
+- [ ] Demo 4 usa só 3 incidentes reais, 2 workers, com credencial fora da projeção.
+- [ ] Demo 5 distingue degraded recommendation de human_review_required.
+- [ ] Antes da Demo 6, A/B reiniciados em mock; nenhuma chamada OpenAI no SIGKILL/idempotência.
+- [ ] Demo 6 preserva UUID e mostra worker/tentativa diferentes.
+- [ ] Idempotência publica opções idênticas e conserva uma execução efetiva.
+- [ ] Demo 7 consulta histórico com workers parados e banco ligado.
+- [ ] Preservados 65 min de teoria/contexto, intervalo e margem dentro de 4 horas.
+
+**Material de fallback já existente:**
+
+- [Saídas de OpenAI e continuidade](lesson-02/llm-demo-outputs.md).
+- [Ensaio final e recuperação](lesson-02/final-rehearsal-outputs.md).
+- [Saídas do candidato distribuído](lesson-02/complete-demo-outputs.md).
+- [Concorrência local e gargalo](lesson-02/demo-outputs.md).
+
+Tempos registrados nesses materiais são evidências de ensaios anteriores, não garantias desta máquina.
+As estimativas desta agenda incluem explicação, troca de terminais, perguntas e contingência.
