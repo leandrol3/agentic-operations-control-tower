@@ -1,0 +1,38 @@
+{
+  "execution_id": "212cd880-dbfe-4e43-a863-429ef5c54e61",
+  "incident_id": "NC-S42-0001",
+  "status": "completed",
+  "started_at": "2026-09-16T04:53:10.784883Z",
+  "completed_at": "2026-09-16T04:53:20.870008Z",
+  "current_step": "awaiting_approval",
+  "attempt": 2,
+  "worker_id": "lesson02-A@Leandros-MacBook-Pro.local:3399",
+  "error": null,
+  "workflow_status": "awaiting_approval",
+  "idempotency_key": "idem-v1-49d1b875aa2eaf35802e88ae53387bec9cb7c9f483dba1eea8b0f92f1f8aec09",
+  "result": {
+    "reference_case_id": "INCIDENT-001",
+    "mode": "mock",
+    "recommendation": {
+      "incident_id": "INCIDENT-001",
+      "severity": "high",
+      "recommended_action": "Cenário D: Transferir até o piso de Campinas por rota padrão e replanejar; residual via Alpha",
+      "estimated_cost_brl": "12500.00",
+      "avoided_penalty_brl": "16000.00",
+      "customer_delay_days": 3,
+      "confidence": 0.65,
+      "risks": [
+        "Confirmar quantidade/prazo de Alpha e disponibilidade comercial de Beta/transportadora antes da decisão.",
+        "Capacidade produtiva simplificada e reposição do safety stock local precisam de validação humana.",
+        "Custos incrementais excluem material base, reposição de Campinas e eventual cancelamento de Alpha."
+      ],
+      "approval_required": true
+    },
+    "approval": {
+      "required": true,
+      "status": "pending",
+      "authority": "operations_manager",
+      "actions_executed": false
+    }
+  }
+}

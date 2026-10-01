@@ -1,0 +1,15 @@
+Batch execution | mock | threads locais, sem Celery
+Carga de referência: INCIDENT-001 por envelope; não analisa as 5 categorias.
+----------------
+incidents: 10
+workers: 2
+provider_limit: 2 | pico ativo: 2
+completed: 10
+failed: 0
+duration: 0.346 s
+throughput: 28.86 incidents/s (completed)
+waited: 0 | pico esperando capacidade: 0
+provider_wait_total: 0.000 worker-s (somatório, não duração)
+delay didático: 50 ms por execução; não é benchmark de produção.
+completed = workflow terminou; aprovação humana pendente. Nenhuma ação executada.
+Estado/eventos em memória; fila durável, deduplicação e retry ainda não existem.

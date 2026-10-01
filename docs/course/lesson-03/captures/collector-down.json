@@ -1,0 +1,11 @@
+{
+  "health": 200,
+  "ready": 200,
+  "accepted_status": 202,
+  "execution_id": "a76ef8a8-6d9a-4d0b-a74f-c60f6dedd3d1",
+  "status": "completed",
+  "duration_ms": 25.30529200021192,
+  "elapsed_seconds": 0.2142328749760054,
+  "collector_down_at_least_seconds": 8,
+  "export_failure_observed": true
+}

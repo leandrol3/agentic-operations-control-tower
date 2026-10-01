@@ -1,0 +1,5 @@
+refs/heads/codex/lesson-02-complete d3a67ad9ce71fd3a67e3e67ec29bf682f4eca70d
+refs/heads/codex/lesson-02-start 8fbc4fc2ca4a744ee89d2b2e9d54a326c801baf5
+refs/heads/codex/lesson-03-start ff3166dde434f1b68954580bc33d7ab906e12e4f
+refs/tags/lesson-01-complete b306d3a5f4437df25a902b11a368e45efd30ec0c
+refs/tags/lesson-01-start 3d880c9ed7f9b679980bc17dc91660d8d79b2f81

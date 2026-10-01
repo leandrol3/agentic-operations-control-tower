@@ -1,4 +1,72 @@
+# Escopo vigente — fechamento e congelamento lesson-03-complete
+
+Autorizado em 30/09/2026: somente evidências/documentação, regressão final, correções indispensáveis,
+commit final e tag anotada local `lesson-03-complete` após validação. Sem push, features, refatorações
+ou Aula 4. Professor aprovou arquitetura/demos, smoke OpenAI real e rehearsal integral.
+Esta autorização substitui restrições históricas incompatíveis abaixo; demais limites permanecem.
+
+## Aula 3 concluída — estado aprovado
+
+API → Queue → Workers → LangGraph + Telemetry. FastAPI, Docker/Compose, Redis, Celery,
+PostgreSQL, OpenTelemetry, OTLP e Jaeger; OpenAI opcional real validado pelo professor.
+Conceitos: Service Boundary, Async API, API contracts, runtime roles, configuration,
+health/readiness, correlation, W3C Trace Context, trace/span, distributed tracing,
+Agent/Tool/LLM Spans, observable bottleneck/failure, telemetry vs durable events.
+A lógica de negócio e aprovação humana permanecem intactas. As seções seguintes são histórico.
+
+Gancho, sem implementação: “Agora conseguimos observar uma força de trabalho agêntica.
+Como decidimos se ela está boa, cara, lenta ou gerando valor?”
+
+# Histórico — candidato lesson-03-complete
+Autorizado em 28/09/2026: tracing OTel real, W3C, spans semânticos, Collector + Jaeger,
+métricas básicas e Demos6–9. Preservar start, core/regras Aulas1/2, HTTP/health/readiness.
+Não criar/mover tags, não publicar, não iniciar Aula4. Parar para revisão.
+Esta autorização substitui apenas as restrições históricas incompatíveis abaixo.
+
+# Escopo vigente — Aula 3 / somente candidato lesson-03-start
+
+Autorizado em 24/09/2026: Runtime, Deployment & Production. Preservar Aulas 1/2 congeladas.
+Fronteira FastAPI reutilizando producer, imagem comum API/worker, Compose completo via override,
+Pydantic Settings, health/readiness, contexto persistido/headers Celery/logs, SDK OTel preparado.
+Sem tracing distribuído completo, dashboards, routing, governança, cloud/K8s/CI/CD ou Aula 4.
+Não criar/mover tags e não publicar; parar para revisão. A tag lesson-02-complete não será criada
+por inferência. Mensagem: produção começa com implantação, observação, reinício e previsibilidade.
+Guia e runbook são observacionais; alunos não programam. A agenda de 240 minutos está em
+lesson-03-runbook.md; decisões, limitações e contratos em lesson-03/contracts.md.
+Esta autorização substitui somente os limites históricos incompatíveis abaixo.
+
+# Ajuste autorizado — LLM real e continuidade operacional na Aula 2
+
+Mesmo LangGraph e arquitetura distribuída. Task suporta mock/openai, requests estruturadas da Aula 1,
+um retry por falha transitória, fallback explícito determinístico limitado ao case ou revisão humana.
+Mock é o padrão; SIGKILL/retry de task/idempotência só em mock. Não implementar routing avançado,
+custo/SLO/observabilidade nem Aula 3. Sem tags/publicação; parar para revisão.
+
+# Atualização aprovada — candidato lesson-02-complete
+
+O usuário aprovou o start e autorizou SOMENTE o candidato complete da Aula 2. Esta atualização
+substitui proibições históricas de integração abaixo. Preservar Aula 1 e comportamento do start.
+Implementar Celery/Redis, metadata/eventos/resultado PostgreSQL, claim atômico, retry limitado,
+redelivery após morte de worker e CLI curta. Sem checkpoint por nó, API, telemetria ou aulas futuras.
+Não criar/mover tags nem publicar. Parar para revisão. Detalhes em lesson-02-runbook.md e
+lesson-02/distributed-contracts.md.
+
+---
+
 # Contexto permanente do projeto
+
+## Escopo vigente — candidato lesson-02-start
+
+Autorizado em 16/09/2026: iniciar somente o start da Aula 2, “Execução Distribuída e Escala”.
+Aula 1 congelada em 8fbc4fc; tags existentes intocáveis. Novo escopo prevalece sobre proibições
+históricas de avançar à Aula 2 abaixo. Preservar os materiais e a implementação da Aula 1.
+Adicionar generator de 500 envelopes, baseline local mock, capacidade simulada, contratos de
+Execution/ExecutionEvent/idempotência, Compose Redis/PostgreSQL e dependências opcionais preparadas.
+Baseline repete INCIDENT-001; não interpreta os payloads das cinco categorias como novos casos.
+Não implementar Celery worker real, queue/store integrados, resume, API, OTel/Langfuse, Control Plane,
+Kubernetes, Harness/Hermes ou lesson-02-complete. Não criar lesson-02-start antes de revisão.
+Runbook: lesson-02-runbook.md; guia: labs/02_distributed_execution/README.md.
+
 
 ## Revisão vigente — segundo modo com LLM
 

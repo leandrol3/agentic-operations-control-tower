@@ -1,0 +1,11 @@
+{
+  "demo": "bottleneck",
+  "execution_id": "c61d8f7c-bf62-451f-a3c6-da71139b2b7a",
+  "trace_id": "7ee0e7ee8db73faf6a0ec94191c1d8c8",
+  "worker": "worker-b@47e9497161cf:9",
+  "execution_duration_ms": 1772.0177920000424,
+  "spans": 25,
+  "operational_seconds": 2.573,
+  "outcome": "recommendation",
+  "jaeger": "http://127.0.0.1:16686/trace/7ee0e7ee8db73faf6a0ec94191c1d8c8"
+}

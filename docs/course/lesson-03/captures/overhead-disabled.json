@@ -1,0 +1,32 @@
+{
+  "otel": "disabled",
+  "warmups": 2,
+  "samples": [
+    {
+      "execution_id": "c7af7015-52c6-476f-afc2-6ea68ecf1ff4",
+      "duration_ms": 17.748624999967433,
+      "observed_ms": 86.57616600976326
+    },
+    {
+      "execution_id": "1e148462-a14d-49ab-8238-9c6ee1dffee4",
+      "duration_ms": 18.135415999950055,
+      "observed_ms": 86.28966700052842
+    },
+    {
+      "execution_id": "c0e6fe00-5132-44df-9ee5-7dc7b87d5d0b",
+      "duration_ms": 17.612499999813735,
+      "observed_ms": 81.83875001850538
+    },
+    {
+      "execution_id": "d16c4076-4a1a-4f8f-b234-e05eb66f3737",
+      "duration_ms": 18.256207999911567,
+      "observed_ms": 86.79170801769942
+    },
+    {
+      "execution_id": "4d9b35f7-e727-4e33-9f60-393e0f9eb881",
+      "duration_ms": 17.53537500007951,
+      "observed_ms": 86.43020800082013
+    }
+  ],
+  "median_execution_ms": 17.748624999967433
+}

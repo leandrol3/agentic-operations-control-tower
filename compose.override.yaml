@@ -1,0 +1,76 @@
+# Aula 3: merge automático com compose.yaml, que permanece congelado da Aula 2.
+x-app: &app
+  image: novacore-control-tower:lesson03-complete
+  build: .
+  init: true
+  environment: &runtime
+    APP_ENV: local
+    APP_NAME: control-tower
+    LOG_LEVEL: '${LOG_LEVEL:-INFO}'
+    LOG_FORMAT: '${LOG_FORMAT:-human}'
+    REDIS_URL: redis://redis:6379/2
+    DATABASE_URL: 'postgresql://novacore:${LESSON02_POSTGRES_PASSWORD:-novacore_demo_only}@postgres:5432/novacore'
+    LLM_MODE: '${LLM_MODE:-mock}'
+    OPENAI_MODEL: '${OPENAI_MODEL:-gpt-4.1-mini}'
+    OPENAI_API_KEY: '${OPENAI_API_KEY:-}'
+    VISIBILITY_TIMEOUT: '${VISIBILITY_TIMEOUT:-900}'
+    WORKER_CONCURRENCY: '${WORKER_CONCURRENCY:-1}'
+    REQUEST_TIMEOUT: '${REQUEST_TIMEOUT:-3}'
+    DEMO_CONTROLS_ENABLED: 'true'
+    OTEL_CAPTURE_CONTENT: 'false'
+    DEMO_AGENT_DELAY_MS: '${DEMO_AGENT_DELAY_MS:-0}'
+    OTEL_ENABLED: '${OTEL_ENABLED:-true}'
+    OTEL_EXPORTER_OTLP_ENDPOINT: '${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4318}'
+  stop_grace_period: 60s
+services:
+  api:
+    <<: *app
+    command: [python, -m, control_tower.runtime, api]
+    environment:
+      <<: *runtime
+      OTEL_SERVICE_NAME: control-tower-api
+    ports: ['127.0.0.1:${API_PORT:-8000}:8000']
+    depends_on:
+      redis: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+  worker-a:
+    <<: *app
+    command: [python, -m, control_tower.runtime, worker]
+    environment:
+      <<: *runtime
+      WORKER_NAME: worker-a
+      OTEL_SERVICE_NAME: control-tower-worker-a
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck: &worker-health
+      test: [CMD, python, -m, control_tower.runtime.worker_health]
+      interval: 15s
+      timeout: 8s
+      retries: 4
+      start_period: 15s
+  worker-b:
+    <<: *app
+    command: [python, -m, control_tower.runtime, worker]
+    environment:
+      <<: *runtime
+      WORKER_NAME: worker-b
+      OTEL_SERVICE_NAME: control-tower-worker-b
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck: *worker-health
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.123.0
+    command: [--config=/etc/otelcol/config.yaml]
+    volumes: ['./deploy/otel/collector.yaml:/etc/otelcol/config.yaml:ro']
+    restart: unless-stopped
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.11.0
+    ports: ['127.0.0.1:16686:16686']
+    restart: unless-stopped

@@ -1,0 +1,11 @@
+{
+  "demo": "normal",
+  "execution_id": "2012d701-9145-44b4-ba55-9e991ee1403a",
+  "trace_id": "3896ccd6ebd856cd24bc974f408aa58a",
+  "worker": "worker-a@bdacebd7ad55:9",
+  "execution_duration_ms": 342.4318340000809,
+  "spans": 25,
+  "operational_seconds": 1.145,
+  "outcome": "recommendation",
+  "jaeger": "http://127.0.0.1:16686/trace/3896ccd6ebd856cd24bc974f408aa58a"
+}

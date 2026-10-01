@@ -12,3 +12,6 @@ dist/
 # Credenciais locais, nunca versionar
 .keys
 .keys.*
+
+# Exportações didáticas locais
+artifacts/
