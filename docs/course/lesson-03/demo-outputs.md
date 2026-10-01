@@ -74,7 +74,7 @@ NAME                           IMAGE                                   COMMAND  
 novacore-lesson02-api-1        novacore-control-tower:lesson03-start   "python -m control_t…"   api        2 minutes ago    Up 2 minutes (healthy)        127.0.0.1:8000->8000/tcp
 novacore-lesson02-postgres-1   postgres:16-alpine                      "docker-entrypoint.s…"   postgres   15 minutes ago   Up 15 minutes (healthy)       127.0.0.1:15432->5432/tcp
 novacore-lesson02-redis-1      redis:7.4-alpine                        "docker-entrypoint.s…"   redis      15 minutes ago   Up 9 minutes (healthy)        127.0.0.1:16379->6379/tcp
-novacore-lesson02-worker-a-1   novacore-control-tower:lesson03-start   "python -m control_t…"   worker-a   2 minutes ago    Up About a minute (healthy)   
+novacore-lesson02-worker-a-1   novacore-control-tower:lesson03-start   "python -m control_t…"   worker-a   2 minutes ago    Up About a minute (healthy)
 novacore-lesson02-worker-b-1   novacore-control-tower:lesson03-start   "python -m control_t…"   worker-b   2 minutes ago    Up About a minute (healthy)
 ```
 
@@ -240,27 +240,27 @@ PASS: failure
 ## Encerramento sem remover volumes
 
 ```text
- Container novacore-lesson02-worker-a-1 Stopping 
- Container novacore-lesson02-worker-b-1 Stopping 
- Container novacore-lesson02-worker-a-1 Stopped 
- Container novacore-lesson02-worker-a-1 Removing 
- Container novacore-lesson02-worker-a-1 Removed 
- Container novacore-lesson02-worker-b-1 Stopped 
- Container novacore-lesson02-worker-b-1 Removing 
- Container novacore-lesson02-worker-b-1 Removed 
- Container novacore-lesson02-api-1 Stopping 
- Container novacore-lesson02-api-1 Stopped 
- Container novacore-lesson02-api-1 Removing 
- Container novacore-lesson02-api-1 Removed 
- Container novacore-lesson02-postgres-1 Stopping 
- Container novacore-lesson02-redis-1 Stopping 
- Container novacore-lesson02-postgres-1 Stopped 
- Container novacore-lesson02-postgres-1 Removing 
- Container novacore-lesson02-postgres-1 Removed 
- Container novacore-lesson02-redis-1 Stopped 
- Container novacore-lesson02-redis-1 Removing 
- Container novacore-lesson02-redis-1 Removed 
- Network novacore-lesson02_default Removing 
- Network novacore-lesson02_default Removed 
+ Container novacore-lesson02-worker-a-1 Stopping
+ Container novacore-lesson02-worker-b-1 Stopping
+ Container novacore-lesson02-worker-a-1 Stopped
+ Container novacore-lesson02-worker-a-1 Removing
+ Container novacore-lesson02-worker-a-1 Removed
+ Container novacore-lesson02-worker-b-1 Stopped
+ Container novacore-lesson02-worker-b-1 Removing
+ Container novacore-lesson02-worker-b-1 Removed
+ Container novacore-lesson02-api-1 Stopping
+ Container novacore-lesson02-api-1 Stopped
+ Container novacore-lesson02-api-1 Removing
+ Container novacore-lesson02-api-1 Removed
+ Container novacore-lesson02-postgres-1 Stopping
+ Container novacore-lesson02-redis-1 Stopping
+ Container novacore-lesson02-postgres-1 Stopped
+ Container novacore-lesson02-postgres-1 Removing
+ Container novacore-lesson02-postgres-1 Removed
+ Container novacore-lesson02-redis-1 Stopped
+ Container novacore-lesson02-redis-1 Removing
+ Container novacore-lesson02-redis-1 Removed
+ Network novacore-lesson02_default Removing
+ Network novacore-lesson02_default Removed
 NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
 ```
