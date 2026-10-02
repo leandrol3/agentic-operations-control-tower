@@ -1,10 +1,21 @@
 """Local, configured workforce. Goals are didactic targets, never observed KPIs."""
+from enum import StrEnum
 from typing import Annotated, Literal
 from pydantic import Field, model_validator
 from ..models import Contract
 
 Text = Annotated[str, Field(min_length=1)]
 AgentId = Literal['supervisor', 'supply', 'production', 'logistics', 'finance', 'challenger', 'recommendation']
+
+
+class LifecycleState(StrEnum):
+    """Administrative metadata only; no transitions or runtime execution policy."""
+    DRAFT = 'draft'
+    PILOT = 'pilot'
+    ACTIVE = 'active'
+    REVIEW = 'review'
+    PAUSED = 'paused'
+    RETIRED = 'retired'
 
 
 class BusinessGoal(Contract):
@@ -26,6 +37,8 @@ class AgentRecord(Contract):
     technical_owner: Text
     version: Text = 'lesson-01-complete'
     status: Literal['registered'] = 'registered'
+    lifecycle_state: LifecycleState = Field(description=
+        'Administrative lifecycle position; not runtime health or execution status')
     execution_type: Literal['deterministic', 'llm_with_deterministic_tools']
     model: Text | None
     tools: tuple[Text, ...]
@@ -69,6 +82,7 @@ def registry(mode='mock', model='gpt-4.1-mini') -> tuple[AgentRecord, ...]:
          (), 'recommendation_completed', 'Recomendação estruturada concluída; aprovação permanece humana'),
     )
     return tuple(AgentRecord(agent_id=aid, name=name, role=role, business_owner=owner,
+        lifecycle_state=LifecycleState.ACTIVE,
         technical_owner='AI Engineering (didactic ownership)',
         execution_type='deterministic' if mode == 'mock' or aid == 'finance' else 'llm_with_deterministic_tools',
         model=None if mode == 'mock' or aid == 'finance' else model, tools=tools,

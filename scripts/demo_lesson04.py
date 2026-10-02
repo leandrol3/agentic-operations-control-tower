@@ -104,10 +104,12 @@ def registry(agent):
     if agent:
         print(json.dumps(http('/agents/'+agent),indent=2,ensure_ascii=False))
     else:
-        print('AGENT WORKFORCE (current configured runtime; status is registration, not health)')
+        print('IDENTIFIED + MEASURABLE AGENTIC WORKFORCE (configured registry metadata)')
+        print(f'{"ID":15} {"STATUS":10} {"LIFECYCLE":10} {"EXECUTION TYPE":28} GOALS')
         for row in http('/agents'):
-            print(f'{row["agent_id"]:15} {row["status"]:10} {row["execution_type"]:28} goals={len(row["business_goals"])}')
-            print('  role: '+row['role'])
+            print(f'{row["agent_id"]:15} {row["status"]:10} {row["lifecycle_state"].upper():10} {row["execution_type"]:28} goals={len(row["business_goals"])}')
+            print('  ROLE: '+row['role'])
+        print('Registration status != Lifecycle state != Runtime health != Execution status')
         print('Ownership/goals: registry supply. HTTP/MCP expose the system capability, not each agent.')
 
 

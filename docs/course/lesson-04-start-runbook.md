@@ -7,7 +7,7 @@ Professor demonstra; alunos observam decisões e trade-offs. Não há exercício
 Aula 3 terminou: “We can expose and observe the runtime.” Agora: “Como começamos a operá-lo?”
 
 Narrativa: HTTP é a única boundary? → MCP → o que existe? → Registry → o que deve entregar?
-→ Business Goals → completou bem? → Quality → quanto custou? → Economics.
+→ Business Goals → Lifecycle Metadata → completou bem? → Quality → quanto custou? → Economics.
 
 Mensagem final: sabemos identificar a workforce e consultar sinais de execução. Ainda não
 implementamos um motor que decide o que fazer com esses sinais.
@@ -309,7 +309,7 @@ e deixe explícito que é contrato testado com fixture, não população real.
 
 **Problema:** como sabemos o que existe?
 
-**Hipótese:** identidade, ownership e metas tornam a workforce identificável.
+**Hipótese:** identidade, ownership, metas e lifecycle metadata tornam a workforce identificável.
 
 **Evidência:** sete registros reais, Finance sem modelo, metas explicitamente didáticas.
 
@@ -325,7 +325,8 @@ preencher `supply`, executar; repetir com `finance`.
 ### Fala
 
 > “Nós já tínhamos esses agentes. O cadastro agora explicita identidade, papel, responsáveis,
-> versão, execução, tools e expectativas. Registered não significa que o agente está saudável.
+> versão, execução, tools e expectativas. Registered significa que o agente está cadastrado.
+> Active significa que ele está ativo no lifecycle. Nenhum dos dois diz se o runtime está saudável agora.
 > Em mock ele é determinístico; em OpenAI alguns papéis usam síntese LLM. Finance segue código.”
 
 Mostre as metas de Supply: métrica ligada à conclusão da evidência da etapa, janela por execução,
@@ -340,6 +341,62 @@ sed -n '1,150p' src/control_tower/control_plane/registry.py
 **Pergunta:** “Sabemos quem é, quem responde por ele e o que deve entregar?”
 
 **Mensagem:** “Você não consegue operar uma força de trabalho que não consegue identificar.”
+
+“Identidade não é suficiente. Também precisamos saber em que estágio do lifecycle o agente está.”
+
+### Lifecycle State ≠ Runtime Health ≠ Execution Status (2 min dentro do bloco)
+
+```text
+Registry → Lifecycle State
+Supply  → ACTIVE
+
+Runtime → worker / dependencies → healthy ou unknown (quando observado)
+Execution → execution-123 → completed (exemplo de uma execução específica)
+```
+
+| Dimensão | Pergunta | Exemplo / fonte |
+|---|---|---|
+| Registration status | Está cadastrado? | status=registered em GET /agents |
+| Lifecycle state | Onde está no ciclo de vida administrativo/operacional? | lifecycle_state=active em GET /agents |
+| Runtime health | O runtime consegue operar agora? | /health, /ready e evidências de workers |
+| Execution status | Em que estado está esta execução? | queued/running/completed/failed em GET /executions/{id} |
+
+`/health` confirma que o processo API responde; `/ready` verifica suas dependências configuradas.
+Nenhum deles, isoladamente, certifica a saúde de todos os workers ou de cada agente.
+O exemplo healthy acima é conceitual, não health inventado no Registry.
+
+```bash
+curl --fail --silent --show-error http://localhost:8000/health | uv run python -m json.tool
+curl --fail --silent --show-error http://localhost:8000/ready | uv run python -m json.tool
+```
+
+Output da demo Registry em mock (trecho; os sete agentes aparecem):
+
+```text
+ID              STATUS     LIFECYCLE  EXECUTION TYPE               GOALS
+supply          registered ACTIVE     deterministic                goals=1
+  ROLE: Collect inventory and supplier evidence
+finance         registered ACTIVE     deterministic                goals=1
+  ROLE: Calculate deterministic scenario costs
+Registration status != Lifecycle state != Runtime health != Execution status
+```
+
+A API serializa `active` em minúsculas, seguindo os contratos existentes; a view projeta `ACTIVE`.
+`LifecycleState` declara DRAFT, PILOT, ACTIVE, REVIEW, PAUSED e RETIRED. Todos os sete registros
+atuais recebem explicitamente ACTIVE, tanto em mock quanto em OpenAI. Finance continua
+`deterministic`, com `model=null`; metas e owners permanecem iguais.
+
+**Código que vale abrir:** no arquivo Registry acima, mostre somente `LifecycleState`,
+`AgentRecord.lifecycle_state` e `lifecycle_state=LifecycleState.ACTIVE` na factory.
+O novo campo é obrigatório na construção do modelo; os campos antigos não foram removidos
+nem renomeados. As respostas HTTP ganham um campo aditivo; não há registros persistidos para migrar.
+Não aceitar `healthy`, `completed`, `pending` ou `registered` como lifecycle.
+
+**Fala:** “Lifecycle state, runtime health e execution status respondem perguntas diferentes.
+ACTIVE não certifica disponibilidade, sucesso nem aprovação humana. Aqui é metadata;
+ainda não há mecanismo que pause, retire ou mude um agente de estado.”
+
+**Pergunta:** “Um agente ACTIVE pode participar de uma execução failed?” Sim: são dimensões distintas.
 
 **Fallback:** Registry é local e não depende do banco; se a API falhar, inspecione a configuração
 no código e rode `uv run --extra lesson04 pytest tests/test_lesson04.py -k registry -v`.
@@ -568,6 +625,8 @@ Não usar `down -v`, purge, nem remover histórico. Para preservar ambiente em e
 ## Limitações e fronteira com lesson-04-complete
 
 - Registry simples/local, não enterprise discovery; ownership/targets são configuração didática.
+- `lifecycle_state` é somente metadata. Não existe Lifecycle State Machine, transitions,
+  transition history, triggers, transições automáticas ou aprovação de mudança de lifecycle.
 - Metas estruturadas, sem full automated measurement, human acceptance ou KPIs inventados.
 - Quality signal-based, sem LLM-as-a-Judge, score global ou auditoria completa de políticas.
 - Economics por execução, sem atribuição monetária por agente, business value, infraestrutura
@@ -580,9 +639,37 @@ Não usar `down -v`, purge, nem remover histórico. Para preservar ambiente em e
 
 | Future Control Plane | Agora |
 |---|---|
-| Registry / Business Goals | configuração estruturada |
+| Registry / Business Goals / Lifecycle Metadata | configuração estruturada |
 | Quality / Economics | sinais consultáveis |
-| Business Value / SLO / Decision Engine / Lifecycle | não implementados |
+| Business Value / SLO / Decision Engine / Lifecycle State Machine | não implementados |
+
+### Fronteira futura (lesson-04-complete; não implementada)
+
+Business Goal Measurement; Business Value; SLOs / Thresholds; Lifecycle State Machine;
+Lifecycle Triggers; Decision Engine; Collect → Interpret → Recommend; Recommendation Model;
+Scale, Optimize, Intervene, Review, Pause, Retire; Control Plane Cockpit.
+Não existe Recommendation Engine do Control Plane nem auto-modify neste start.
+A recomendação operacional do workflow da Aula 1 continua existindo e exigindo aprovação humana.
+
+### Fechamento — IDENTIFIED + MEASURABLE AGENTIC WORKFORCE
+
+```text
+Service Boundaries: HTTP + MCP
+↓ Agent Registry
+↓ Business Goals
+↓ Lifecycle Metadata
+↓ Quality Signals
+↓ Economics Signals
+↓ Operational Incident Population
+```
+
+**Fala final:** “Agora sabemos o que existe, o que cada agente deve entregar, em que estágio do
+lifecycle ele está, o que aconteceu, quão boa foi a execução e quanto ela custou — dentro dos
+sinais disponíveis: qualidade ainda tem unknowns; custo LLM é estimativa de usage registrado,
+e em mock fica indisponível. Ainda não decidimos o que fazer com esses sinais.”
+
+IDENTITY + GOALS + LIFECYCLE METADATA + QUALITY + ECONOMICS.
+Measurable significa que há sinais consultáveis, não avaliação automática de metas ou decisão.
 
 Fonte do SDK: [MCP Python SDK oficial, linha 1.x](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x).
 Pin `<2` mantém esta API compatível; versão exata é fixada em `uv.lock`.
