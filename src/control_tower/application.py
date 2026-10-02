@@ -5,7 +5,7 @@ No transport, graph execution or agent logic here. HTTP/MCP map ApplicationError
 from uuid import UUID
 from pydantic import ValidationError
 from opentelemetry import trace
-from .api.models import (IncidentSubmissionRequest, ExecutionAcceptedResponse,
+from .api.models import (IncidentSummary, IncidentSubmissionRequest, ExecutionAcceptedResponse,
     ExecutionStatusResponse, ExecutionEventsResponse, EventResponse, ExecutionResultResponse)
 from .telemetry.context import ExecutionContext, bind_context, current_context
 from .telemetry.logging import log_event
@@ -95,3 +95,11 @@ class IncidentCapability:
             recommended_action=recommendation.recommended_action if recommendation else None,
             estimated_cost_brl=str(recommendation.estimated_cost_brl) if recommendation else None,
             approval_status='pending' if final else None)
+
+
+    def list_incidents(self, *, status=None, limit=20) -> list[IncidentSummary]:
+        try:
+            return [IncidentSummary.model_validate(row)
+                    for row in self.store.list_incidents(status=status, limit=limit)]
+        except Exception:
+            raise ApplicationError(503, 'Listagem de operações indisponível') from None

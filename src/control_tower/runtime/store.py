@@ -48,3 +48,21 @@ class CorrelatedStore(Store):
             if not row:
                 raise ValueError('Execution não encontrada')
             return TaskOptions.model_validate(row['options'])
+
+
+    def list_incidents(self, *, status=None, limit=20):
+        """Bounded public projection; values parameterized, deterministic tie-break."""
+        if status not in (None, 'queued', 'running', 'completed', 'failed') or not 1 <= limit <= 100:
+            raise ValueError('Filtro/limite inválido')
+        with self.connect() as conn:
+            return conn.execute("""
+                SELECT document->>'incident_id' AS incident_id, execution_id,
+                       document->>'status' AS status,
+                       document->'result'->>'outcome' AS outcome,
+                       document->'result'->'approval'->>'status' AS approval_status,
+                       created_at, document->>'completed_at' AS completed_at
+                FROM ct_executions
+                WHERE (%s::text IS NULL OR document->>'status' = %s)
+                ORDER BY created_at DESC, execution_id DESC
+                LIMIT %s
+            """, (status, status, limit)).fetchall()

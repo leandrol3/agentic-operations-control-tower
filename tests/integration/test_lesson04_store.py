@@ -60,3 +60,55 @@ def test_provider_usage_survives_new_store_and_model_configuration():
     finally:
         with psycopg.connect(dsn,autocommit=True) as conn:
             conn.execute(sql.SQL('DROP SCHEMA {} CASCADE').format(sql.Identifier(schema)))
+
+
+def test_incident_population_filters_ordering_and_public_projection():
+    from datetime import datetime, timezone
+    from fastapi.testclient import TestClient
+    from control_tower.api.app import create_app
+    from control_tower.runtime.settings import RuntimeSettings
+    dsn=database_url();schema='test_l04_list_'+uuid4().hex
+    with psycopg.connect(dsn,autocommit=True) as conn:
+        conn.execute(sql.SQL('CREATE SCHEMA {}').format(sql.Identifier(schema)))
+    store=CorrelatedStore(make_conninfo(dsn,options=f'-c search_path={schema}'))
+    try:
+        store.initialize()
+        assert store.list_incidents()==[]
+        envelope=generate_incidents(1)[0];ids=[]
+        for i,status in enumerate(('queued','running','completed','failed')):
+            key='operation-'+str(i)
+            with bind_context(ExecutionContext()):
+                execution,new=store.claim(envelope,key,TaskOptions());assert new
+                duplicate,new=store.claim(envelope,key,TaskOptions());assert not new
+                assert duplicate.execution_id==execution.execution_id
+            ids.append(execution.execution_id)
+            if status!='queued':
+                with store.acquire(execution.execution_id,key,envelope.model_dump(mode='json')) as session:
+                    session.begin('worker-test')
+                    if status=='completed':
+                        session.finish(FinalResult(mode='openai',outcome='human_review_required',
+                            reason='fixture',approval=Approval(authority='operations_manager')))
+                    elif status=='failed': session.fail('fixture',retry=False)
+        # Fixed creation time tests tie-breaking; later timestamp must sort first.
+        with store.connect() as conn:
+            conn.execute('UPDATE ct_executions SET created_at=%s',(datetime(2026,10,1,tzinfo=timezone.utc),))
+            conn.execute('UPDATE ct_executions SET created_at=%s WHERE execution_id=%s',
+                         (datetime(2026,10,2,tzinfo=timezone.utc),ids[0]))
+        expected=[ids[0]]+sorted(ids[1:],reverse=True)
+        assert [r['execution_id'] for r in store.list_incidents()]==expected
+        assert len(store.list_incidents(limit=2))==2
+        for status in ('queued','running','completed','failed'):
+            rows=store.list_incidents(status=status)
+            assert len(rows)==1 and rows[0]['status']==status
+        with TestClient(create_app(RuntimeSettings(_env_file=None,llm_mode='mock',otel_enabled=False),store,MagicMock())) as client:
+            response=client.get('/incidents?status=completed&limit=1')
+            assert response.status_code==200
+            row=response.json()[0]
+            assert row['outcome']=='human_review_required' and row['approval_status']=='pending'
+            assert row['completed_at'] is not None and row['version'] is None
+            assert set(row)=={'incident_id','execution_id','version','status','outcome',
+                             'approval_status','created_at','completed_at'}
+            assert len(client.get('/incidents').json())==4  # duplicate claims are not new operations
+    finally:
+        with psycopg.connect(dsn,autocommit=True) as conn:
+            conn.execute(sql.SQL('DROP SCHEMA {} CASCADE').format(sql.Identifier(schema)))

@@ -14,7 +14,7 @@ from uuid import uuid4
 
 BASE=os.environ.get('AULA4_URL','http://127.0.0.1:8000')
 STATE=Path('artifacts/lesson04-demo.json')
-COMPOSE=['-f','compose.yaml','-f','compose.override.yaml','-f','compose.lesson04.yaml']
+LAUNCHER=Path(__file__).resolve().with_name('start_lesson04_mcp.sh')
 
 
 def http(path, body=None):
@@ -64,8 +64,7 @@ async def boundary():
     version='boundary-'+uuid4().hex[:10]
     body={'incident_id':'L04-HTTP','version':version,'demo_delay_ms':1000}
     accepted=http('/incidents',body);status_line('HTTP accepted',accepted)
-    parameters=StdioServerParameters(command='docker',args=['compose',*COMPOSE,'exec','-T',
-        '-e','OTEL_SERVICE_NAME=control-tower-mcp','api','python','-m','control_tower.mcp.server'])
+    parameters=StdioServerParameters(command='/bin/bash',args=[str(LAUNCHER)])
     STATE.parent.mkdir(parents=True,exist_ok=True)
     print('MCP protocol/runtime logs: artifacts/lesson04-mcp.log',flush=True)
     with Path('artifacts/lesson04-mcp.log').open('a') as logs:
@@ -140,8 +139,10 @@ def economics(uid):
     print('Execution:',uid)
     for key in ('llm_calls','input_tokens','output_tokens','retry_count','task_retry_count','fallback_used',
                 'estimated_llm_cost','estimated_execution_cost','cost_currency','cost_source',
-                'usage_source','usage_coverage','pricing_version','cost_scope'):
-        print(f'{key}: {row[key] if row[key] is not None else "unavailable"}')
+                'usage_source','usage_coverage','pricing_version','reference_date','cached_input_discount_applied',
+                'cost_unavailable_reason','cost_scope'):
+        missing = "none" if key == "cost_unavailable_reason" else "unavailable"
+        print(f'{key}: {row[key] if row[key] is not None else missing}')
     print('outcome:',http(f'/executions/{uid}/result')['outcome'])
     print('Provider usage = measured | Pricing = configured | Cost = estimated')
 

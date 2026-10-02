@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from ..application import IncidentCapability, ApplicationError
 
-from .models import (IncidentSubmissionRequest, ExecutionAcceptedResponse, ExecutionStatusResponse,
+from .models import (IncidentSummary, Status, IncidentSubmissionRequest, ExecutionAcceptedResponse, ExecutionStatusResponse,
     ExecutionEventsResponse, ExecutionResultResponse, HealthResponse, ReadinessResponse)
 from .readiness import check_readiness
 from ..runtime.settings import RuntimeSettings
@@ -64,6 +64,10 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
         ok = all(value == 'ok' for value in dependencies.values())
         response.status_code = 200 if ok else 503
         return ReadinessResponse(status='ready' if ok else 'not_ready', dependencies=dependencies)
+
+    @app.get('/incidents', response_model=list[IncidentSummary])
+    def incidents(status: Status | None = None, limit: int = Query(default=20, ge=1, le=100)):
+        return capability.list_incidents(status=status, limit=limit)
 
     @app.post('/incidents', response_model=ExecutionAcceptedResponse, status_code=202)
     def submit(body: IncidentSubmissionRequest, response: Response,

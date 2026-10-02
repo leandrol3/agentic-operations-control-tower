@@ -4,6 +4,7 @@ No Jaeger queries. Aggregate durable events across all attempts, including retri
 Costs cover recorded usage only; failed calls may have unreported/billable usage.
 """
 import os
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 from typing import Annotated, Literal
@@ -17,12 +18,15 @@ Rate = Annotated[Decimal, Field(ge=0, allow_inf_nan=False)]
 
 class ModelPricing(Contract):
     input_per_million: Rate
+    cached_input_per_million: Rate | None = None
     output_per_million: Rate
     currency: str = Field(pattern=r'^[A-Z]{3}$')
 
 
 class PricingConfig(Contract):
     version: str = Field(min_length=1)
+    source: str | None = None
+    reference_date: date | None = None
     models: dict[str, ModelPricing] = Field(default_factory=dict)
 
 
@@ -48,6 +52,10 @@ class ExecutionEconomics(Contract):
     cost_scope: Literal['recorded_usage_only_not_invoice'] = 'recorded_usage_only_not_invoice'
     pricing_version: str | None
     model: str | None
+    reference_date: date | None = None
+    cached_input_discount_applied: Literal[False] = False
+    cost_unavailable_reason: Literal['mock_no_usage', 'usage_unavailable_or_partial',
+                                    'model_unavailable', 'model_not_priced'] | None = None
 
 
 def assess_economics(execution, events, model: str | None, pricing: PricingConfig) -> ExecutionEconomics:
@@ -61,12 +69,16 @@ def assess_economics(execution, events, model: str | None, pricing: PricingConfi
     rate = pricing.models.get(model) if model else None
     source = 'mock_no_usage' if mock else 'usage_unavailable'
     cost = None
+    reason = 'mock_no_usage' if mock else 'usage_unavailable_or_partial'
     # Never multiply partial input coverage by a complete output sum.
     paired = bool(completed) and len(inputs) == len(outputs) == len(completed)
     if not mock and paired:
         source = 'pricing_unconfigured'
+        reason = 'model_not_priced' if model else 'model_unavailable'
         if rate:
             source = 'configured_pricing_estimate'
+            reason = None
+            # Cached usage is NOT persisted. All observed input uses standard input rate.
             cost = (Decimal(input_tokens)*rate.input_per_million +
                     Decimal(output_tokens)*rate.output_per_million) / Decimal(1_000_000)
     full_recorded = paired and len(requested) == len(completed) and not any(
@@ -81,4 +93,5 @@ def assess_economics(execution, events, model: str | None, pricing: PricingConfi
         usage_source='mock_no_usage' if mock else 'durable_provider_events' if inputs or outputs else 'unavailable',
         usage_coverage='not_applicable' if mock else 'recorded_calls' if full_recorded else 'partial_or_unavailable',
         pricing_version=pricing.version if cost is not None else None,
-        model=None if mock else model)
+        model=None if mock else model, reference_date=pricing.reference_date if cost is not None else None,
+        cost_unavailable_reason=reason)

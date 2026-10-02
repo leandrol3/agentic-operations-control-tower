@@ -82,3 +82,15 @@ class HealthResponse(APIModel):
 class ReadinessResponse(APIModel):
     status: Literal['ready', 'not_ready']
     dependencies: dict[str, Literal['ok', 'unavailable']]
+
+
+class IncidentSummary(APIModel):
+    """One persisted operation, not one unique business incident."""
+    incident_id: str
+    execution_id: UUID
+    version: None = Field(default=None, description='Original version is not persisted separately from its hash')
+    status: Status
+    outcome: str | None
+    approval_status: Literal['pending'] | None
+    created_at: datetime
+    completed_at: datetime | None

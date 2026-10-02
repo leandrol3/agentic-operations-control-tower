@@ -17,7 +17,7 @@ implementamos um motor que decide o que fazer com esses sinais.
 | Bloco | Tempo | Objetivo |
 |---|---:|---|
 | Contexto e teoria: boundary, identidade, qualidade e custo | 30 min | Problema antes da ferramenta |
-| Demo 1 — Same Capability, Different Boundary | 15 min | Duas entradas, mesma capability |
+| Demo 1A/1B — Same Capability, Different Boundary | 15 min | Duas entradas, mesma capability |
 | Demo 2 — Agent Registry + Goals | 10 min | Identidade, responsabilidade e expectativa |
 | Teoria: status, qualidade e incerteza | 10 min | Preparar leitura de null/fallback |
 | Demo 3 — Normal vs Degraded | 15 min | Conclusão não implica equivalência |
@@ -112,7 +112,7 @@ LESSON02_INTEGRATION=1 LESSON03_INTEGRATION=1 LESSON03_TRACING_INTEGRATION=1 LES
 A suíte default não chama provider real; integrações são opt-in. Mock permanece offline após
 instalação/imagens disponíveis. A UI Swagger pode precisar carregar assets de CDN.
 
-## Demo 1 — Same Capability, Different Boundary (15 min)
+## Demo 1A — SDK MCP Client (15 min; alternativa à 1B)
 
 **Problema:** HTTP é a única boundary possível?
 
@@ -187,6 +187,123 @@ MCP offline. Não apresente testes como execução distribuída real:
 ```bash
 uv run --extra lesson04 pytest tests/test_lesson04.py -k mcp -v
 ```
+
+## Demo 1B — Codex as MCP Client (15 min; alternativa à 1A)
+
+Ensaie antes e escolha **1A ou 1B** para o bloco de 15 minutos. Se mostrar as duas, reserve
+10 minutos adicionais. A 1A continua sendo o fallback reproduzível e prepara os UUIDs para
+as demos seguintes; execute-a antes da aula se optar pela 1B ao vivo.
+
+### Preparar e registrar (antes da aula)
+
+Mantenha a stack **mock** da preparação ligada. O launcher resolve a raiz do repositório,
+usa `exec -T` (sem pseudo-terminal) e inicia o mesmo servidor stdio dentro da imagem da API.
+O container hospeda o processo; **nenhuma tool chama HTTP**. Docker ausente produz erro em
+stderr. Não execute o launcher sozinho esperando uma interface visual: ele aguarda JSON-RPC.
+
+No Terminal macOS, copie:
+
+```bash
+cd '/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower'
+CODEX_BIN="$(command -v codex || true)"
+if [ -z "$CODEX_BIN" ]; then
+  CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex
+fi
+"$CODEX_BIN" --version
+"$CODEX_BIN" mcp add novacore -- /bin/bash "$PWD/scripts/start_lesson04_mcp.sh"
+"$CODEX_BIN" mcp get novacore
+"$CODEX_BIN" mcp list
+"$CODEX_BIN"
+```
+
+Esses comandos registram o servidor local no Codex do professor. `mcp list` confirma cadastro,
+**não prova execução de tools**. Dentro da sessão interativa digite `/mcp`, veja `novacore`
+conectado e as três tools. Se houver aprovação para tools, revise o nome e os argumentos.
+Mantenha as aprovações normais. Não habilite bypass de segurança.
+
+Configuração equivalente em `~/.codex/config.toml` (use registro CLI acima **ou** esta entrada;
+não duplique a seção). Troque o caminho somente se seu checkout estiver em outro local:
+
+```toml
+[mcp_servers.novacore]
+command = "/bin/bash"
+args = ["/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower/scripts/start_lesson04_mcp.sh"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+```
+
+### Prompts para copiar, um de cada vez
+
+1. “Use somente o servidor MCP novacore, sem shell ou chamadas HTTP. Liste as tools disponíveis
+   e explique brevemente o contrato de submit_incident.”
+2. “Submeta usando submit_incident com request: incident_id=L04-CODEX,
+   version=codex-demo-01, reference_case_id=INCIDENT-001, demo_delay_ms=1000,
+   llm_failure=none, fallback=human. Mostre o execution_id retornado.”
+3. “Consulte get_execution_status para o execution_id que acabou de receber. Mostre status,
+   worker responsável e duração. Se ainda estiver queued/running, consulte novamente quando eu pedir.”
+4. “Recupere get_execution_result para essa mesma execução. Se estiver pendente, diga que
+   devemos aguardar; não invente resultado.”
+5. “Resuma o resultado público da Control Tower em três frases. Distinga recommended_action,
+   estimated_cost_brl do cenário industrial e aprovação pendente. Confirme actions_executed=false.”
+
+Nova rodada: altere a versão para `codex-demo-02`, `codex-demo-03`, etc. Repetir exatamente a
+identidade/corpo reutiliza o UUID (`created=false`); alterar opções sem mudar version gera conflito.
+O envelope continua replay do mesmo case de referência, não outro workflow empresarial.
+
+```text
+Codex → MCP → IncidentCapability → Producer → Redis/Celery
+      → Worker → LangGraph → Agents → Recommendation
+```
+
+**Fala:** “O cliente descobriu capacidades, enviou trabalho e interpretou um resultado público.
+Same capability, different boundary. O Codex pode usar seu próprio modelo; o workflow do
+servidor continua em mock offline. Aprovação humana permanece obrigatória.”
+
+**Mostrar no código:** `scripts/start_lesson04_mcp.sh`, depois os três adaptadores em
+`src/control_tower/mcp/tools.py` e sua chamada à `IncidentCapability`. Não explicar internals
+JSON-RPC nem abrir prompts internos.
+
+**Esperado:** três tools; UUID aceito; status completed; outcome recommendation;
+approval_status pending; actions_executed false. Status intermediários podem passar rápido.
+O cliente só recebe a projeção pública curta, não a justificativa interna integral do LLM.
+
+**Fallback:** se autenticação/rede do Codex ou startup do cliente falhar, execute a Demo 1A.
+Logs normais ficam em stderr; stdout pertence ao protocolo. Não adicione `echo` ao launcher.
+
+Sintaxe: [documentação oficial de MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
+Conexão real validada no Codex CLI 0.155.0-alpha.16.4 em sessão `exec` temporária: descoberta
+das três tools, submit, status e result, terminando completed/mock/pending/actions=false.
+A interface Desktop e a sessão interativa `/mcp` não foram operadas neste ensaio.
+**Codex interactive client not validated in this execution environment.**
+A validação efetivamente realizada e seus limites estão em
+[refinement-validation.md](lesson-04/refinement-validation.md).
+
+## Mini Demo — GET /incidents (3 min dentro da Demo 2)
+
+```bash
+curl --fail --silent --show-error http://localhost:8000/incidents | uv run python -m json.tool
+curl --fail --silent --show-error 'http://localhost:8000/incidents?status=completed&limit=10' | uv run python -m json.tool
+```
+
+**Fala:** “Agora conseguimos observar não apenas uma execução conhecida, mas a população
+operacional persistida. Control Plane trabalha sobre uma população de agentes e execuções,
+não apenas sobre um UUID isolado.”
+
+Cada linha representa uma operação persistida: `incident_id` pode se repetir; `execution_id`
+identifica a execução. Contrato: incident_id, execution_id, version, status, outcome,
+approval_status, created_at, completed_at. Não contém IncidentState, eventos, prompts ou payload.
+`version=null`: a versão original não é persistida separadamente do hash de idempotência;
+não é defensável reconstruí-la. Isso não muda a idempotência do POST.
+Datas vêm do banco/documento; completed_at fica null enquanto ausente. Outcome/aprovação
+ficam null sem resultado. Ordenação: created_at DESC, desempate execution_id DESC.
+Limit padrão 20, mínimo 1, máximo 100. Status: queued, running, completed, failed.
+Parâmetro inválido: 422; banco vazio: []; banco indisponível: 503 sanitizado.
+Não há paginação nem tool MCP adicional para listar incidentes.
+
+**Código (30 segundos):** GET em `api/app.py` → `IncidentCapability.list_incidents` em
+`application.py` → projeção em `runtime/store.py`. SQL fica fora do endpoint.
+**Fallback:** use `uv run --extra lesson04 pytest tests/test_lesson04_refinements.py -k incident -v`
+e deixe explícito que é contrato testado com fixture, não população real.
 
 ## Demo 2 — Registry e Business Goals (10 min)
 
@@ -344,42 +461,58 @@ uv run --extra lesson04 python scripts/demo_lesson04.py economics "$REAL_ID"
 Se não existe execução real, não inventar. Use mock e o teste de cálculo controlado abaixo.
 Este checkpoint não inclui execução OpenAI paga automática em seu ensaio padrão.
 
-### Pricing configurável
+### Pricing reference — gpt-4.1-mini / 2026-10-02
 
-`config/lesson04-pricing.json` vem com `models={}`: não afirma preço de nenhum modelo.
-A API monta esse arquivo e usa `CONTROL_TOWER_PRICING_FILE`. Fora do Compose, variável ausente
-significa pricing não configurado. Para uso real, preencher com preços verificados pelo professor:
+O exercício já contém uma referência pública datada em `config/lesson04-pricing.json`.
+A API monta o arquivo e usa `CONTROL_TOWER_PRICING_FILE`. Fora do Compose, variável ausente
+continua significando pricing não configurado.
 
-```json
-{
-  "version": "identificador-da-tabela-verificada",
-  "models": {
-    "nome-exato-do-modelo-persistido": {
-      "input_per_million": "VALOR_VERIFICADO",
-      "output_per_million": "VALOR_VERIFICADO",
-      "currency": "USD"
-    }
-  }
-}
+| Campo | Valor |
+|---|---|
+| version | openai-public-pricing-2026-10-02 |
+| source | OpenAI public API pricing |
+| reference_date | 2026-10-02 |
+| Model | gpt-4.1-mini |
+| Input | USD 0.40 / 1M tokens |
+| Cached input | USD 0.10 / 1M tokens |
+| Output | USD 1.60 / 1M tokens |
+
+Fonte: [página oficial do gpt-4.1-mini](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
+“Esta é uma configuração didática baseada no preço público da data de referência. Preços
+podem mudar depois dessa data.” Valores monetários são strings decimais, calculados com Decimal.
+
+Não temos cached_input_tokens persistidos. Guardamos a tarifa, **não aplicamos desconto**:
+`cached_input_discount_applied=false`. Todo input registrado usa a tarifa padrão; não afirmar
+que cache foi zero. “Pricing capability is richer than current measurement capability.”
+
+```text
+estimated_llm_cost = (input_tokens × 0.40 + output_tokens × 1.60) / 1_000_000
+10117 input + 831 output → USD 0.0053764
 ```
 
-**Exemplo de estrutura, não copiar literalmente como configuração válida:** os dois valores devem
-ser números decimais não negativos, em strings. Não inserir credenciais. Nenhum preço é embutido
-nas funções. O modelo é recuperado das opções persistidas, não de OPENAI_MODEL atual.
+O exemplo só representa execução real se esses tokens estiverem persistidos no banco consultado.
+Não dependa de UUID local em outra instalação. Sem histórico real, use o teste offline abaixo
+como exemplo aritmético identificado como fixture.
 
-Cálculo: `(input_tokens × input_per_million + output_tokens × output_per_million) / 1.000.000`.
-Decimal evita aritmética binária para dinheiro. A estimativa cobre **somente usage registrado**;
-requests com falha podem ter consumo/faturamento não informado. Cobertura parcial é explícita.
-Tokens parcialmente informados são exibidos, mas não geram estimativa monetária completa.
-`estimated_execution_cost=null`: infraestrutura, trabalho humano e valor de negócio não medidos.
-A tabela atual é aplicada na consulta: não é snapshot de faturamento histórico. `pricing_version`
-identifica a configuração usada; alterar preços muda a estimativa, não os eventos históricos.
-Cache/promoções/tarifas especiais não modelados; não tratar esta conta simples como invoice.
+Três leituras possíveis no output:
 
-Teste de aritmética com valores **fictícios**, sem provider nem banco:
+| Situação | Tokens | estimated_llm_cost | cost_unavailable_reason |
+|---|---|---|---|
+| A. Mock | unavailable | unavailable | mock_no_usage |
+| B. Usage completo + modelo + tabela | measured | estimativa em USD | null |
+| C. Usage real, modelo sem tarifa | measured | unavailable | model_not_priced |
+
+Modelo ausente: `model_unavailable`; usage ausente/parcial: `usage_unavailable_or_partial`.
+A conta cobre somente `cost_scope=recorded_usage_only_not_invoice`. Falhas podem consumir tokens não
+informados. Não cobre infraestrutura, ferramentas, APIs terceiras, trabalho humano, engenharia,
+impacto de negócio, cenário industrial ou faturamento real do provider.
+`estimated_execution_cost=null` permanece. Pricing é aplicado na consulta, não é snapshot de
+fatura histórica: mudar a tabela muda a estimativa, nunca os eventos. `pricing_version` e
+`reference_date` identificam a referência utilizada quando há custo disponível.
 
 ```bash
-uv run --extra lesson04 pytest tests/test_lesson04.py -k economics -v
+cat config/lesson04-pricing.json
+uv run --extra lesson04 pytest tests/test_lesson04_refinements.py -k "pricing or estimate or cost" -v
 ```
 
 Mostre apenas os contratos e a expressão de cálculo:
@@ -397,6 +530,7 @@ Pricing é configurado. Cost é estimado. Token Cost ≠ Agent Cost ≠ Workflow
 
 | Endpoint | Retorno | Ausência |
 |---|---|---|
+| GET /incidents | lista de IncidentSummary | [] se banco vazio |
 | GET /agents | 7 AgentRecords | não depende do banco |
 | GET /agents/{agent_id} | AgentRecord público | 404 |
 | GET /executions/{id}/quality | QualityAssessment | 404 |
