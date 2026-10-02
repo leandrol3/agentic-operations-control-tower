@@ -1,3 +1,11 @@
+# Escopo vigente — candidato lesson-04-complete
+
+Autorizado em 02/10/2026: Collect → Interpret → Recommend; Goal Measurement, Business Value
+parcial, SLOs/thresholds didáticos, tendências simples, lifecycle state machine pura,
+triggers e Decision Engine determinístico; API/cockpit read-only, fixtures identificadas.
+Preservar runtime, Aulas 1–3 e start. Sem ACT, auto-remediation, auto-modify, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
 # Escopo vigente — candidato lesson-04-start
 
 Autorizado em 01/10/2026: MCP reutilizando capability HTTP, Registry local com Business Goals,

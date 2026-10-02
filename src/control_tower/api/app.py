@@ -35,7 +35,7 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
             tracing.shutdown()
 
     capability = IncidentCapability(settings, store, enqueue)
-    app = FastAPI(title=settings.app_name, version='lesson-04-start', lifespan=lifespan)
+    app = FastAPI(title=settings.app_name, version='lesson-04-complete', lifespan=lifespan)
 
     @app.exception_handler(ApplicationError)
     async def application_error(request, error):
@@ -132,6 +132,9 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
         except Exception:
             raise HTTPException(503, 'Configuração de economics indisponível') from None
         return assess_economics(execution, history, options.llm_model, pricing)
+
+    from ..control_plane.api import register_routes
+    register_routes(app, store, settings)
 
     app.add_middleware(HTTPTracing)  # Outer span also covers the existing HTTP log middleware.
     return app

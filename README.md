@@ -1,4 +1,26 @@
-# Aula 3 — lesson-03-complete
+# Aula 4 — candidato lesson-04-complete
+
+**Collect → Interpret → Recommend**, sem ACT. Metas medidas, SLOs configuráveis, tendências,
+Business Value parcial, lifecycle state machine e recomendações determinísticas com evidência.
+Runtime, Aulas 1–3 e checkpoint start preservados. Sem transição automática ou auto-modify.
+
+```bash
+uv sync --locked --extra lesson04
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize --agent logistics --section pipeline
+```
+
+A fixture é explicitamente sintética, offline, sem provider ou gravação no banco.
+Para histórico real, preparar os quatro arquivos Compose no
+[runbook complete — cinco demos, comandos e fechamento](docs/course/lesson-04-complete-runbook.md).
+APIs somente leitura: `/control-plane/agents`, `/control-plane/agents/{agent_id}`,
+`/control-plane/recommendations`. Evidência insuficiente permanece unknown.
+
+Branch: `codex/lesson-04-complete`. Candidato para revisão; sem push ou tag automática.
+[Relatório de validação e limitações](docs/course/lesson-04/complete-validation.md).
+
+---
+
+# Histórico — Aula 3 / lesson-03-complete
 
 ## Candidato Aula 4 — start
 

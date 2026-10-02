@@ -66,3 +66,25 @@ class CorrelatedStore(Store):
                 ORDER BY created_at DESC, execution_id DESC
                 LIMIT %s
             """, (status, status, limit)).fetchall()
+
+    def control_plane_samples(self, *, limit=6, mode='mock'):
+        """One repeatable-read snapshot; bounded terminal cohort, deterministic ordering."""
+        from ..control_plane.collection import ExecutionSample
+        if not 1 <= limit <= 100 or mode not in ('mock', 'openai'):
+            raise ValueError('Invalid Control Plane cohort')
+        with self.connect() as conn, conn.transaction():
+            conn.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
+            rows = conn.execute("""
+                SELECT execution_id, document, options, created_at FROM ct_executions
+                WHERE document->>'status' IN ('completed','failed')
+                  AND document->>'llm_mode' = %s
+                ORDER BY created_at DESC, execution_id DESC LIMIT %s
+            """, (mode, limit)).fetchall()
+            if not rows:
+                return []
+            histories = {r['execution_id']: [] for r in rows}
+            for event in conn.execute('SELECT execution_id,document FROM ct_events '
+                    'WHERE execution_id = ANY(%s) ORDER BY execution_id,sequence', (list(histories),)):
+                histories[event['execution_id']].append(event['document'])
+            return [ExecutionSample(execution=r['document'], options=r['options'], created_at=r['created_at'],
+                                    events=histories[r['execution_id']]) for r in rows]
