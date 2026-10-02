@@ -1,5 +1,14 @@
 # Aula 3 — lesson-03-complete
 
+## Candidato Aula 4 — start
+
+MCP e HTTP reutilizam a mesma capability distribuída; Registry/Business Goals e
+Quality/Economics são inputs do futuro Control Plane, sem decision engine.
+Instalação: `uv sync --locked --extra lesson04`.
+[Runbook completo com quatro demos](docs/course/lesson-04-start-runbook.md).
+Sem tags novas; checkpoints anteriores permanecem preservados.
+
+
 **Runtime, Deployment & Production**: API → producer original → Redis → Celery workers → mesmo
 LangGraph → PostgreSQL. Nova camada operacional; agentes/tools/grafo/task/store anteriores preservados.
 Checkpoint final aprovado; fechamento local, publicação separada. [Runbook completo](docs/course/lesson-03-runbook.md) ·

@@ -17,6 +17,9 @@ lesson03 = [
     "fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic-settings>=2.8,<3",
     "opentelemetry-sdk>=1.30,<2", "opentelemetry-exporter-otlp-proto-http>=1.30,<2",
 ]
+lesson04 = ["agentic-operations-control-tower[lesson03]",
+    "mcp>=1.28,<2",
+]
 
 [project.scripts]
 control-tower = "control_tower.main:main"

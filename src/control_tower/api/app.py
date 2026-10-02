@@ -4,19 +4,17 @@ from uuid import UUID
 from fastapi import FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
+from ..application import IncidentCapability, ApplicationError
 
 from .models import (IncidentSubmissionRequest, ExecutionAcceptedResponse, ExecutionStatusResponse,
-    ExecutionEventsResponse, EventResponse, ExecutionResultResponse, HealthResponse, ReadinessResponse)
+    ExecutionEventsResponse, ExecutionResultResponse, HealthResponse, ReadinessResponse)
 from .readiness import check_readiness
 from ..runtime.settings import RuntimeSettings
 from ..runtime.store import CorrelatedStore
-from ..telemetry.context import ExecutionContext, bind_context, current_context
 from ..telemetry.logging import log_event
 from ..telemetry.tracing import initialize_tracing
 from ..telemetry import tracing
 from ..telemetry.http import HTTPTracing
-from opentelemetry import trace
 
 
 def create_app(settings=None, store=None, enqueue=None, readiness=None):
@@ -36,7 +34,12 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
         if provider:
             tracing.shutdown()
 
-    app = FastAPI(title=settings.app_name, version='lesson-03-complete', lifespan=lifespan)
+    capability = IncidentCapability(settings, store, enqueue)
+    app = FastAPI(title=settings.app_name, version='lesson-04-start', lifespan=lifespan)
+
+    @app.exception_handler(ApplicationError)
+    async def application_error(request, error):
+        return JSONResponse(status_code=error.code, content={'detail': error.detail})
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, error):
@@ -66,85 +69,65 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
     def submit(body: IncidentSubmissionRequest, response: Response,
                x_trace_id: str | None = Header(default=None),
                x_correlation_id: str | None = Header(default=None)):
-        from ..distributed.durable import TaskOptions
-        try:
-            context = ExecutionContext(**({'trace_id': x_trace_id} if x_trace_id else {}),
-                **({'correlation_id': x_correlation_id} if x_correlation_id else {}))
-            options = TaskOptions(llm_mode=settings.llm_mode, llm_model=settings.openai_model,
-                demo_delay_ms=body.demo_delay_ms, llm_failure=body.llm_failure, fallback=body.fallback)
-        except ValidationError:
-            raise HTTPException(422, 'Contexto/opções incompatíveis com o modo do runtime') from None
-        if (body.demo_delay_ms or body.llm_failure != 'none' or body.fallback != 'human') and not settings.demo_controls_enabled:
-            raise HTTPException(422, 'Demo controls desabilitados neste runtime')
-        real = tracing.identifiers()
-        if real:
-            context = context.model_copy(update={'trace_id': real['trace_id']})
-        with bind_context(context):
-            trace.get_current_span().set_attributes({
-                'control_tower.operation': 'analyze-reference',
-                'control_tower.version': body.version})
-            try:
-                execution, created = enqueue(body.envelope(), options, version=body.version, store=store)
-            except ValueError:
-                raise HTTPException(409, 'Identidade/opções conflitantes ou configuração inválida; '
-                                    'confira configuração e use nova version para nova operação') from None
-            except Exception:
-                log_event('queue.submission_failed', 'Publicação não confirmada; reenviar mesma identidade')
-                raise HTTPException(503, 'Publicação não confirmada. Reenvie o mesmo request/version; '
-                                    'pode haver claim persistido.') from None
-            context = current_context.get()
-            trace.get_current_span().set_attributes(tracing.attributes())
-            response.headers['X-Trace-ID'] = context.trace_id
-            response.headers['X-Correlation-ID'] = context.correlation_id
-            response.headers['Location'] = f'/executions/{execution.execution_id}'
-            log_event('queue.submitted', 'Producer confirmou publicação', created=created)
-            return ExecutionAcceptedResponse(execution_id=execution.execution_id, status=execution.status,
-                created=created, trace_id=context.trace_id, correlation_id=context.correlation_id)
-
-    def load(execution_id):
-        try:
-            return store.get(execution_id)
-        except ValueError:
-            raise HTTPException(404, 'Execution não encontrada') from None
-        except Exception:
-            raise HTTPException(503, 'Store indisponível') from None
+        accepted = capability.submit_incident(body, x_trace_id=x_trace_id,
+                                              x_correlation_id=x_correlation_id)
+        response.headers['X-Trace-ID'] = accepted.trace_id
+        response.headers['X-Correlation-ID'] = accepted.correlation_id
+        response.headers['Location'] = f'/executions/{accepted.execution_id}'
+        return accepted
 
     @app.get('/executions/{execution_id}', response_model=ExecutionStatusResponse)
     def execution_status(execution_id: UUID):
-        execution = load(execution_id)
-        try:
-            context = store.context(execution_id)
-        except Exception:
-            raise HTTPException(503, 'Contexto indisponível') from None
-        return ExecutionStatusResponse(**{key: getattr(execution, key) for key in
-            ('execution_id', 'incident_id', 'status', 'attempt', 'current_step', 'worker_id', 'duration_ms')},
-            trace_id=context.trace_id if context else None,
-            correlation_id=context.correlation_id if context else None)
+        return capability.execution_status(execution_id)
 
     @app.get('/executions/{execution_id}/events', response_model=ExecutionEventsResponse)
     def events(execution_id: UUID, after: int = Query(default=0, ge=0),
                limit: int = Query(default=30, ge=1, le=100)):
-        load(execution_id)
-        try:
-            items = store.events(execution_id)
-        except Exception:
-            raise HTTPException(503, 'Histórico indisponível') from None
-        return ExecutionEventsResponse(execution_id=execution_id, events=[
-            EventResponse(**{key: getattr(item, key) for key in EventResponse.model_fields})
-            for item in items if item.sequence > after][:limit])
+        return capability.events(execution_id, after, limit)
 
     @app.get('/executions/{execution_id}/result', response_model=ExecutionResultResponse)
     def result(execution_id: UUID, response: Response):
-        execution = load(execution_id)
-        if execution.status in ('queued', 'running'):
+        result = capability.result(execution_id)
+        if result.status in ('queued', 'running'):
             response.status_code = 202
-        final = execution.result
-        recommendation = final.recommendation if final else None
-        return ExecutionResultResponse(execution_id=execution_id, status=execution.status,
-            outcome=final.outcome if final else None, mode=final.mode if final else None,
-            recommended_action=recommendation.recommended_action if recommendation else None,
-            estimated_cost_brl=str(recommendation.estimated_cost_brl) if recommendation else None,
-            approval_status='pending' if final else None)
+        return result
+
+    # Future Control Plane INPUTS only. No decision or automatic action.
+    from ..control_plane.registry import registry, AgentRecord
+    from ..control_plane.quality import assess_quality, QualityAssessment
+    from ..control_plane.economics import assess_economics, load_pricing, ExecutionEconomics
+
+    @app.get('/agents', response_model=list[AgentRecord])
+    def agents():
+        return registry(settings.llm_mode, settings.openai_model)
+
+    @app.get('/agents/{agent_id}', response_model=AgentRecord)
+    def agent(agent_id: str):
+        for record in registry(settings.llm_mode, settings.openai_model):
+            if record.agent_id == agent_id:
+                return record
+        raise HTTPException(404, 'Agent não encontrado')
+
+    def signal_inputs(execution_id):
+        execution = capability.load(execution_id)
+        try:
+            return execution, store.events(execution_id)
+        except Exception:
+            raise HTTPException(503, 'Histórico indisponível') from None
+
+    @app.get('/executions/{execution_id}/quality', response_model=QualityAssessment)
+    def quality(execution_id: UUID):
+        return assess_quality(*signal_inputs(execution_id))
+
+    @app.get('/executions/{execution_id}/economics', response_model=ExecutionEconomics)
+    def economics(execution_id: UUID):
+        execution, history = signal_inputs(execution_id)
+        try:
+            options = store.options_for(execution_id)
+            pricing = load_pricing()
+        except Exception:
+            raise HTTPException(503, 'Configuração de economics indisponível') from None
+        return assess_economics(execution, history, options.llm_model, pricing)
 
     app.add_middleware(HTTPTracing)  # Outer span also covers the existing HTTP log middleware.
     return app

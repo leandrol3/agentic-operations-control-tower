@@ -1,5 +1,6 @@
 """Associação 1:1 aditiva. Não modifica documentos/contratos da Aula 2."""
 from psycopg.types.json import Jsonb
+from ..distributed.durable import TaskOptions
 from ..distributed.store import Store
 from ..telemetry.context import ExecutionContext, current_context
 
@@ -38,3 +39,12 @@ class CorrelatedStore(Store):
             row = conn.execute('SELECT document FROM ct_execution_context WHERE execution_id=%s',
                                (execution_id,)).fetchone()
             return ExecutionContext.model_validate(row['document']) if row else None
+
+    def options_for(self, execution_id):
+        """Read persisted model selection; economics never guesses from current config."""
+        with self.connect() as conn:
+            row = conn.execute('SELECT options FROM ct_executions WHERE execution_id=%s',
+                               (execution_id,)).fetchone()
+            if not row:
+                raise ValueError('Execution não encontrada')
+            return TaskOptions.model_validate(row['options'])

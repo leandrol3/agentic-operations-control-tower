@@ -1,0 +1,14 @@
+# Use after compose.yaml + compose.override.yaml. Same runtime/services; new image candidate.
+x-lesson04: &lesson04
+  image: novacore-control-tower:lesson04-start
+  volumes:
+    - ./config/lesson04-pricing.json:/app/config/lesson04-pricing.json:ro
+services:
+  api:
+    <<: *lesson04
+    environment:
+      CONTROL_TOWER_PRICING_FILE: /app/config/lesson04-pricing.json
+  worker-a:
+    <<: *lesson04
+  worker-b:
+    <<: *lesson04

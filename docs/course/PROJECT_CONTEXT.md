@@ -1,3 +1,10 @@
+# Escopo vigente — candidato lesson-04-start
+
+Autorizado em 01/10/2026: MCP reutilizando capability HTTP, Registry local com Business Goals,
+Quality e Economics derivados do histórico durável. Preservar core, contracts e infraestrutura
+Aulas 1–3. Sem decision engine, SLO, lifecycle actions, Aula 4 complete, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
 # Escopo vigente — fechamento e congelamento lesson-03-complete
 
 Autorizado em 30/09/2026: somente evidências/documentação, regressão final, correções indispensáveis,
