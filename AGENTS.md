@@ -1,3 +1,10 @@
+# Escopo vigente — candidato lesson-04-cockpit
+
+Autorizado em 03/10/2026: Presentation Layer pt-BR, cockpit Next.js separado, projeções backend,
+Maestro com fontes e planos, Knowledge Compiler e Segundo Cérebro Markdown com revisão humana.
+Preservar runtime/checkpoints; sem ACT autônomo, auto-modify, auto-deploy, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
 # Escopo vigente — candidato lesson-04-complete
 
 Autorizado em 02/10/2026: Collect → Interpret → Recommend; Goal Measurement, Business Value

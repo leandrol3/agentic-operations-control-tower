@@ -36,7 +36,7 @@ def measure_goal(agent, goal, evidence, config, now):
     with tracing.operation('goal evaluate'):
         actual = evidence.observed
         # Current registry's seven technical completion goals, not arbitrary future metrics.
-        supported = goal.metric in {'investigation_plan_completed','supply_evidence_completed',
+        supported = goal.metric in {'alternative_evidence_coverage', 'investigation_plan_completed','supply_evidence_completed',
             'production_evidence_completed','logistics_evidence_completed',
             'deterministic_calculation_completed','challenge_completed','recommendation_completed'}
         if not supported or goal.unit != 'percent':

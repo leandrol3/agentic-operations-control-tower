@@ -1,4 +1,31 @@
-# Aula 4 — candidato lesson-04-complete
+# Aula 4 — candidato lesson-04-cockpit
+
+**L3 Control Plane · LAB NovaCore**: cockpit pt-BR para identificar, medir, interpretar,
+recomendar e preservar conhecimento. Next.js separado do core Python, Maestro com fontes,
+planos propostos e Segundo Cérebro Markdown com revisão explícita. Sem ACT autônomo.
+
+```bash
+uv sync --locked --extra lesson04
+export LLM_MODE=mock
+export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
+export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
+uv run --extra lesson04 python scripts/seed_cockpit.py
+./scripts/cockpit.sh up -d --build --wait
+```
+
+Abra **http://localhost:3000**. API: 8000; Jaeger: 16686.
+[Runbook da demonstração final — 18 minutos, comandos e fallbacks](docs/course/lesson-04-cockpit-runbook.md).
+[Relatório técnico e evidências](docs/course/lesson-04/cockpit-validation.md).
+
+Cenário didático explícito: Supply alvo 90%, cobertura 74%, proposta Intervir. Histórico persistido
+é outra fonte; fixtures não preenchem dados ausentes. Mock funciona offline depois da instalação.
+OpenAI é opcional, estruturado via Pydantic e configurado apenas no servidor.
+
+Branch `codex/lesson-04-cockpit`. Checkpoints preservados. Sem push ou tag neste candidato.
+
+---
+
+# Histórico — Aula 4 / lesson-04-complete
 
 **Collect → Interpret → Recommend**, sem ACT. Metas medidas, SLOs configuráveis, tendências,
 Business Value parcial, lifecycle state machine e recomendações determinísticas com evidência.

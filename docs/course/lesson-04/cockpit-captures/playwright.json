@@ -1,0 +1,37 @@
+{
+  "stats": {
+    "startTime": "2026-10-03T15:12:52.304Z",
+    "duration": 3693.461,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "test": "Visão Geral, Agent 360 e recomendação explicável",
+      "status": "passed",
+      "duration_ms": 602
+    },
+    {
+      "test": "Navegação pelas 14 áreas, dimensões de projeção e estados conhecidos",
+      "status": "passed",
+      "duration_ms": 799
+    },
+    {
+      "test": "Maestro cita evidências e propõe staffs sem executar",
+      "status": "passed",
+      "duration_ms": 494
+    },
+    {
+      "test": "Extração, confirmação humana, persistência e grafo",
+      "status": "passed",
+      "duration_ms": 630
+    },
+    {
+      "test": "Carregamento, erro recuperável e fonte vazia sem misturar fixtures",
+      "status": "passed",
+      "duration_ms": 627
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+services:
+  api:
+    image: novacore-control-tower:lesson04-cockpit
+    user: '${LOCAL_UID:-501}:${LOCAL_GID:-20}'
+    environment:
+      KNOWLEDGE_ROOT: /app/knowledge
+    volumes:
+      - ./knowledge:/app/knowledge
+      - ./fixtures:/app/fixtures:ro
+  worker-a:
+    image: novacore-control-tower:lesson04-cockpit
+  worker-b:
+    image: novacore-control-tower:lesson04-cockpit
+  cockpit:
+    build: ./web
+    image: novacore-cockpit:lesson04
+    ports: ['127.0.0.1:3000:3000']
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: '1'
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

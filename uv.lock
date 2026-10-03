@@ -34,6 +34,7 @@ lesson04 = [
     { name = "opentelemetry-sdk" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
+    { name = "pyyaml" },
     { name = "uvicorn" },
 ]
 
@@ -58,6 +59,7 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], marker = "extra == 'lesson03'", specifier = ">=3.2,<4" },
     { name = "pydantic", specifier = ">=2.11,<3" },
     { name = "pydantic-settings", marker = "extra == 'lesson03'", specifier = ">=2.8,<3" },
+    { name = "pyyaml", marker = "extra == 'lesson04'", specifier = ">=6,<7" },
     { name = "uvicorn", marker = "extra == 'lesson03'", specifier = ">=0.34,<1" },
 ]
 provides-extras = ["lesson02", "lesson03", "lesson04"]

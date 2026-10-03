@@ -35,7 +35,7 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
             tracing.shutdown()
 
     capability = IncidentCapability(settings, store, enqueue)
-    app = FastAPI(title=settings.app_name, version='lesson-04-complete', lifespan=lifespan)
+    app = FastAPI(title=settings.app_name, version='lesson-04-cockpit', lifespan=lifespan)
 
     @app.exception_handler(ApplicationError)
     async def application_error(request, error):
@@ -135,6 +135,9 @@ def create_app(settings=None, store=None, enqueue=None, readiness=None):
 
     from ..control_plane.api import register_routes
     register_routes(app, store, settings)
+
+    from ..cockpit.api import register_cockpit
+    register_cockpit(app, store, settings)
 
     app.add_middleware(HTTPTracing)  # Outer span also covers the existing HTTP log middleware.
     return app
