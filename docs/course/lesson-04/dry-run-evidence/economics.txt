@@ -1,0 +1,20 @@
+Execução: c9c1d59b-7c2f-46b1-aedc-fa360797226f
+Chamadas LLM: 0
+Tokens de entrada: Não disponível
+Tokens de saída: Não disponível
+Retries do LLM: 0
+Retries da tarefa: 0
+Fallback usado: Não
+Custo LLM estimado: Não disponível
+Custo total da execução: Não disponível
+Moeda: Não disponível
+Origem do custo: Mock sem consumo de tokens
+Origem do consumo: Mock sem consumo de tokens
+Cobertura do consumo: Não se aplica
+Versão do pricing: Não disponível
+Data de referência: Não disponível
+Desconto de cache aplicado: Não
+Motivo de custo indisponível: Mock sem consumo de tokens
+Escopo do custo: Somente consumo registrado; não é fatura
+Resultado: Recomendação
+Consumo do provider = medido | Pricing = configurado | Custo = estimado

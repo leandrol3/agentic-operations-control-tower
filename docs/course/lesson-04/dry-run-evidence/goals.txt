@@ -1,0 +1,9 @@
+FONTE: FIXTURE DIDÁTICA. Eventos/tokens sintéticos; sem chamadas LLM nem gravação no banco.
+COLETAR → INTERPRETAR → RECOMENDAR (somente leitura; sem ACT)
+Agente                  Lifecycle    Meta             Qualidade* Custo(USD)** SLO                 Ação
+Logística               Ativo        Dentro da meta   0          0.00056      Dentro do limite    Escalar
+  COLETAR fonte=Fixture didática amostras=3 modo=openai modelo=gpt-4.1-mini
+  Pricing=openai-public-pricing-2026-10-02 referência=2026-10-02
+  META alvo=100.0 atual=100 gap=0; tendência de custo=Estável
+* Resultado não normal do workflow (%), não correção do agente. ** Estimativa média do consumo atribuído ao papel.
+Desconhecido não é zero. Recomendação não é autorização. Lifecycle inalterado. Sem inferência de economia ou ROI.

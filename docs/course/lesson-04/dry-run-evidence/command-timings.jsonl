@@ -1,0 +1,25 @@
+{"name": "startup-mock", "seconds": 1.785, "exit": 0, "command": ["bash", "scripts/cockpit.sh", "-f", "/private/tmp/lesson04-rehearsal/isolation.yaml", "up", "-d", "--wait"]}
+{"name": "boundary", "seconds": 2.933, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "boundary"]}
+{"name": "registry", "seconds": 0.177, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "registry"]}
+{"name": "registry-supply", "seconds": 0.151, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "registry", "supply"]}
+{"name": "economics", "seconds": 0.189, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "economics"]}
+{"name": "goals", "seconds": 0.129, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04_complete.py", "--fixture", "stable", "--agent", "logistics", "--section", "goals"]}
+{"name": "slo", "seconds": 0.129, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04_complete.py", "--fixture", "cost", "--agent", "logistics", "--section", "slo"]}
+{"name": "pipeline", "seconds": 0.132, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04_complete.py", "--fixture", "optimize", "--agent", "logistics", "--section", "pipeline"]}
+{"name": "overview", "seconds": 0.109, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_cockpit.py"]}
+{"name": "switch-failure", "seconds": 15.445, "exit": 0, "command": ["bash", "scripts/cockpit.sh", "-f", "/private/tmp/lesson04-rehearsal/isolation.yaml", "-f", "compose.lesson03-failure.yaml", "up", "-d", "--wait"]}
+{"name": "degraded", "seconds": 2.188, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "degraded"]}
+{"name": "quality", "seconds": 0.302, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "quality"]}
+{"name": "switch-openai", "seconds": 15.557, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "/private/tmp/cockpit_switch.py", "openai", "/private/tmp/lesson04-rehearsal/isolation.yaml"]}
+{"name": "fallback-mock", "seconds": 15.46, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "/private/tmp/cockpit_switch.py", "mock", "/private/tmp/lesson04-rehearsal/isolation.yaml"]}
+{"name": "final-types", "seconds": 1.132, "exit": 0, "command": ["npm", "--prefix", "web", "run", "typecheck"]}
+{"name": "final-build", "seconds": 18.498, "exit": 0, "command": ["bash", "scripts/cockpit.sh", "build", "--no-cache", "cockpit"]}
+{"name": "final-python", "seconds": 23.287, "exit": 0, "command": ["uv", "run", "--no-sync", "pytest", "-q"]}
+{"name": "health", "seconds": 0.015, "exit": 0}
+{"name": "ready", "seconds": 0.016, "exit": 0}
+{"name": "snapshot", "seconds": 0.042, "exit": 0}
+{"name": "fallback-maestro", "seconds": 0.059, "exit": 0}
+{"name": "final-browser", "seconds": 7.931, "exit": 0, "command": ["npm", "--prefix", "web", "test"]}
+{"name": "fallback-compiler", "seconds": 0.061, "exit": 0}
+{"name": "final-smoke", "seconds": 0.137, "exit": 0, "command": ["uv", "run", "--no-sync", "control-tower", "smoke"]}
+{"name": "final-compose-demo", "seconds": 2.753, "exit": 0, "command": ["uv", "run", "--no-sync", "python", "scripts/demo_lesson04.py", "boundary"]}
