@@ -1,21 +1,49 @@
+import os
 from typing import Literal
 from uuid import UUID
+
 from fastapi import HTTPException, Query
-from .models import (
-    MaestroRequest,
-    ReviewRequest,
-    Source,
-    MaestroResponse,
-    KnowledgeItem,
-    KnowledgeCandidate,
-)
+from fastapi.responses import JSONResponse
+
+from ..settings import Settings
+from .assistance import KnowledgeCompiler
+from .conversation import Conversations
 from .knowledge import KnowledgeStore
 from .llm import ProviderConfigurationError
+from .models import (
+    KnowledgeCandidate,
+    KnowledgeItem,
+    MaestroRequest,
+    MaestroResponse,
+    ReviewRequest,
+    Source,
+)
 from .presentation import CockpitService
-from .assistance import Maestro, KnowledgeCompiler
 
 
 def register_cockpit(app, store, settings):
+    conversations = Conversations()
+
+    @app.middleware("http")
+    async def protect_submission_without_provider(request, call_next):
+        # Read-only availability must not silently accept unserviceable jobs.
+        if (
+            os.getenv("COCKPIT_READ_WITHOUT_LLM") == "true"
+            and settings.llm_mode == "openai"
+            and request.method == "POST"
+            and request.url.path == "/incidents"
+        ):
+            try:
+                Settings.load(settings.control_tower_root)
+            except ValueError:
+                return JSONResponse(
+                    status_code=503,
+                    content={
+                        "detail": "Provider LLM não configurado; consultas do Control Plane permanecem disponíveis."
+                    },
+                )
+        return await call_next(request)
+
     def service():
         return CockpitService(store, settings, KnowledgeStore())
 
@@ -55,7 +83,7 @@ def register_cockpit(app, store, settings):
 
     @app.post("/maestro/chat", response_model=MaestroResponse)
     def chat(request: MaestroRequest):
-        return call(lambda: Maestro(service()).chat(request))
+        return call(lambda: conversations.chat(service(), request))
 
     @app.get("/knowledge", response_model=list[KnowledgeItem])
     def knowledge(

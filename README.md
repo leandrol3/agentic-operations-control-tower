@@ -10,16 +10,24 @@ export LLM_MODE=mock
 export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
 export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
 uv run --extra lesson04 python scripts/seed_cockpit.py
+# Experiência principal do Maestro (zsh no Mac; entrada oculta):
+read -s "OPENAI_API_KEY?Chave OpenAI: "
+export OPENAI_API_KEY
+export LLM_MODE=openai
+export OPENAI_MODEL=gpt-4.1-mini
 ./scripts/cockpit.sh up -d --build --wait
 ```
 
 Abra **http://localhost:3000**. API: 8000; Jaeger: 16686.
 [Runbook da demonstração final — 18 minutos, comandos e fallbacks](docs/course/lesson-04-cockpit-runbook.md).
-[Relatório técnico e evidências](docs/course/lesson-04/cockpit-validation.md).
+[Relatório técnico original](docs/course/lesson-04/cockpit-validation.md).
+[Refinamento final — relatório A–L e capturas](docs/course/lesson-04/cockpit-refinement-validation.md).
 
 Cenário didático explícito: Supply alvo 90%, cobertura 74%, proposta Intervir. Histórico persistido
 é outra fonte; fixtures não preenchem dados ausentes. Mock funciona offline depois da instalação.
-OpenAI é opcional, estruturado via Pydantic e configurado apenas no servidor.
+OpenAI é a experiência principal do Maestro, com Pydantic, contexto e sessão explícita.
+Para testes/CI/fallback offline, selecione `LLM_MODE=mock` e reinicie o perfil. Nunca há fallback silencioso.
+Logo oficial L3, lifecycle visual, exposição potencial (sem savings) e maturidade entre níveis 3 e 4.
 
 Branch `codex/lesson-04-cockpit`. Checkpoints preservados. Sem push ou tag neste candidato.
 

@@ -94,6 +94,14 @@ export type Knowledge = {
   review_note: string | null;
 };
 export type Plan = {
+  hypothesis?: string | null;
+  usage?: {
+    model: string;
+    input_tokens: number;
+    output_tokens: number;
+    estimated_cost: string | null;
+    currency: string | null;
+  };
   plan_id: string;
   agent_id: string;
   diagnosis: string;
@@ -157,6 +165,19 @@ export type Detail = {
   events: { id: number; agent: string; type: string; timestamp: string }[];
 };
 export type Snapshot = {
+  attention: {
+    count: number;
+    agent_ids: string[];
+    label: string;
+    basis: string;
+  };
+  business_exposure: {
+    exposure_brl: string | null;
+    daily_penalty_brl: string | null;
+    hypothetical_days: number | null;
+    realized: null;
+    note: string;
+  };
   runtime_mode: string;
   source: Source;
   updated_at: string;

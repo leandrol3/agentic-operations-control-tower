@@ -2,11 +2,18 @@
 
 from datetime import datetime, timezone
 from uuid import uuid4
-from .models import Fact, PlanDraft, ImprovementPlan, KnowledgeDraft, KnowledgeCandidate
-from .llm import StructuredProvider, MAESTRO_PROMPT, COMPILER_PROMPT
-from .presentation import NAMES
+
 from .knowledge import FOLDERS
+from .llm import COMPILER_PROMPT, MAESTRO_PROMPT, StructuredProvider
 from .localization import pt
+from .models import (
+    Fact,
+    ImprovementPlan,
+    KnowledgeCandidate,
+    KnowledgeDraft,
+    grounded_plan_schema,
+)
+from .presentation import NAMES
 
 
 def validate_refs(ids, facts):
@@ -108,10 +115,10 @@ class Maestro:
         self.service = service
         self.provider = provider or StructuredProvider()
 
-    def chat(self, request):
+    def chat(self, request, *, history=None, context_facts=None):
         tools = MaestroTools(self.service, request.source, request.agent_id)
         agent = tools.get_agent()
-        goals = tools.get_agent_goals()
+        tools.get_agent_goals()
         measurements = tools.get_goal_measurements()
         quality = tools.get_agent_quality()
         econ = tools.get_agent_economics()
@@ -198,7 +205,9 @@ class Maestro:
             )
             for i in knowledge
         ]
+        facts += context_facts or []
         mock = {
+            "hypothesis": "Investigar se lacunas na coleta de evidências contribuem para o gap; causa ainda não confirmada.",
             "language": "pt-BR",
             "diagnosis": f"{NAMES[agent.agent_id]} tem meta de {g.target}% e resultado {actual}. "
             + (
@@ -263,10 +272,12 @@ class Maestro:
                 f.id for f in facts if f.id.startswith("workforce:")
             ]
         draft = self.provider.generate(
-            PlanDraft,
+            grounded_plan_schema(facts),
             MAESTRO_PROMPT,
             {
                 "question": request.question,
+                "history": history or [],
+                "context": request.context.model_dump() if request.context else None,
                 "facts": [f.model_dump() for f in facts],
                 "knowledge_ids": [i.id for i in knowledge],
             },
@@ -279,10 +290,12 @@ class Maestro:
             draft.diagnosis + " " + draft.expected_result + " " + " ".join(draft.steps)
         )
         plan = ImprovementPlan(
+            usage=getattr(self.provider, "usage", None),
             plan_id="plan-" + uuid4().hex,
             agent_id=agent.agent_id,
             source=request.source,
             diagnosis=draft.diagnosis,
+            hypothesis=draft.hypothesis,
             objective=draft.objective,
             steps=draft.steps,
             staff_assignments=[

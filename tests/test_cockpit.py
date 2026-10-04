@@ -284,7 +284,7 @@ def test_real_mode_structured_parser_uses_schema_without_network(service, schema
         )
     else:
         Maestro(service, recorder).chat(MaestroRequest(question="Melhorar Supply"))
-    assert client.responses.parse.call_args.kwargs["text_format"] is schema
+    assert issubclass(client.responses.parse.call_args.kwargs["text_format"], schema)
     assert client.responses.parse.call_args.kwargs["model"] == "test-model"
     assert "português" in client.responses.parse.call_args.kwargs["input"][0]["content"]
 
@@ -372,3 +372,246 @@ def test_no_candidate_from_incomplete_execution(service, monkeypatch):
     with pytest.raises(ValueError, match="concluídas"):
         KnowledgeCompiler(service).extract("any", "durable")
     assert not service.knowledge.list()
+
+
+# Final presentation refinement: identifiers, bounded conversation, honest value.
+def test_exposure_reuses_capability_and_attention_is_backend_projection(service):
+    snapshot = service.snapshot("didactic")
+    assert snapshot["business_exposure"]["exposure_brl"] == "140000.00"
+    assert snapshot["business_exposure"]["daily_penalty_brl"] == "20000.00"
+    assert snapshot["business_exposure"]["realized"] is None
+    assert snapshot["attention"]["agent_ids"] == ["supply"]
+    assert snapshot["attention"]["count"] == snapshot["overview"]["attention_agents"]
+    assert service.snapshot("durable")["business_exposure"]["exposure_brl"] is None
+
+
+def test_chat_session_passes_bounded_history_and_changes_context(
+    client, service, monkeypatch
+):
+    contexts = []
+    original = StructuredProvider.generate
+
+    def capture(self, schema, prompt, context, mock):
+        contexts.append(context)
+        return original(self, schema, prompt, context, mock)
+
+    monkeypatch.setattr(StructuredProvider, "generate", capture)
+    first = client.post(
+        "/maestro/chat",
+        json={
+            "question": "Quem precisa de atenção?",
+            "context": {
+                "context_type": "agent",
+                "agent_id": "supply",
+                "source": "didactic",
+            },
+        },
+    ).json()
+    key = service.operations("didactic")[0]["execution_id"]
+    for _ in range(8):
+        response = client.post(
+            "/maestro/chat",
+            json={
+                "question": "Explique as evidências anteriores",
+                "session_id": first["session_id"],
+                "context": {
+                    "context_type": "execution",
+                    "execution_id": key,
+                    "source": "didactic",
+                },
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["session_id"] == first["session_id"]
+    assert contexts[0]["history"] == []
+    assert contexts[1]["history"][0]["content"] == "Quem precisa de atenção?"
+    assert len(contexts[-1]["history"]) == 12
+    assert any(f["id"].startswith("context-execution:") for f in contexts[-1]["facts"])
+
+
+@pytest.mark.parametrize(
+    "kind,field,value",
+    [
+        ("execution", "execution_id", "00000000-0000-0000-0000-000000000000"),
+        ("recommendation", "recommendation_id", "unknown"),
+        ("knowledge", "knowledge_id", "unknown"),
+    ],
+)
+def test_invalid_context_never_saves_plan(client, service, kind, field, value):
+    before = len(service.knowledge.plans())
+    response = client.post(
+        "/maestro/chat",
+        json={
+            "question": "Explique este item",
+            "context": {"context_type": kind, field: value},
+        },
+    )
+    assert response.status_code in (404, 409)
+    assert len(service.knowledge.plans()) == before
+
+
+def test_recommendation_context_resolves_owner(client, service):
+    rec = service.snapshot("didactic")["recommendations"][0]
+    response = client.post(
+        "/maestro/chat",
+        json={
+            "question": "Explique esta recomendação",
+            "context": {
+                "context_type": "recommendation",
+                "recommendation_id": str(rec["recommendation_id"]),
+            },
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["plan"]["agent_id"] == rec["agent_id"]
+
+
+def test_pending_context_content_excluded_from_facts(service):
+    from control_tower.cockpit.conversation import resolve_context
+    from control_tower.cockpit.models import MaestroContext
+
+    item = candidate(service)
+    facts, _ = resolve_context(
+        service, MaestroContext(context_type="knowledge", knowledge_id=item.id)
+    )
+    assert "ainda não validado" in facts[0].text
+    assert item.summary not in facts[0].text
+    approve(service, item)
+    facts, _ = resolve_context(
+        service, MaestroContext(context_type="knowledge", knowledge_id=item.id)
+    )
+    assert item.summary in facts[0].text
+
+
+def test_failed_provider_keeps_conversation_and_no_partial_plan(service, monkeypatch):
+    from control_tower.cockpit.conversation import Conversations
+
+    sessions = Conversations()
+    req = MaestroRequest(question="Como melhorar Supply?")
+    first = sessions.chat(service, req)
+    before = len(service.knowledge.plans())
+    history = list(sessions.sessions[first["session_id"]]["history"])
+
+    def fail(*args, **kwargs):
+        raise TimeoutError("provider")
+
+    monkeypatch.setattr(StructuredProvider, "generate", fail)
+    with pytest.raises(TimeoutError):
+        sessions.chat(
+            service, req.model_copy(update={"session_id": first["session_id"]})
+        )
+    assert sessions.sessions[first["session_id"]]["history"] == history
+    assert len(service.knowledge.plans()) == before
+    assert not sessions.sessions[first["session_id"]]["lock"].locked()
+
+
+def test_session_capacity_and_duplicate_request_guard(service):
+    from control_tower.cockpit.conversation import Conversations
+
+    sessions = Conversations(capacity=1)
+    req = MaestroRequest(question="Como melhorar Supply?")
+    first = sessions.chat(service, req)
+    entry = sessions.sessions[first["session_id"]]
+    entry["lock"].acquire()
+    try:
+        with pytest.raises(ValueError):
+            sessions.chat(
+                service, req.model_copy(update={"session_id": first["session_id"]})
+            )
+        with pytest.raises(ValueError):
+            sessions.chat(service, req)
+    finally:
+        entry["lock"].release()
+    second = sessions.chat(service, req)
+    assert list(sessions.sessions) == [second["session_id"]]
+
+
+def test_usage_is_estimated_separately_from_workflow(service):
+    from decimal import Decimal
+
+    provider = StructuredProvider(
+        Settings(mode="openai", api_key="unit-test"), client=MagicMock()
+    )
+    mock = Maestro(service).chat(MaestroRequest(question="Como melhorar Supply?"))[
+        "plan"
+    ]
+    draft = PlanDraft(
+        language="pt-BR",
+        diagnosis=mock.diagnosis,
+        objective=mock.objective,
+        steps=mock.steps,
+        evidence_refs=[e.id for e in mock.evidence],
+        knowledge_ids=[],
+        expected_result=mock.expected_result,
+        risks=mock.risk,
+    )
+    provider.client.responses.parse.return_value = SimpleNamespace(
+        output_parsed=draft.model_dump(),
+        usage=SimpleNamespace(input_tokens=1000, output_tokens=200),
+    )
+    result = Maestro(service, provider).chat(
+        MaestroRequest(question="Como melhorar Supply?")
+    )
+    usage = result["plan"].usage
+    assert usage.input_tokens == 1000 and usage.output_tokens == 200
+    assert Decimal(usage.estimated_cost) == Decimal("0.00072")
+    assert usage.currency == "USD"
+    assert service.snapshot("didactic")["overview"]["estimated_cost_usd"] is None
+
+
+def test_missing_provider_does_not_break_control_plane(client, monkeypatch, tmp_path):
+    monkeypatch.setenv("LLM_MODE", "openai")
+    monkeypatch.setenv("CONTROL_TOWER_ROOT", str(tmp_path))
+    monkeypatch.setenv("OPENAI_API_KEY_FILE", str(tmp_path / "missing"))
+    response = client.post(
+        "/maestro/chat", json={"question": "Quem precisa de atenção?"}
+    )
+    assert response.status_code == 503
+    assert (
+        "Maestro indisponível: provider LLM não configurado"
+        in response.json()["detail"]
+    )
+    assert client.get("/cockpit/overview").status_code == 200
+
+
+def test_read_only_cockpit_without_key_rejects_new_jobs(service, monkeypatch, tmp_path):
+    monkeypatch.setenv("COCKPIT_READ_WITHOUT_LLM", "true")
+    monkeypatch.setenv("LLM_MODE", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY_FILE", str(tmp_path / "missing"))
+    enqueue = MagicMock()
+    settings = service.settings.model_copy(
+        update={"llm_mode": "openai", "control_tower_root": tmp_path}
+    )
+    with TestClient(create_app(settings, service.store, enqueue)) as c:
+        response = c.post(
+            "/incidents", json={"incident_id": "INCIDENT-001", "version": "test"}
+        )
+        assert response.status_code == 503
+        enqueue.assert_not_called()
+        assert c.get("/agents").status_code == 200
+
+
+def test_maestro_provider_schema_limits_evidence_to_retrieved_ids():
+    from control_tower.cockpit.models import Fact, grounded_plan_schema
+
+    schema = grounded_plan_schema(
+        [
+            Fact(id="goal:supply", text="Meta de 90%", source="Registry"),
+            Fact(id="slo:supply", text="Limite", source="SLO"),
+        ]
+    )
+    assert schema.model_json_schema()["properties"]["evidence_refs"]["items"][
+        "enum"
+    ] == ["goal:supply", "slo:supply"]
+
+
+def test_economics_context_resolves_displayed_exposure_without_savings(service):
+    from control_tower.cockpit.conversation import resolve_context
+    from control_tower.cockpit.models import MaestroContext
+
+    facts, _ = resolve_context(service, MaestroContext(context_type="economics"))
+    assert "140000.00" in facts[0].text and "Não é atraso confirmado" in facts[0].text
+    facts, _ = resolve_context(
+        service, MaestroContext(context_type="economics", source="durable")
+    )
+    assert "140000" not in facts[0].text and "indisponível" in facts[0].text

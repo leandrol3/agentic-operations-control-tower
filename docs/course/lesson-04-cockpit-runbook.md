@@ -67,7 +67,7 @@ ou baixar imagens. O ensaio em mock não chama OpenAI.
 docker version
 uv --version
 uv sync --locked --extra lesson04
-export LLM_MODE=mock
+export LLM_MODE=mock # preparação determinística do seed
 export OTEL_ENABLED=true
 export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
 export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
@@ -79,9 +79,19 @@ O seed cria três referências didáticas previamente curadas, um candidato pend
 É idempotente: preserva itens existentes; só repõe candidato/plano quando não há um disponível.
 Os seeds aprovados são **curadoria do material da aula**, não descobertas de produção nem aprovação feita pelo LLM.
 
-### 3.3 Iniciar todos os serviços corretos
+### 3.3 Iniciar todos os serviços corretos — OpenAI principal
+
+O logo oficial L3 e a identidade navy/cyan identificam o sistema; verde representa apenas status positivo.
+Carregue a chave sem projetar o terminal de entrada. O `read -s` abaixo é para zsh no Mac;
+nenhuma chave é escrita em arquivo ou enviada ao navegador. Se já exportou a variável nesta sessão,
+não precisa repetir a leitura. O `.keys` do host não é montado automaticamente nos containers.
 
 ```bash
+read -s "OPENAI_API_KEY?Chave OpenAI (entrada oculta): "
+export OPENAI_API_KEY
+export LLM_MODE=openai
+export OPENAI_MODEL=gpt-4.1-mini
+export VISIBILITY_TIMEOUT=900
 ./scripts/cockpit.sh config --quiet
 ./scripts/cockpit.sh up -d --build --wait
 ./scripts/cockpit.sh ps
@@ -150,7 +160,13 @@ Os tokens do cenário são sintéticos, **não consumo OpenAI em mock**. No hist
 **Fala:** “Um agente é uma unidade de inteligência. Um sistema multiagente é uma organização.
 Até aqui observávamos execuções. Agora identificamos sete papéis, metas e sinais que exigem uma decisão de gestão.”
 
-Aponte: 7 agentes ativos, 6 metas dentro do alvo, Supply fora da meta, alertas e propostas pendentes.
+Aponte **Performance da workforce**: 7 ativos, 6 metas dentro do alvo, Supply em atenção, 3 alertas e 6 propostas.
+Mostre **Valor sob gestão: R$ 140.000**, cenário didático, e **Valor realizado: Não validado**.
+É a penalidade do pedido CO-001 (R$ 20.000/dia) multiplicada por 7 dias hipotéticos pela capability existente.
+Não é impacto confirmado nem economia realizada.
+Clique **1 agente requer atenção · Perguntar ao Maestro**. A contagem vem dos triggers do backend.
+O drawer abre com Supply e uma pergunta preparada: **não ocorre chamada ao provider até clicar Enviar**.
+Feche o painel para continuar o percurso.
 Role até a tabela. Os círculos de SLO representam avaliações, não uma saúde global inventada.
 
 **Explique antes:** cadastro ≠ lifecycle ≠ saúde do runtime ≠ status da execução.
@@ -200,6 +216,11 @@ Recommendation is not authorization: recomendação não é autorização.”
 
 **Código que vale mostrar:** `control_plane/decision_engine.py`, precedência das regras; `control_plane/lifecycle.py`, transições permitidas.
 Nenhuma regra é reimplementada em React. Não altere thresholds ao vivo para “conseguir” o resultado.
+Abra **Lifecycle**: o SVG desenha as 11 transições permitidas pelo backend. Azul destaca o cadastro Ativo;
+abaixo, a proposta Ativo → Em revisão está **não executada**, com aprovação humana obrigatória.
+Em Economia & Valor, diferencie custo LLM/por papel, custo do cenário proposto (R$ 12.500), exposição potencial
+(R$ 140.000), tempo ilustrativo registrado até proposta e valor realizado ainda não validado.
+**LLM Cost ≠ Agent Cost ≠ Workflow Cost ≠ Business Decision ≠ Business Value.**
 
 ### 07:00–10:00 · Maestro — da evidência ao plano
 
@@ -208,13 +229,25 @@ Agente em foco: `Suprimentos`. Clique na sugestão:
 
 > Como posso melhorar o agente de Supply?
 
-**Resultado esperado em mock:** diagnóstico 90% versus 74%, 13 observações com cobertura incompleta,
+**Experiência principal:** OpenAI real (`gpt-4.1-mini`), síntese em pt-BR com fatos e fontes verificáveis.
+O texto varia; números e regras não. **Fallback mock explícito:** diagnóstico 90% versus 74%, 13 observações com cobertura incompleta,
 proposta para revisar evidências, preparar avaliação antes/depois e solicitar revisão humana.
 
 **Fala:** “O Supervisor coordena uma investigação. O Maestro consulta o Control Plane e o conhecimento aprovado
 para coordenar a melhoria da força de trabalho. O LLM não calcula metas, pricing, SLOs ou transições.”
 
-Aponte `Fontes utilizadas`; expanda `Ver todas as fontes consultadas`.
+Aponte o diagnóstico. Expanda **Hipótese, plano de melhoria e staffs** e depois **Fontes utilizadas (N)**.
+Envie uma segunda pergunta: **Qual evidência sustenta essa proposta e o que ainda falta validar?**
+As duas respostas permanecem. Feche o drawer, entre em Operações, abra uma execução e use o botão global
+**Perguntar ao Maestro**. O histórico permanece e surge **Contexto alterado para Execução INCIDENT-001**.
+Envie: **Explique os limites desta execução em relação ao plano anterior.**
+Página Maestro e drawer compartilham a sessão. O backend recebe IDs, resolve fatos e envia até 12 mensagens
+recentes ao provider; não usa HTML nem memória implícita. Em Agent 360, **Última análise do Maestro**
+mostra a proposta mais recente; **Continuar conversa** preserva a sessão da aba atual.
+Ao abrir uma recomendação, use **Perguntar ao Maestro sobre esta recomendação**; em um documento,
+o botão global carrega o conhecimento selecionado. Pendentes não viram verdade aprovada.
+Expanda **Custo desta consulta ao Maestro** quando houver usage: modelo, tokens e estimativa USD
+com pricing configurado. Essa consulta não entra nos custos históricos do workflow.
 Mostre conhecimento relacionado e staffs: Desenvolvimento, Dados, Arquitetura, Avaliação/QA, Segurança,
 Conhecimento e Revisor humano. São responsabilidades propostas, não sete novos agentes executando.
 
@@ -286,12 +319,9 @@ Maestro → Plano → Staffs → Validação humana → Segundo Cérebro → Mel
 **Fala:** “A organização não aprende porque executou mais. Ela aprende quando sua experiência melhora a próxima decisão.
 O LAB está nos níveis de observar e recomendar, com delegação representada como proposta. Nível 5 não está operacional.”
 
-Aponte o arco das quatro aulas:
-
-1. Agentes conseguem colaborar.
-2. Executam em paralelo e sobrevivem a falhas.
-3. Conseguimos implantar e observar o runtime.
-4. Conseguimos identificar, medir, interpretar e gerenciar a workforce.
+Aponte **Maturidade da empresa agêntica**: Automação → Observável → Gerenciada → Adaptativa → Learning Enterprise.
+O marcador do LAB está entre 3 e 4: medimos, interpretamos e propomos. Nível 5 é visão futura.
+Maturidade organizacional e autoridade de execução são eixos distintos; nenhum libera ACT autônomo.
 
 **Fechamento:** “Control Tower opera o processo. Control Plane opera a força de trabalho agêntica.
 Operar agentes é uma disciplina de lifecycle, não apenas de runtime.
@@ -300,9 +330,12 @@ Learning Loops transformam experiência em melhor desempenho. Self-learning is n
 
 ## 5. Histórico real opcional — preparar antes da aula
 
-A demo final usa fixtures para ter resultado repetível. Para mostrar uma execução **real do runtime em mock**:
+A demo final usa fixtures para ter resultado repetível. Este bloco é opcional e altera o modo da stack.
+Para mostrar uma execução **real do runtime em mock**, selecione esse modo explicitamente antes de publicar:
 
 ```bash
+export LLM_MODE=mock
+./scripts/cockpit.sh up -d --wait
 curl --fail --silent --show-error http://localhost:8000/incidents \
   -H 'Content-Type: application/json' \
   -d "{\"incident_id\":\"COCKPIT-MOCK-001\",\"version\":\"cockpit-$(date +%s)\"}" \
@@ -315,31 +348,21 @@ Aguarde alguns segundos e repita a última consulta até `completed`. Abra `Hist
 O resultado exige revisão humana. Use `Extrair aprendizado` para gerar um candidato dessa fonte.
 Não chame o número didático de 74% de resultado dessa execução.
 
-## 6. OpenAI opcional — não é requisito para a aula funcionar
+Após este bloco opcional, repita o startup OpenAI da seção 3.3 para retomar a experiência principal.
 
-Maestro e Compiler usam o mesmo `LLM_MODE` do processo; `OPENAI_MODEL` seleciona o modelo.
-Ambos usam contratos Pydantic e `responses.parse`. Mock tem conteúdo determinístico, IDs/timestamps novos por registro,
-nenhuma chamada paga e nenhum usage inventado. As requisições são independentes; não há memória de chat implícita.
+## 6. OpenAI principal e fallback offline explícito
 
-Se quiser demonstrar síntese real, carregue uma chave própria sem projetá-la. No zsh do Mac:
+A preparação da seção 3 inicia Maestro e Compiler em OpenAI. O launcher assume `openai` quando
+`LLM_MODE` não foi definido. Testes e CI devem declarar `LLM_MODE=mock` explicitamente.
+Contratos Pydantic, fontes, validação e revisão humana são os mesmos. O SDK usa timeout de 45 s
+sem retry automático; falhas preservam a conversa e não salvam plano parcial. Use **Tentar análise novamente**
+apenas por decisão manual. Nunca há troca silenciosa para mock.
 
-```bash
-read -s "OPENAI_API_KEY?Chave OpenAI (entrada oculta): "
-export OPENAI_API_KEY
-export OPENAI_MODEL=gpt-4.1-mini
-export LLM_MODE=openai
-export VISIBILITY_TIMEOUT=900
-./scripts/cockpit.sh up -d --wait
-```
+Sem chave no servidor, a UI mostra **Maestro indisponível: provider LLM não configurado.**
+O perfil cockpit permite à API manter consultas do Control Plane disponíveis; workers continuam
+exigindo credencial para aceitar execução OpenAI. Isso não relaxa a validação dos outros perfis.
 
-**Só depois de configurar:** clique uma vez na pergunta do Maestro e, se desejado, extraia um candidato.
-O texto variará; metas, SLOs, custos e regras permanecem em Python. No ensaio, o Maestro levou
-5–10 s e o Compiler 5,66 s. Uma resposta foi rejeitada pela validação; uma nova solicitação manual passou.
-Esses tempos não são garantia e schema válido não equivale a verdade semântica. O selo passa de MODO MOCK para LLM.
-Não use uma falha real como parte obrigatória da demo. Sem chave, a API retorna erro explícito mencionando `OPENAI_API_KEY`.
-O SDK usa timeout de 45 s e sem retries automáticos nesse serviço. Não existe fallback silencioso para mock.
-
-Voltar explicitamente ao modo offline:
+Fallback offline (determinístico, sem chamadas pagas):
 
 ```bash
 export LLM_MODE=mock
@@ -347,8 +370,14 @@ unset OPENAI_API_KEY
 ./scripts/cockpit.sh up -d --wait
 ```
 
-O container não lê automaticamente o `.keys` do host. Não copie chaves para o frontend ou para Git.
-As chamadas de Maestro/Compiler ainda não entram nos eventos/custos históricos do workflow; isso é uma limitação explícita do MVP.
+Recarregue os dados e explique que a próxima resposta será mock. A interface conserva o gerador de cada
+resposta antiga. Para voltar a OpenAI, repita a configuração segura e o startup da seção 3.3.
+Para Knowledge Compiler, um candidato didático já preparado também evita depender da latência em aula;
+sua aprovação continua sendo uma decisão explícita do professor.
+
+Sessões são locais ao processo da API (até 128, histórico de 12 mensagens), sem autenticação empresarial.
+Reiniciar a API ou recarregar a página perde a continuidade do chat. Os planos válidos e o conhecimento
+continuam persistidos no filesystem. Navegar entre páginas ou trocar o contexto na mesma aba preserva o chat.
 
 ## 7. APIs e exemplos pequenos
 
@@ -467,6 +496,14 @@ Não transforme indisponibilidade em resultado “saudável”; explique que a f
 - Sem economia/ROI realizado inferido. Cached tokens não estão instrumentados no histórico atual.
 - A próxima execução empresarial ainda não injeta conhecimento automaticamente; o retrieval demonstrado é do Maestro.
   O loop é assistido, não aprendizado irrestrito nem atualização de pesos.
+
+### Maturidade na conclusão do Learning Loop
+
+O fluxo de 12 etapas permanece. O arco Aula 1–4 saiu da UI e fica nos slides.
+Aponte a régua de cinco níveis e a posição **entre 3 e 4**. Diga:
+“O LAB atual mede, interpreta e propõe melhorias. Ainda não executa mudanças autônomas.”
+“Learning Enterprise não significa auto-modificação sem controle.”
+“Self-learning is not uncontrolled self-modification.” Nível 5 é visão futura, não capacidade operacional atual.
 
 ## 12. Encerrar sem apagar a memória
 

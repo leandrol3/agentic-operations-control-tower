@@ -4,6 +4,7 @@ services:
     user: '${LOCAL_UID:-501}:${LOCAL_GID:-20}'
     environment:
       KNOWLEDGE_ROOT: /app/knowledge
+      COCKPIT_READ_WITHOUT_LLM: "true"
     volumes:
       - ./knowledge:/app/knowledge
       - ./fixtures:/app/fixtures:ro

@@ -1,4 +1,6 @@
 "use client";
+import { MaestroPanel, useConversation, type MaestroContext } from "./maestro";
+import { LifecycleGraph } from "./lifecycle-graph";
 import { useEffect, useState, useRef, type ReactNode } from "react";
 import {
   Activity,
@@ -78,6 +80,14 @@ async function api<T>(path: string, body?: unknown): Promise<T> {
     throw new Error(data.detail || "Não foi possível concluir a operação.");
   return data;
 }
+const money = (v: string | null | undefined) =>
+  v == null
+    ? "Não disponível"
+    : new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      }).format(Number(v));
 function Badge({ value, children }: { value?: string; children?: ReactNode }) {
   return (
     <span className={"badge " + (value || "neutral")}>
@@ -201,7 +211,7 @@ function KnowledgeGraph({
               y1={55 + Math.floor(a / 3) * 82}
               x2={130 + (b % 3) * 270}
               y2={55 + Math.floor(b / 3) * 82}
-              stroke="#b7c7c0"
+              stroke="var(--edge)"
               strokeWidth="2"
             />
           );
@@ -220,13 +230,17 @@ function KnowledgeGraph({
               width="185"
               height="58"
               rx="10"
-              fill={n.validation_status === "approved" ? "#e7f0e9" : "#fff4db"}
-              stroke="#bccbc2"
+              fill={
+                n.validation_status === "approved"
+                  ? "var(--positive-soft)"
+                  : "var(--warning-soft)"
+              }
+              stroke="var(--edge)"
             />
-            <text x="12" y="23" fontSize="11" fill="#67766e">
+            <text x="12" y="23" fontSize="11" fill="var(--muted)">
               {label(n.type)} · {label(n.validation_status)}
             </text>
-            <text x="12" y="43" fontSize="12" fill="#203e30">
+            <text x="12" y="43" fontSize="12" fill="var(--ink)">
               {n.title.slice(0, 24)}
               {n.title.length > 24 ? "…" : ""}
             </text>
@@ -304,10 +318,7 @@ export default function Cockpit() {
     [query, setQuery] = useState(""),
     [busy, setBusy] = useState(""),
     [toast, setToast] = useState("");
-  const [question, setQuestion] = useState(""),
-    [plan, setPlan] = useState<Plan | null>(null),
-    [chatHistory, setChatHistory] = useState<string[]>([]),
-    [reviewer, setReviewer] = useState(""),
+  const [reviewer, setReviewer] = useState(""),
     [reviewNote, setReviewNote] = useState(""),
     [confirmed, setConfirmed] = useState(false);
   useEffect(() => {
@@ -333,6 +344,7 @@ export default function Cockpit() {
   }, [source, revision]);
   const go = (v: string) => {
     setView(v);
+    setMaestroOverride(null);
     setAgentOpen(false);
     setExecution(null);
     setKnowledgeId(null);
@@ -350,6 +362,81 @@ export default function Cockpit() {
     data?.agents[0];
   const item = data?.knowledge.items.find((k) => k.id === knowledgeId);
   const refresh = () => setRevision((v) => v + 1);
+  const chat = useConversation(refresh);
+  const [maestroOpen, setMaestroOpen] = useState(false);
+  const [maestroOverride, setMaestroOverride] = useState<MaestroContext | null>(
+    null,
+  );
+  const plan = [...chat.messages].reverse().find((m) => m.reply)?.reply?.plan;
+  useEffect(() => {
+    setMaestroOverride(null);
+  }, [view, execution?.execution_id, knowledgeId, agentId, source]);
+  const context: MaestroContext = maestroOverride || {
+    context_type: execution
+      ? "execution"
+      : decision
+        ? "recommendation"
+        : knowledgeId
+          ? "knowledge"
+          : view === "lifecycle"
+            ? "lifecycle"
+            : view === "economics"
+              ? "economics"
+              : agentOpen || view === "maestro"
+                ? "agent"
+                : "workforce",
+    source,
+    route: view,
+    ...(execution ? { execution_id: execution.execution_id } : {}),
+    ...(decision
+      ? {
+          recommendation_id: decision.recommendation_id,
+          agent_id: decision.agent_id,
+        }
+      : {}),
+    ...(knowledgeId ? { knowledge_id: knowledgeId } : {}),
+    ...(!execution &&
+    !knowledgeId &&
+    !decision &&
+    (agentOpen || ["maestro", "lifecycle", "economics", "goals"].includes(view))
+      ? { agent_id: agentId }
+      : {}),
+  };
+  const contextTitle =
+    context.context_type === "execution"
+      ? `Execução ${execution?.incident_id || context.execution_id}`
+      : context.context_type === "knowledge"
+        ? `Conhecimento ${item?.title || context.knowledge_id}`
+        : context.context_type === "recommendation"
+          ? "Recomendação em revisão"
+          : context.agent_id
+            ? `Agente ${names[context.agent_id] || context.agent_id}`
+            : "Workforce";
+  const openMaestro = () => {
+    setMaestroOverride(null);
+    setMaestroOpen(true);
+  };
+  const maestroPanel = (
+    <MaestroPanel
+      chat={chat}
+      context={context}
+      title={contextTitle}
+      lifecycle={
+        context.agent_id
+          ? data?.agents.find((a) => a.registry.agent_id === context.agent_id)
+              ?.registry.lifecycle_state
+          : undefined
+      }
+      attention={data?.attention.agent_ids}
+      onClose={maestroOpen ? () => setMaestroOpen(false) : undefined}
+      onKnowledge={(id) => {
+        setKnowledgeId(id);
+        setView("knowledge");
+        setMaestroOverride(null);
+      }}
+    />
+  );
+
   async function action<T>(
     name: string,
     fn: () => Promise<T>,
@@ -372,22 +459,6 @@ export default function Cockpit() {
       (e) => {
         setExecution(e);
         setView("operations");
-      },
-    );
-  const ask = (text: string) =>
-    action(
-      "maestro",
-      () =>
-        api<{ plan: Plan; sources_consulted: string[] }>("maestro/chat", {
-          question: text,
-          agent_id: agentId,
-          source,
-        }),
-      (r) => {
-        setPlan(r.plan);
-        setChatHistory([text]);
-        setQuestion("");
-        refresh();
       },
     );
   const extract = () =>
@@ -593,37 +664,17 @@ export default function Cockpit() {
   );
   const lifecycle = (a: Agent) => (
     <>
-      <div className="lifecycle-states">
-        {["draft", "pilot", "active", "review", "paused", "retired"].map(
-          (s) => (
-            <div
-              className={s === a.registry.lifecycle_state ? "selected" : ""}
-              key={s}
-            >
-              <CircleDot size={18} />
-              <b>{label(s)}</b>
-              <small>
-                {s === a.registry.lifecycle_state
-                  ? "Estado atual"
-                  : "Estado possível"}
-              </small>
-            </div>
-          ),
-        )}
-      </div>
-      <div className="transition-list">
-        {data?.settings.lifecycle_edges.map((e, i) => (
-          <span key={i}>
-            {label(e.from)} → {label(e.to)}
-          </span>
-        ))}
-      </div>
+      <LifecycleGraph
+        edges={data?.settings.lifecycle_edges || []}
+        current={a.registry.lifecycle_state}
+      />
       <p className="notice">
         Cadastro ≠ lifecycle ≠ saúde do runtime ≠ estado da execução. Nenhuma
         transição é executada pelo cockpit.
       </p>
       {a.recommendation && (
-        <Panel title="Transição sugerida">
+        <Panel title="Transição recomendada · não executada">
+          <p>Aprovação humana: obrigatória.</p>
           <Decision r={a.recommendation} />
         </Panel>
       )}
@@ -631,33 +682,59 @@ export default function Cockpit() {
   );
   const economy = (a: Agent) => (
     <div className="split">
-      <Panel title="Economia da execução" tag="ESTIMADO">
+      <Panel title="Custo da IA" tag="ESTIMADO">
         <div className="big-number">{num(a.economics.observed, "USD")}</div>
         <p>
           Usage registrado e atribuído ao papel. Não representa o custo total do
           agente.
         </p>
         <p className="muted">Tendência: {label(a.cost_trend)}</p>
+        <div className="kv">
+          <span>Custo total da execução</span>
+          <b>Não disponível</b>
+        </div>
+        <small>
+          Infraestrutura e trabalho humano não medidos. Não confundir custo LLM
+          com custo total.
+        </small>
       </Panel>
       <Panel title="Valor de negócio" tag="PARCIAL">
-        <h3>Valor realizado desconhecido</h3>
+        <h3>Valor realizado: ainda não validado</h3>
+        {data?.business_exposure.exposure_brl && (
+          <div className="value-exposure">
+            <small>CENÁRIO DIDÁTICO · INCIDENT-001</small>
+            <span>Exposição potencial / valor sob gestão</span>
+            <strong>{money(data.business_exposure.exposure_brl)}</strong>
+            <p>
+              {money(data.business_exposure.daily_penalty_brl)} / dia ×{" "}
+              {data.business_exposure.hypothetical_days} dias hipotéticos.
+            </p>
+            <small>
+              Pedido CO-001 · não é economia realizada nem impacto confirmado.
+              Contexto do incidente; não somar entre agentes.
+            </small>
+          </div>
+        )}
         <p>
-          Proposta industrial e tempo até a proposta são contexto, não
-          comprovação de benefício.
+          Cenário recomendado e tempo até proposta são contexto; status:
+          aguardando aprovação.
         </p>
         {a.business_value.slice(0, 3).map((v, i) => (
           <div className="kv" key={i}>
             <span>{label(v.value_metric)}</span>
             <b>
-              {num(
-                v.value_amount,
-                v.currency_or_unit === "unknown" ? "" : v.currency_or_unit,
-              )}
+              {v.currency_or_unit === "BRL"
+                ? money(v.value_amount)
+                : num(
+                    v.value_amount,
+                    v.currency_or_unit === "unknown" ? "" : v.currency_or_unit,
+                  )}
             </b>
           </div>
         ))}
         <small>
-          Sem conversão automática de moedas, ROI ou economia inventada.
+          LLM Cost ≠ Agent Cost ≠ Workflow Cost ≠ Business Decision ≠ Business
+          Value. Sem conversão automática de moedas ou ROI.
         </small>
       </Panel>
     </div>
@@ -666,12 +743,15 @@ export default function Cockpit() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark">
-            L3
-            <span />
-          </span>
+          <img
+            className="official-logo"
+            src="/l3-logo.jpg"
+            width="285"
+            height="167"
+            alt="Logo oficial L3"
+          />
           <div>
-            <strong>Control Plane</strong>
+            <strong>L3 Control Plane</strong>
             <small>AGENTIC WORKFORCE OPERATIONS</small>
           </div>
         </div>
@@ -717,6 +797,7 @@ export default function Cockpit() {
             <b>{nav.find((n) => n[0] === view)?.[1]}</b>
           </div>
           <div className="inline gap">
+            <Button onClick={openMaestro}>Perguntar ao Maestro</Button>
             <span className="live-label">
               <i /> Ambiente local
             </span>
@@ -760,8 +841,6 @@ export default function Cockpit() {
                   setSource(e.target.value as Source);
                   setExecution(null);
                   setKnowledgeId(null);
-                  setPlan(null);
-                  setChatHistory([]);
                 }}
               >
                 <option value="didactic">Cenário didático</option>
@@ -807,6 +886,51 @@ export default function Cockpit() {
               <>
                 {view === "overview" && (
                   <>
+                    <div className="performance-heading">
+                      <h2>Performance da workforce</h2>
+                      <span>
+                        {data.overview.alerts} alertas ·{" "}
+                        {data.overview.pending_recommendations} recomendações
+                        abertas
+                      </span>
+                    </div>
+                    {data.attention.count > 0 && (
+                      <button
+                        className="attention-cta"
+                        onClick={() => {
+                          const ids = data.attention.agent_ids;
+                          setMaestroOverride({
+                            context_type:
+                              ids.length === 1 ? "agent" : "workforce",
+                            ...(ids.length === 1 ? { agent_id: ids[0] } : {}),
+                            source,
+                            route: "overview",
+                          });
+                          chat.setQuestion(
+                            ids.length === 1
+                              ? `Por que o agente de ${names[ids[0]]} requer atenção e como posso melhorá-lo?`
+                              : "Quais agentes requerem atenção e como posso melhorá-los?",
+                          );
+                          setMaestroOpen(true);
+                        }}
+                      >
+                        {data.attention.label} · Perguntar ao Maestro ↗
+                      </button>
+                    )}
+                    <div className="value-strip">
+                      <div>
+                        <small>VALOR SOB GESTÃO · {label(source)}</small>
+                        <b>{money(data.business_exposure.exposure_brl)}</b>
+                        <span>
+                          Exposição potencial; não é economia realizada
+                        </span>
+                      </div>
+                      <div>
+                        <small>VALOR REALIZADO</small>
+                        <b>Não validado</b>
+                        <span>Propostas aguardam decisão humana</span>
+                      </div>
+                    </div>
                     <div className="kpis">
                       <Panel>
                         <div className="metric-label">
@@ -837,7 +961,7 @@ export default function Cockpit() {
                         </div>
                         <strong>
                           {data.overview.attention_agents}
-                          <span> agentes</span>
+                          <span> em atenção</span>
                         </strong>
                         <small>
                           {data.overview.alerts} sinais para investigação
@@ -871,7 +995,7 @@ export default function Cockpit() {
                             <BarChart data={data.chart} barGap={5}>
                               <CartesianGrid
                                 vertical={false}
-                                stroke="#e8ece8"
+                                stroke="var(--line)"
                               />
                               <XAxis
                                 dataKey="agent"
@@ -883,7 +1007,7 @@ export default function Cockpit() {
                                       ? "Contestação"
                                       : v
                                 }
-                                tick={{ fontSize: 10, fill: "#68776f" }}
+                                tick={{ fontSize: 10, fill: "var(--muted)" }}
                                 axisLine={false}
                                 tickLine={false}
                               />
@@ -899,19 +1023,21 @@ export default function Cockpit() {
                                 formatter={(v) => num(v as number, "%")}
                                 contentStyle={{
                                   borderRadius: 10,
-                                  border: "1px solid #dde5df",
+                                  border: "1px solid var(--line)",
                                 }}
                               />
                               <Bar
+                                isAnimationActive={false}
                                 dataKey="actual"
                                 name="Atual"
-                                fill="#295f45"
+                                fill="var(--chart-result)"
                                 radius={[5, 5, 0, 0]}
                               />
                               <Bar
+                                isAnimationActive={false}
                                 dataKey="target"
                                 name="Alvo"
-                                fill="#dce6df"
+                                fill="var(--chart-target)"
                                 radius={[5, 5, 0, 0]}
                               />
                             </BarChart>
@@ -1014,7 +1140,7 @@ export default function Cockpit() {
                           · {current.registry.version}
                         </small>
                       </div>
-                      <Button variant="outline" onClick={() => go("maestro")}>
+                      <Button variant="outline" onClick={openMaestro}>
                         Perguntar ao Maestro <Sparkles size={16} />
                       </Button>
                     </div>
@@ -1097,6 +1223,33 @@ export default function Cockpit() {
                     {tab === "Metas" && <Panel>{goals([current])}</Panel>}
                     {tab === "SLOs" && <Panel>{slos(current)}</Panel>}
                     {tab === "Lifecycle" && lifecycle(current)}
+                    {data.plans
+                      .filter((p) => p.agent_id === agentId)
+                      .slice(0, 1)
+                      .map((p) => (
+                        <Panel
+                          key={p.plan_id}
+                          title="Última análise do Maestro"
+                        >
+                          <h3>Problema observado</h3>
+                          <p>{p.diagnosis}</p>
+                          <h4>Hipótese a verificar</h4>
+                          <p>
+                            {p.hypothesis ||
+                              "Causa ainda não estabelecida; revisar as evidências da proposta."}
+                          </p>
+                          <h4>Recomendação</h4>
+                          <p>{p.objective}</p>
+                          <p>
+                            Staffs:{" "}
+                            {p.staff_assignments.map((s) => s.name).join(" · ")}
+                          </p>
+                          <Badge value={p.status} />
+                          <Button variant="outline" onClick={openMaestro}>
+                            Continuar conversa no Maestro
+                          </Button>
+                        </Panel>
+                      ))}
                     {tab === "Decisões" &&
                       (current.recommendation ? (
                         <Panel>
@@ -1561,191 +1714,8 @@ export default function Cockpit() {
                     {lifecycle(current)}
                   </>
                 )}
-                {view === "maestro" && (
-                  <div className="maestro-grid">
-                    <Panel className="chat">
-                      <div className="maestro-heading">
-                        <span className="maestro-orb">
-                          <Sparkles />
-                        </span>
-                        <div>
-                          <h2>Maestro</h2>
-                          <p>Chief of Staff da força de trabalho</p>
-                        </div>
-                        <Badge>PROPOSTAS, NÃO AÇÕES</Badge>
-                      </div>
-                      <p className="chat-intro">
-                        O Supervisor coordena uma execução. O Maestro reúne
-                        sinais e conhecimento para coordenar a melhoria da
-                        workforce.
-                      </p>
-                      <label className="field-label">
-                        Agente em foco
-                        <select
-                          aria-label="Agente do Maestro"
-                          disabled={!!busy}
-                          value={agentId}
-                          onChange={(e) => {
-                            setAgentId(e.target.value);
-                            setPlan(null);
-                          }}
-                        >
-                          {data.agents.map((a) => (
-                            <option
-                              key={a.registry.agent_id}
-                              value={a.registry.agent_id}
-                            >
-                              {a.name_pt}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <div className="suggestions">
-                        {[
-                          "Quem precisa de atenção?",
-                          "Por que o Supply está abaixo da meta?",
-                          "Como posso melhorar o agente de Supply?",
-                          "O que aprendemos hoje?",
-                          "Quais recomendações estão pendentes?",
-                          "Quais agentes deveriam entrar em revisão?",
-                        ].map((q) => (
-                          <button
-                            disabled={!!busy}
-                            key={q}
-                            onClick={() => ask(q)}
-                          >
-                            {q}
-                            <ArrowUpRight size={13} />
-                          </button>
-                        ))}
-                      </div>
-                      {chatHistory.map((q, i) => (
-                        <div className="user-message" key={i}>
-                          {q}
-                        </div>
-                      ))}
-                      {busy === "maestro" && (
-                        <p role="status" className="notice">
-                          <Loader2 className="spin" size={16} /> Consultando
-                          Control Plane e conhecimento validado…
-                        </p>
-                      )}
-                      {plan && (
-                        <div className="assistant-message">
-                          <div className="eyebrow">
-                            <Sparkles size={14} /> SÍNTESE COM FONTES ·{" "}
-                            {plan.generated_by === "mock-deterministic"
-                              ? "MODO MOCK"
-                              : "LLM"}
-                          </div>
-                          <h3>Diagnóstico</h3>
-                          <p>{plan.diagnosis}</p>
-                          <h3>Plano de melhoria</h3>
-                          <p>{plan.objective}</p>
-                          <ol className="steps">
-                            {plan.steps.map((s, i) => (
-                              <li key={i}>{s}</li>
-                            ))}
-                          </ol>
-                          <h4>Resultado esperado</h4>
-                          <p>{plan.expected_result}</p>
-                          <h4>Riscos e limites</h4>
-                          <p>{plan.risk}</p>
-                          <h4>Fontes utilizadas</h4>
-                          <Facts facts={plan.evidence.slice(0, 5)} />
-                          {plan.evidence.length > 5 && (
-                            <details>
-                              <summary>Ver todas as fontes consultadas</summary>
-                              <Facts facts={plan.evidence.slice(5)} />
-                            </details>
-                          )}
-                          <h4>Conhecimento relacionado</h4>
-                          {plan.knowledge_ids.map((id) => (
-                            <button
-                              className="text-link"
-                              key={id}
-                              onClick={() => {
-                                setKnowledgeId(id);
-                                setView("knowledge");
-                              }}
-                            >
-                              {data.knowledge.items.find((i) => i.id === id)
-                                ?.title || id}{" "}
-                              ↗
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      <form
-                        className="composer"
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          if (question.trim()) ask(question);
-                        }}
-                      >
-                        <textarea
-                          aria-label="Pergunta ao Maestro"
-                          placeholder="Pergunte sobre metas, sinais e próximos passos…"
-                          value={question}
-                          onChange={(e) => setQuestion(e.target.value)}
-                          maxLength={2000}
-                        />
-                        <Button
-                          disabled={!!busy || question.trim().length < 3}
-                          type="submit"
-                        >
-                          Enviar <ArrowUpRight size={16} />
-                        </Button>
-                      </form>
-                      <small>
-                        O modelo propõe. As regras medem e validam. O humano
-                        autoriza.
-                      </small>
-                    </Panel>
-                    <div>
-                      <Panel title="Fontes antes de opiniões">
-                        <ul className="source-list">
-                          {[
-                            "Registry e lifecycle",
-                            "Metas e medições",
-                            "Qualidade e economia",
-                            "SLOs e recomendações",
-                            "Execuções e valor parcial",
-                            "Segundo Cérebro validado",
-                          ].map((s) => (
-                            <li key={s}>
-                              <Check size={14} />
-                              {s}
-                            </li>
-                          ))}
-                        </ul>
-                      </Panel>
-                      <Panel title="Staffs de melhoria" tag="METADATA">
-                        {(
-                          plan?.staff_assignments || [
-                            { name: "Desenvolvimento", status: "Proposto" },
-                            { name: "Avaliação / QA", status: "Proposto" },
-                            { name: "Revisor humano", status: "Obrigatório" },
-                          ]
-                        ).map((s) => (
-                          <div className="kv" key={s.name}>
-                            <span>{s.name}</span>
-                            <Badge>{s.status}</Badge>
-                          </div>
-                        ))}
-                        <p>
-                          Representação de responsabilidades. Não são agentes
-                          autônomos executando o plano.
-                        </p>
-                        <Button
-                          disabled
-                          title="Disponível somente com Action Authority adequada."
-                        >
-                          Executar plano · indisponível
-                        </Button>
-                      </Panel>
-                    </div>
-                  </div>
+                {view === "maestro" && !maestroOpen && (
+                  <Panel className="chat">{maestroPanel}</Panel>
                 )}
                 {view === "knowledge" && !item && (
                   <>
@@ -2092,40 +2062,47 @@ export default function Cockpit() {
                         </ol>
                       </Panel>
                     </div>
-                    <Panel title="O arco da disciplina">
-                      <div className="course-arc">
+                    <Panel title="Maturidade da empresa agêntica">
+                      <div className="maturity-track">
                         {[
-                          ["01", "Agentes conseguem colaborar."],
-                          ["02", "Executam em paralelo e sobrevivem a falhas."],
-                          ["03", "O runtime pode ser implantado e observado."],
+                          ["Automação", "Agentes executam tarefas."],
                           [
-                            "04",
-                            "A workforce pode ser identificada, medida e interpretada.",
+                            "Observável",
+                            "Execuções possuem telemetria, histórico e qualidade operacional.",
                           ],
-                        ].map(([n, t]) => (
-                          <div key={n}>
-                            <span>AULA {n}</span>
-                            <h3>{t}</h3>
+                          [
+                            "Gerenciada",
+                            "Identidade, metas, SLOs, economics e lifecycle.",
+                          ],
+                          [
+                            "Adaptativa",
+                            "Control Plane identifica gaps. Maestro propõe melhorias. Segundo Cérebro preserva conhecimento.",
+                          ],
+                          [
+                            "Learning Enterprise",
+                            "Experiência, conhecimento, feedback e melhoria formam um ciclo contínuo.",
+                          ],
+                        ].map(([name, description], i) => (
+                          <div key={name}>
+                            <span>{i + 1}</span>
+                            <h3>{name}</h3>
+                            <p>{description}</p>
                           </div>
                         ))}
                       </div>
-                      <p className="closing">
-                        Agentes executam. Control Planes compreendem. Maestros
-                        coordenam a melhoria.
-                        <br />
-                        Segundos Cérebros preservam a memória. Learning Loops
-                        transformam experiência em melhor desempenho.
+                      <div className="lab-position">
+                        ↑ LAB ATUAL · ENTRE NÍVEIS 3 E 4
+                      </div>
+                      <p>
+                        O LAB atual mede, interpreta e propõe melhorias. Ainda
+                        não executa mudanças autônomas.
                       </p>
-                      <details>
-                        <summary>Formulação conceitual original</summary>
-                        <p>
-                          Agents execute. Control Planes understand. Maestros
-                          improve. Second Brains remember. Learning Loops
-                          transform experience into better performance.
-                        </p>
-                      </details>
                       <p className="notice">
-                        Aprendizado contínuo não é automodificação irrestrita.
+                        Learning Enterprise não significa auto-modificação sem
+                        controle.
+                        <br />
+                        Self-learning is not uncontrolled self-modification.
+                        <br />
                         Nível 5 não está operacional neste LAB.
                       </p>
                     </Panel>
@@ -2206,6 +2183,16 @@ export default function Cockpit() {
                     </div>
                     <h3>Desempenho e limites</h3>
                     {goals(data.agents)}
+                    <h3>Valor sob gestão / exposição potencial</h3>
+                    <p>
+                      {money(data.business_exposure.exposure_brl)} ·{" "}
+                      {label(source)}. Valor realizado: não validado.
+                    </p>
+                    <p>
+                      Atenção requerida: {data.attention.count} agentes.
+                      Recomendações abertas:{" "}
+                      {data.overview.pending_recommendations}.
+                    </p>
                     <h3>Economia</h3>
                     <p>
                       {num(data.overview.estimated_cost_usd, "USD")} ·{" "}
@@ -2238,6 +2225,11 @@ export default function Cockpit() {
           </footer>
         </div>
       </main>
+      {maestroOpen && (
+        <aside className="maestro-drawer" aria-label="Painel global do Maestro">
+          {maestroPanel}
+        </aside>
+      )}
       {decision && (
         <Modal onClose={() => setDecision(null)}>
           <button
@@ -2251,6 +2243,21 @@ export default function Cockpit() {
             DECISÃO EXPLICÁVEL · {names[decision.agent_id]}
           </div>
           <Decision r={decision} />
+          <Button
+            onClick={() => {
+              setMaestroOverride({
+                context_type: "recommendation",
+                recommendation_id: decision.recommendation_id,
+                agent_id: decision.agent_id,
+                source,
+                route: "decisions",
+              });
+              setDecision(null);
+              setMaestroOpen(true);
+            }}
+          >
+            Perguntar ao Maestro sobre esta recomendação
+          </Button>
         </Modal>
       )}
     </div>

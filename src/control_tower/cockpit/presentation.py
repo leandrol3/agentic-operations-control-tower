@@ -4,21 +4,22 @@ import json
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
-from uuid import UUID, uuid5, NAMESPACE_URL
+from uuid import NAMESPACE_URL, UUID, uuid5
+
 from ..control_plane.configuration import load_config
-from ..control_plane.economics import load_pricing, assess_economics
-from ..control_plane.quality import assess_quality
-from ..control_plane.service import ControlPlane
-from ..control_plane.demo_fixture import fixture_samples
-from ..control_plane.registry import registry, BusinessGoal
 from ..control_plane.contracts import Evidence, Trend
+from ..control_plane.decision_engine import recommend
+from ..control_plane.demo_fixture import fixture_samples
+from ..control_plane.economics import assess_economics, load_pricing
 from ..control_plane.interpretation import (
-    measure_goal,
     evaluate_slo,
     lifecycle_triggers,
+    measure_goal,
 )
-from ..control_plane.decision_engine import recommend
 from ..control_plane.lifecycle import ALLOWED_TRANSITIONS
+from ..control_plane.quality import assess_quality
+from ..control_plane.registry import BusinessGoal, registry
+from ..control_plane.service import ControlPlane
 
 NAMES = {
     "supervisor": "Supervisor de operações",
@@ -284,12 +285,42 @@ class CockpitService:
             if costs and all(c is not None for c in costs)
             else None
         )
+        attention = sorted({a["agent_id"] for a in alerts})
+        value = {
+            "exposure_brl": None,
+            "daily_penalty_brl": None,
+            "hypothetical_days": None,
+            "source": source,
+            "realized": None,
+            "note": "Valor realizado ainda não validado",
+        }
+        if source == "didactic":
+            from ..tools import Tools
+
+            tools = Tools(self.settings.control_tower_root)
+            value.update(
+                exposure_brl=str(tools.calculate_penalty("CO-001", 7)),
+                daily_penalty_brl=str(tools.calculate_penalty("CO-001", 1)),
+                hypothetical_days=7,
+                order_id="CO-001",
+                incident_id="INCIDENT-001",
+                note="Exposição potencial para atraso hipotético; não é economia realizada",
+            )
         goals = [g for v in views for g in v.goals]
         return {
             "source": source,
             "runtime_mode": self.settings.llm_mode,
             "updated_at": datetime.now(timezone.utc),
             "agents": [present(v) for v in views],
+            "attention": {
+                "agent_ids": attention,
+                "count": len(attention),
+                "label": f"{len(attention)} agente requer atenção"
+                if len(attention) == 1
+                else f"{len(attention)} agentes requerem atenção",
+                "basis": "Agentes distintos com triggers determinísticos existentes",
+            },
+            "business_exposure": value,
             "overview": {
                 "total_agents": len(views),
                 "active_agents": sum(
