@@ -1,0 +1,12 @@
+# Append after base + override + lesson04. No new service, database or broker.
+services:
+  api:
+    image: novacore-control-tower:lesson04-complete
+    environment:
+      CONTROL_PLANE_CONFIG_FILE: /app/config/lesson04-control-plane.json
+    volumes:
+      - ./config/lesson04-control-plane.json:/app/config/lesson04-control-plane.json:ro
+  worker-a:
+    image: novacore-control-tower:lesson04-complete
+  worker-b:
+    image: novacore-control-tower:lesson04-complete

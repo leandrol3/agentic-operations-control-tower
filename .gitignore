@@ -15,3 +15,16 @@ dist/
 
 # Exportações didáticas locais
 artifacts/
+
+# Frontend e artefatos locais
+web/node_modules/
+web/.next/
+web/test-results/
+web/playwright-report/
+web/tsconfig.tsbuildinfo
+knowledge/.lock
+
+# Dados gerados em ensaios do Segundo Cérebro; seeds já versionados são preservados
+knowledge/plans/plan-*.json
+knowledge/raw/executions/knowledge-*.json
+knowledge/wiki/lessons/knowledge-*.md

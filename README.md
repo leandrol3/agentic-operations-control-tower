@@ -1,4 +1,72 @@
-# Aula 3 — lesson-03-complete
+# Aula 4 — candidato lesson-04-cockpit
+
+**L3 Control Plane · LAB NovaCore**: cockpit pt-BR para identificar, medir, interpretar,
+recomendar e preservar conhecimento. Next.js separado do core Python, Maestro com fontes,
+planos propostos e Segundo Cérebro Markdown com revisão explícita. Sem ACT autônomo.
+
+```bash
+uv sync --locked --extra lesson04
+export LLM_MODE=mock
+export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
+export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
+uv run --extra lesson04 python scripts/seed_cockpit.py
+# Experiência principal do Maestro (zsh no Mac; entrada oculta):
+read -s "OPENAI_API_KEY?Chave OpenAI: "
+export OPENAI_API_KEY
+export LLM_MODE=openai
+export OPENAI_MODEL=gpt-4.1-mini
+./scripts/cockpit.sh up -d --build --wait
+```
+
+Abra **http://localhost:3000**. API: 8000; Jaeger: 16686.
+[Runbook principal — seis demos, 240 minutos e navegação pelo cockpit](docs/course/lesson-04-final-runbook.md).
+[Roteiro slide a slide em PDF e comandos copiáveis](docs/course/lesson-04/materials/README.md).
+[Runbook histórico do cockpit](docs/course/lesson-04-cockpit-runbook.md).
+[Relatório técnico original](docs/course/lesson-04/cockpit-validation.md).
+[Refinamento final — relatório A–L e capturas](docs/course/lesson-04/cockpit-refinement-validation.md).
+
+Cenário didático explícito: Supply alvo 90%, cobertura 74%, proposta Intervir. Histórico persistido
+é outra fonte; fixtures não preenchem dados ausentes. Mock funciona offline depois da instalação.
+OpenAI é a experiência principal do Maestro, com Pydantic, contexto e sessão explícita.
+Para testes/CI/fallback offline, selecione `LLM_MODE=mock` e reinicie o perfil. Nunca há fallback silencioso.
+Logo oficial L3, lifecycle visual, exposição potencial (sem savings) e maturidade entre níveis 3 e 4.
+
+Branch `codex/lesson-04-cockpit`. Publicação autorizada em 05/10/2026; integração com `main` via PR. Checkpoints e tags anteriores preservados.
+
+---
+
+# Histórico — Aula 4 / lesson-04-complete
+
+**Collect → Interpret → Recommend**, sem ACT. Metas medidas, SLOs configuráveis, tendências,
+Business Value parcial, lifecycle state machine e recomendações determinísticas com evidência.
+Runtime, Aulas 1–3 e checkpoint start preservados. Sem transição automática ou auto-modify.
+
+```bash
+uv sync --locked --extra lesson04
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize --agent logistics --section pipeline
+```
+
+A fixture é explicitamente sintética, offline, sem provider ou gravação no banco.
+Para histórico real, preparar os quatro arquivos Compose no
+[runbook complete — cinco demos, comandos e fechamento](docs/course/lesson-04-complete-runbook.md).
+APIs somente leitura: `/control-plane/agents`, `/control-plane/agents/{agent_id}`,
+`/control-plane/recommendations`. Evidência insuficiente permanece unknown.
+
+Branch: `codex/lesson-04-complete`. Candidato para revisão; sem push ou tag automática.
+[Relatório de validação e limitações](docs/course/lesson-04/complete-validation.md).
+
+---
+
+# Histórico — Aula 3 / lesson-03-complete
+
+## Candidato Aula 4 — start
+
+MCP e HTTP reutilizam a mesma capability distribuída; Registry/Business Goals e
+Quality/Economics são inputs do futuro Control Plane, sem decision engine.
+Instalação: `uv sync --locked --extra lesson04`.
+[Runbook completo com quatro demos](docs/course/lesson-04-start-runbook.md).
+Sem tags novas; checkpoints anteriores permanecem preservados.
+
 
 **Runtime, Deployment & Production**: API → producer original → Redis → Celery workers → mesmo
 LangGraph → PostgreSQL. Nova camada operacional; agentes/tools/grafo/task/store anteriores preservados.
@@ -404,3 +472,10 @@ Após criação/publicação das tags futuras: `git fetch --tags`, `git checkout
 - Teste falha: preserve a saída completa, rode doctor e confira `git status`.
 
 Nunca comite `.env`, tokens ou chaves.
+
+### Aula 4: roteiro único e Demo 6
+
+O [runbook final](docs/course/lesson-04-final-runbook.md) organiza seis demos em 240 minutos.
+A Demo 6 usa Codex → MCP → o mesmo Maestro do cockpit, via `scripts/start_maestro_mcp.sh`.
+A tool opcional `ask_maestro` persiste propostas; não aprova conhecimento nem executa ações.
+O launcher MCP original e suas três tools permanecem inalterados.

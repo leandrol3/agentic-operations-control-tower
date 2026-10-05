@@ -1,0 +1,5 @@
+Accepted: 1243d2a8-3479-4f95-a6bc-a899961fcbdb | Na fila | worker=- | duração_ms=None
+Status HTTP: 1243d2a8-3479-4f95-a6bc-a899961fcbdb | Na fila | worker=- | duração_ms=None
+Status HTTP: 1243d2a8-3479-4f95-a6bc-a899961fcbdb | Em execução | worker=worker-a@05659d6ad1ae:9 | duração_ms=None
+Status HTTP: 1243d2a8-3479-4f95-a6bc-a899961fcbdb | Concluída | worker=worker-a@05659d6ad1ae:9 | duração_ms=1327.2201249928912
+Timeout artificial antes da rede; continuidade determinística; sem chamada OpenAI real.

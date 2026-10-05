@@ -1,0 +1,21 @@
+FONTE: FIXTURE DIDÁTICA. Eventos/tokens sintéticos; sem chamadas LLM nem gravação no banco.
+COLETAR → INTERPRETAR → RECOMENDAR (somente leitura; sem ACT)
+Agente                  Lifecycle    Meta             Qualidade* Custo(USD)** SLO                 Ação
+Logística               Ativo        Fora da meta     Desconhecido 0.02016      Violação            Otimizar
+  COLETAR fonte=Fixture didática amostras=3 modo=openai modelo=gpt-4.1-mini
+  Pricing=openai-public-pricing-2026-10-02 referência=2026-10-02
+  META alvo=100.0 atual=66.666667 gap=-33.333333; tendência de custo=Degradando
+  SLO stage-completion: 66.666667 >= 90 → Violação
+  SLO stage-latency: 100 <= 2000 → Dentro do limite
+  SLO stage-llm-cost: 0.02016 <= 0.01 → Violação
+  SLO workflow-degradation: Desconhecido <= 10 → Desconhecido
+  Sinais: Meta não atingida, Violação de limite, Violação de limite, Aumento de custo
+  RECOMENDAÇÃO Otimizar | prioridade=Média | aprovação humana=Sim
+  Motivo: A meta está abaixo do esperado e o custo registrado aumentou. Investigue o processo antes de alterar o agente.
+  Lifecycle: Ativo → sugestão Não disponível (não aplicada)
+  Evidência Conclusão/cobertura da etapa=66.666667 alvo=100.0 percent escopo=Etapa do agente n=3
+  Evidência Custo LLM atribuído ao papel=0.00056 alvo=Não disponível USD escopo=Etapa do agente n=3
+  Evidência Custo LLM atribuído ao papel=0.02016 alvo=Não disponível USD escopo=Etapa do agente n=3
+  Valor realizado DESCONHECIDO; custos de cenários e tempo até proposta não comprovam economia.
+* Resultado não normal do workflow (%), não correção do agente. ** Estimativa média do consumo atribuído ao papel.
+Desconhecido não é zero. Recomendação não é autorização. Lifecycle inalterado. Sem inferência de economia ou ROI.

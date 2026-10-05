@@ -1,0 +1,16 @@
+{
+  "version": "lesson04-didactic-v1",
+  "source": "didactic_configured_example",
+  "window_size": 3,
+  "min_samples": 3,
+  "goal_warning_gap": "5",
+  "trend_relative_tolerance": "0.05",
+  "severe_completion_below": "50",
+  "review_high_violations": 2,
+  "slos": [
+    {"slo_id":"stage-completion","metric":"completion_rate","target":"90","operator":">=","warning_margin":"5","severity":"high"},
+    {"slo_id":"stage-latency","metric":"stage_latency_p95_ms","target":"2000","operator":"<=","warning_margin":"200","severity":"high"},
+    {"slo_id":"stage-llm-cost","metric":"stage_llm_cost_usd","target":"0.01","operator":"<=","warning_margin":"0.002","severity":"medium"},
+    {"slo_id":"workflow-degradation","metric":"workflow_degraded_rate","target":"10","operator":"<=","warning_margin":"5","severity":"high"}
+  ]
+}

@@ -1,0 +1,257 @@
+{
+  "source": "didactic",
+  "target": 90,
+  "description": "Cobertura de evidências alternativas; 50 observações sintéticas, não métricas do runtime real.",
+  "observations": [
+    {
+      "id": "supply-observation-01",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-02",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-03",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-04",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-05",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-06",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-07",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-08",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-09",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-10",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-11",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-12",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-13",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-14",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-15",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-16",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-17",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-18",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-19",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-20",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-21",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-22",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-23",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-24",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-25",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-26",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-27",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-28",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-29",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-30",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-31",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-32",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-33",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-34",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-35",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-36",
+      "alternative_evidence_complete": true,
+      "degraded": false
+    },
+    {
+      "id": "supply-observation-37",
+      "alternative_evidence_complete": true,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-38",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-39",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-40",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-41",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-42",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-43",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-44",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-45",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-46",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-47",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-48",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-49",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    },
+    {
+      "id": "supply-observation-50",
+      "alternative_evidence_complete": false,
+      "degraded": true
+    }
+  ]
+}

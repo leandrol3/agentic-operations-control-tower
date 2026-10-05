@@ -1,3 +1,39 @@
+# Publicação autorizada — Aula 4
+
+Em 05/10/2026, o professor autorizou atualizar o GitHub com a implementação e os materiais
+aprovados. Nesta publicação, as branches da Aula 4 são preservadas e a integração com
+main será apresentada em PR, sem merge automático.
+Preservar tags/checkpoints e excluir dados pessoais de ensaios e credenciais.
+Esta autorização substitui as restrições históricas de push abaixo; não autoriza ACT.
+
+# Escopo vigente — Demo 6: Codex → MCP → Maestro
+
+Autorizado em 04/10/2026: adaptador MCP opcional para o Maestro existente e roteiro final com
+seis demos em 240 minutos. Mesmas fontes/regras/contratos, sem aprovação ou ACT via MCP.
+Preservar as três tools e checkpoints anteriores; sem push ou tags.
+
+# Escopo vigente — candidato lesson-04-cockpit
+
+Autorizado em 03/10/2026: Presentation Layer pt-BR, cockpit Next.js separado, projeções backend,
+Maestro com fontes e planos, Knowledge Compiler e Segundo Cérebro Markdown com revisão humana.
+Preservar runtime/checkpoints; sem ACT autônomo, auto-modify, auto-deploy, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
+# Escopo vigente — candidato lesson-04-complete
+
+Autorizado em 02/10/2026: Collect → Interpret → Recommend; Goal Measurement, Business Value
+parcial, SLOs/thresholds didáticos, tendências simples, lifecycle state machine pura,
+triggers e Decision Engine determinístico; API/cockpit read-only, fixtures identificadas.
+Preservar runtime, Aulas 1–3 e start. Sem ACT, auto-remediation, auto-modify, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
+# Escopo vigente — candidato lesson-04-start
+
+Autorizado em 01/10/2026: MCP reutilizando capability HTTP, Registry local com Business Goals,
+Quality e Economics derivados do histórico durável. Preservar core, contracts e infraestrutura
+Aulas 1–3. Sem decision engine, SLO, lifecycle actions, Aula 4 complete, push ou tags.
+Esta autorização substitui limites históricos incompatíveis abaixo. Parar para revisão.
+
 # Escopo vigente — fechamento e congelamento lesson-03-complete
 
 Autorizado em 30/09/2026: somente evidências/documentação, regressão final, correções indispensáveis,

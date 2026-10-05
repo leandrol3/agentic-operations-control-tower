@@ -1,0 +1,10 @@
+L3 CONTROL PLANE — ENSAIO DO COCKPIT
+Fonte: DIDÁTICA / SINTÉTICA
+Agentes: 7 | com sinais de atenção: 1
+Supply: alvo=90.0% | atual=74% | gap=-16.0 p.p.
+Proposta: A taxa de resultados degradados ultrapassou o limite configurado. Revise evidências e coordene uma intervenção humana.
+Execuções disponíveis: 6
+Conhecimentos aprovados: 4 | pendentes: 1
+Planos propostos persistidos: 10
+Valor realizado: desconhecido. Nenhuma ação operacional autorizada ou executada.
+Cenário didático conferido: 37/50 observações de cobertura; 6 execuções ilustrativas independentes.

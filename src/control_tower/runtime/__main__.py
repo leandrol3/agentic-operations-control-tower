@@ -1,5 +1,6 @@
 """Entrypoint comum dos containers: python -m control_tower.runtime api|worker."""
 import argparse
+import os
 from .settings import RuntimeSettings
 from .bootstrap import configure
 from .store import CorrelatedStore
@@ -12,7 +13,7 @@ def main():
     try:
         settings = RuntimeSettings()
         app = configure(settings)
-        if settings.llm_mode == 'openai':
+        if settings.llm_mode == 'openai' and not (args.role == 'api' and os.getenv('COCKPIT_READ_WITHOUT_LLM') == 'true'):
             from ..settings import Settings
             Settings.load(settings.control_tower_root)  # falha antes de aceitar jobs, sem request LLM
         if args.role == 'api':

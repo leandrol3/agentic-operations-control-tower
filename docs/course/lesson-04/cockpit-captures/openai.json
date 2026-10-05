@@ -1,0 +1,50 @@
+[
+  {
+    "component": "Maestro",
+    "status": "ok",
+    "duration_seconds": 10.08,
+    "model": "gpt-4.1-mini",
+    "diagnosis": "O agente de Supply está fora da meta, com cobertura de evidências alternativa em 74%, abaixo da meta de 90%, e apresenta 28% de resultados fora do padrão no workflow, indicando degradação e possível problemas na correção semântica. O custo por papel é baixo, mas o valor de negócio realizado é desconhecido.",
+    "steps": [
+      "Realizar revisão aprofundada das evidências alternativas correlacionando estoque, fornecedores, lead time e transporte, conforme indicado no conhecimento 'pattern-evidence-review'.",
+      "Tratar dados ausentes na análise como limites para melhorar a qualidade das evidências.",
+      "Avaliar e manter o estoque de segurança antes de realizar qualquer transferência entre plantas, seguindo a lição 'lesson-safety-stock'.",
+      "Implementar monitoramento para redução dos 28% de resultados fora da normalidade, buscando correção semântica e melhorias no workflow.",
+      "Validar o custo estimado atual e buscar formas de otimizar sem prejudicar a qualidade.",
+      "Submeter proposta de intervenção para aprovação humana, conforme recomendação institucional.",
+      "Acompanhar as métricas de SLO para cobertura e degradação para medir os efeitos das intervenções."
+    ],
+    "evidence_count": 8,
+    "approval_required": true,
+    "plan_status": "proposed",
+    "sources": [
+      "get_agent",
+      "get_agent_goals",
+      "get_goal_measurements",
+      "get_agent_quality",
+      "get_agent_economics",
+      "get_agent_slos",
+      "get_agent_business_value",
+      "get_agent_lifecycle",
+      "get_workforce",
+      "get_agent_recommendations",
+      "get_agent_executions",
+      "search_knowledge",
+      "get_knowledge_item",
+      "get_knowledge_item",
+      "get_knowledge_item"
+    ]
+  },
+  {
+    "component": "Knowledge Compiler",
+    "status": "ok",
+    "duration_seconds": 5.66,
+    "model": "gpt-4.1-mini",
+    "title": "Lição sobre Propostas Não Executadas e Evidências de Resultado",
+    "summary": "Foi observada uma execução com proposta registrada, porém não executada, e aprovação pendente sem ação operacional. Não há evidência persistida de economia realizada nem confirmação de transferência efetiva, apesar do cálculo de estoque de segurança. A completude das evidências e conformidade podem ser desconhecidas, destacando a importância de revisar conjuntamente as evidências e confirmar resultados de negócios.",
+    "evidence_count": 7,
+    "validation_status": "pending_review",
+    "source": "didactic",
+    "generated_by": "openai:gpt-4.1-mini"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "source": "didactic_fixture",
+  "description": "Synthetic durable-format events, never provider measurements or business achievements. Prior/current windows each have 3 executions; no database writes.",
+  "scenarios": {
+    "stable": {"current_failures":0,"previous_failures":0,"current_input_tokens":1000,"previous_input_tokens":1000,"latency_ms":100,"degraded":false},
+    "cost": {"current_failures":0,"previous_failures":0,"current_input_tokens":50000,"previous_input_tokens":1000,"latency_ms":100,"degraded":false},
+    "optimize": {"current_failures":1,"previous_failures":0,"current_input_tokens":50000,"previous_input_tokens":1000,"latency_ms":100,"degraded":false},
+    "intervene": {"current_failures":0,"previous_failures":0,"current_input_tokens":1000,"previous_input_tokens":1000,"latency_ms":100,"degraded":true},
+    "review": {"current_failures":1,"previous_failures":0,"current_input_tokens":1000,"previous_input_tokens":1000,"latency_ms":3000,"degraded":false},
+    "pause": {"current_failures":2,"previous_failures":2,"current_input_tokens":1000,"previous_input_tokens":1000,"latency_ms":100,"degraded":false}
+  }
+}

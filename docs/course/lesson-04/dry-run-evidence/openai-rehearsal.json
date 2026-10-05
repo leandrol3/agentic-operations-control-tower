@@ -1,0 +1,53 @@
+[
+  {
+    "operation": "maestro",
+    "seconds_click_to_persist": 7.087,
+    "success": true,
+    "generated_by": "openai:gpt-4.1-mini",
+    "knowledge_ids": [
+      "knowledge-0e3f92ea303547249d885ce6fd700079",
+      "pattern-evidence-review",
+      "lesson-safety-stock"
+    ],
+    "evidence_count": 16
+  },
+  {
+    "operation": "maestro",
+    "seconds_click_to_persist": 5.562,
+    "success": true,
+    "generated_by": "openai:gpt-4.1-mini",
+    "knowledge_ids": [
+      "knowledge-38626d64945a44eca832fe33857ed488",
+      "knowledge-0e3f92ea303547249d885ce6fd700079",
+      "pattern-evidence-review",
+      "lesson-safety-stock",
+      "entity-material-m42"
+    ],
+    "evidence_count": 8
+  },
+  {
+    "operation": "compiler",
+    "seconds_click_to_persist": 2.81,
+    "success": true,
+    "status_created": "pending_review",
+    "status_after_explicit_review": "approved"
+  },
+  {
+    "operation": "review",
+    "seconds_click_to_persist": 0.377,
+    "success": true
+  },
+  {
+    "operation": "ui_walkthrough",
+    "seconds": 182.707,
+    "spoken_lecture": false
+  },
+  {
+    "operation": "second_brain_navigation",
+    "seconds": 0.419
+  },
+  {
+    "operation": "learning_loop_navigation",
+    "seconds": 0.59
+  }
+]

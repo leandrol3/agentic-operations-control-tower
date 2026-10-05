@@ -1,0 +1,11 @@
+Aceito por HTTP: c9c1d59b-7c2f-46b1-aedc-fa360797226f | Na fila | worker=- | duração_ms=None
+Logs do protocolo MCP: artifacts/lesson04-mcp.log
+Ferramentas MCP: submit_incident, get_execution_status, get_execution_result
+HTTP → MCP: mesma identidade e execução, created=false (idempotência durável)
+Aceito por MCP: e2414bec-d5ec-4fce-bbee-727f92cb27b6 | Na fila | worker=- | duração_ms=None
+MCP consulta execução HTTP: c9c1d59b-7c2f-46b1-aedc-fa360797226f | Concluída | worker=worker-a@82ae30c85d12:9 | duração_ms=1034.8622080055065
+Status HTTP: c9c1d59b-7c2f-46b1-aedc-fa360797226f | Concluída | worker=worker-a@82ae30c85d12:9 | duração_ms=1034.8622080055065
+Status HTTP: e2414bec-d5ec-4fce-bbee-727f92cb27b6 | Em execução | worker=worker-a@82ae30c85d12:9 | duração_ms=None
+Status HTTP: e2414bec-d5ec-4fce-bbee-727f92cb27b6 | Concluída | worker=worker-a@82ae30c85d12:9 | duração_ms=1026.954458997352
+HTTP = MCP resultado público | resultado=Recomendação | aprovação=pendente | ações=não executadas
+Mesma capacidade, fronteiras diferentes.

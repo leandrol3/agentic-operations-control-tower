@@ -1,0 +1,8 @@
+FORÇA DE TRABALHO IDENTIFICADA — metadata configurada, não saúde medida
+Agente | Cadastro | Lifecycle | Tipo de execução | Metas
+Suprimentos | Cadastrado | Ativo | Determinístico | 1
+  ID: supply | versão: lesson-01-complete | modelo: Não disponível
+  Ferramentas: get_stock, get_supplier, get_alternative_suppliers
+  Meta: Evidência de estoque e fornecedores produzida sem falha | alvo: 100.0 percent
+Cadastro ≠ Lifecycle ≠ Saúde do runtime ≠ Status da execução
+HTTP e MCP expõem a capability do sistema, não cada agente individualmente.

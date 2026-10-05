@@ -7,10 +7,10 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy \
     PATH="/app/.venv/bin:$PATH" CONTROL_TOWER_ROOT=/app
 RUN useradd --create-home --uid 10001 app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --extra lesson03 --no-dev --no-install-project
+RUN uv sync --locked --extra lesson04 --no-dev --no-install-project
 COPY src ./src
 COPY data ./data
 COPY incidents ./incidents
-RUN uv sync --locked --extra lesson03 --no-dev && chown -R app:app /app
+RUN uv sync --locked --extra lesson04 --no-dev && chown -R app:app /app
 USER app
 CMD ["python", "-m", "control_tower.runtime", "api"]

@@ -1,0 +1,11 @@
+FORÇA DE TRABALHO IDENTIFICADA — metadata configurada, não saúde medida
+Agente | Cadastro | Lifecycle | Tipo de execução | Metas
+Supervisor de operações | Cadastrado | Ativo | Determinístico | 1
+Suprimentos | Cadastrado | Ativo | Determinístico | 1
+Produção | Cadastrado | Ativo | Determinístico | 1
+Logística | Cadastrado | Ativo | Determinístico | 1
+Finanças | Cadastrado | Ativo | Determinístico | 1
+Riscos e contestação | Cadastrado | Ativo | Determinístico | 1
+Recomendação | Cadastrado | Ativo | Determinístico | 1
+Cadastro ≠ Lifecycle ≠ Saúde do runtime ≠ Status da execução
+HTTP e MCP expõem a capability do sistema, não cada agente individualmente.

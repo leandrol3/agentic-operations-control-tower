@@ -1,0 +1,19 @@
+{
+  "component": "Maestro — prompt revisado",
+  "status": "ok",
+  "duration_seconds": 5.1,
+  "diagnosis": "Observação: O agente de Supply está ativo, porém apresenta desempenho fora da meta em evidência alternativa e workflow com 28% de resultados anormais (não mede correção semântica). Hipótese a verificar: Os dados ausentes e estoque insuficiente antes da transferência podem estar afetando a cobertura de evidências e a qualidade do agente.",
+  "risk": "Intervenções podem demandar ajustes finos para evitar impactos negativos no desempenho; dados incompletos podem persistir e dificultar a análise precisa; decisões baseadas em dados parciais podem levar a propostas inadequadas que requerem revisão humana.",
+  "steps": [
+    "Analisar os dados de estoque, fornecedores, lead time e transporte para identificar e preencher dados ausentes conforme recomendado na revisão conjunta de evidências (knowledge:pattern-evidence-review).",
+    "Avaliar o estoque de segurança atual antes de realizar transferências entre plantas, garantindo que o piso de segurança seja respeitado (knowledge:lesson-safety-stock).",
+    "Implementar mecanismos para tratar dados ausentes como limites da análise, evitando distorções nos resultados do agente.",
+    "Monitorar os indicadores de cobertura de evidências e percentual de resultados anormais para verificar o impacto das intervenções.",
+    "Submeter propostas de intervenção para aprovação humana conforme política recomendada para agentes fora da meta."
+  ],
+  "evidence_count": 7,
+  "requires_human_approval": true,
+  "plan_status": "proposed",
+  "source": "didactic",
+  "generated_by": "openai:gpt-4.1-mini"
+}

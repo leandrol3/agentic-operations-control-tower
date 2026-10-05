@@ -1,0 +1,131 @@
+{
+  "plan_id": "plan-c564ecf386774fe48b76aafa0f4c5b7a",
+  "agent_id": "supply",
+  "source": "didactic",
+  "diagnosis": "Suprimentos tem meta de 90.0% e resultado 74.00%. No cenário didático, 13 de 50 observações têm evidências alternativas incompletas. Isso exige investigação, não comprova a causa raiz.",
+  "objective": "Melhorar a cobertura e a confiabilidade das evidências sem alterar o agente automaticamente.",
+  "steps": [
+    "Revisar amostras fora da meta e distinguir observação de hipótese.",
+    "Verificar estoque disponível, estoque de segurança, alternativas de fornecedor e transporte.",
+    "Propor ajustes e um conjunto de avaliação com casos positivos e negativos.",
+    "Comparar os resultados antes e depois e solicitar revisão humana."
+  ],
+  "staff_assignments": [
+    {
+      "name": "Desenvolvimento",
+      "status": "Proposto"
+    },
+    {
+      "name": "Dados",
+      "status": "Proposto"
+    },
+    {
+      "name": "Arquitetura",
+      "status": "Consultivo"
+    },
+    {
+      "name": "Avaliação / QA",
+      "status": "Proposto"
+    },
+    {
+      "name": "Segurança",
+      "status": "Consultivo"
+    },
+    {
+      "name": "Conhecimento",
+      "status": "Proposto"
+    },
+    {
+      "name": "Revisor humano",
+      "status": "Obrigatório"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "registry:supply",
+      "text": "Agente Suprimentos; cadastro registrado; lifecycle Ativo.",
+      "source": "Registry"
+    },
+    {
+      "id": "goal:supply-alternative-evidence-coverage",
+      "text": "Meta 90.0%; atual 74.00%; diferença -16.0 pontos percentuais; 50 amostras.",
+      "source": "Didático"
+    },
+    {
+      "id": "quality:supply",
+      "text": "Resultados não normais no contexto do workflow: 28%. Não mede correção semântica.",
+      "source": "Didático"
+    },
+    {
+      "id": "economics:supply",
+      "text": "Custo estimado por papel: 0.00056 USD. Não é custo total nem valor realizado.",
+      "source": "Didático"
+    },
+    {
+      "id": "value:supply",
+      "text": "Valor de negócio realizado desconhecido; propostas não são economias obtidas.",
+      "source": "BusinessValueAssessment"
+    },
+    {
+      "id": "recommendation:supply",
+      "text": "Há proposta de Intervir sujeita à aprovação humana.",
+      "source": "Decision Engine"
+    },
+    {
+      "id": "slo:stage-completion",
+      "text": "Limite 90; observado 74; resultado Violação.",
+      "source": "SLO"
+    },
+    {
+      "id": "slo:stage-latency",
+      "text": "Limite 2000; observado 100.0; resultado Dentro do limite.",
+      "source": "SLO"
+    },
+    {
+      "id": "slo:stage-llm-cost",
+      "text": "Limite 0.01; observado 0.00056; resultado Dentro do limite.",
+      "source": "SLO"
+    },
+    {
+      "id": "slo:workflow-degradation",
+      "text": "Limite 10; observado 28; resultado Violação.",
+      "source": "SLO"
+    },
+    {
+      "id": "execution:5d04239c-4f69-5d84-9910-34b1d4d19914",
+      "text": "Execução 5d04239c-4f69-5d84-9910-34b1d4d19914: Concluída; fonte Didático.",
+      "source": "Didático"
+    },
+    {
+      "id": "execution:9f9bda22-46d0-54db-9ac9-a29fdf14fb90",
+      "text": "Execução 9f9bda22-46d0-54db-9ac9-a29fdf14fb90: Concluída; fonte Didático.",
+      "source": "Didático"
+    },
+    {
+      "id": "knowledge:pattern-evidence-review",
+      "text": "Revisão conjunta de evidências alternativas: Relacionar estoque, fornecedores, lead time e transporte; tratar dados ausentes como limites da análise.",
+      "source": "Segundo Cérebro / aprovado / Didático"
+    },
+    {
+      "id": "knowledge:lesson-safety-stock",
+      "text": "Estoque de segurança antes da transferência: Avaliar estoque livre e preservar o piso de segurança antes de propor transferência entre plantas.",
+      "source": "Segundo Cérebro / aprovado / Didático"
+    },
+    {
+      "id": "knowledge:entity-material-m42",
+      "text": "Material M42: Material fictício do caso NovaCore; sem vínculo com clientes reais.",
+      "source": "Segundo Cérebro / aprovado / Didático"
+    }
+  ],
+  "knowledge_ids": [
+    "pattern-evidence-review",
+    "lesson-safety-stock",
+    "entity-material-m42"
+  ],
+  "expected_result": "Uma proposta de melhoria testável, com evidências e critérios de aceite.",
+  "risk": "Dados didáticos não comprovam desempenho real. Não houve mudança de código, lifecycle ou permissões.",
+  "requires_human_approval": true,
+  "status": "proposed",
+  "created_at": "2026-10-03T15:15:32.984093Z",
+  "generated_by": "mock-deterministic"
+}
