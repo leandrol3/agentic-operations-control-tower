@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#526574"/></marker></defs>
+<rect width="1140" height="680" fill="white"/>
+<polygon points="15,30 1110,30 1110,235 790,235 790,540 15,540" fill="#f7fafc" stroke="#94a3b8" stroke-dasharray="7 5"/>
+<polyline points="260,148 430,148" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,148 830,148" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="145,196 145,405" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="945,196 945,320 55,320 55,405" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="830,175 740,175 740,453 660,453" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="1040,196 1040,405" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="30" y="100" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="145.0" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="145.0" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">API de aplicação</text>
+<text x="145.0" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Python / FastAPI</text>
+<text x="145.0" y="160.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">Contratos, submissão e consultas</text>
+<rect x="430" y="100" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="545.0" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="545.0" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">Fila de tarefas</text>
+<text x="545.0" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">Redis / protocolo Redis</text>
+<text x="545.0" y="160.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Broker Celery; não guarda o resultado</text>
+<rect x="830" y="100" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="945.0" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="945.0" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">Worker do workflow</text>
+<text x="945.0" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Python / Celery + LangGraph</text>
+<text x="945.0" y="160.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">Uma task executa o grafo inteiro</text>
+<rect x="30" y="405" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="145.0" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="145.0" y="433" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">Store de execuções</text>
+<text x="145.0" y="451" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">PostgreSQL / SQL + JSONB</text>
+<text x="145.0" y="465.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Identidade, estado, eventos, resultado</text>
+<rect x="430" y="405" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="545.0" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="545.0" y="433" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">Dados do case</text>
+<text x="545.0" y="451" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">CSV / JSON no filesystem</text>
+<text x="545.0" y="465.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Tools, políticas e cenários locais</text>
+<rect x="830" y="405" width="230" height="96" rx="8" fill="#e5e7eb" stroke="#374151" stroke-width="1.1"/>
+<text x="945.0" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#374151">Sistema externo</text>
+<text x="945.0" y="433" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#374151">OpenAI API</text>
+<text x="945.0" y="451" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#374151">HTTPS / saída Pydantic</text>
+<text x="945.0" y="465.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#374151">Dependência externa opcional</text>
+<rect x="302.6572265625" y="108" width="84.685546875" height="34" rx="3" fill="white"/>
+<text x="345" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Publica task</text>
+<text x="345" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Redis / JSON</text>
+<rect x="686.974609375" y="108" width="116.05078125" height="34" rx="3" fill="white"/>
+<text x="745" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Entrega / redelivery</text>
+<text x="745" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Redis / JSON</text>
+<rect x="183.6474609375" y="273" width="106.705078125" height="34" rx="3" fill="white"/>
+<text x="237" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Claim e consultas</text>
+<text x="237" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">SQL</text>
+<rect x="518.2861328125" y="289" width="183.427734375" height="19" rx="3" fill="white"/>
+<text x="610" y="301" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Lock, eventos e resultado · SQL</text>
+<rect x="687.314453125" y="367" width="91.37109375" height="34" rx="3" fill="white"/>
+<text x="733" y="379" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Lê via Tools</text>
+<text x="733" y="394" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">arquivos locais</text>
+<rect x="900.306640625" y="248" width="117.38671875" height="34" rx="3" fill="white"/>
+<text x="959" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Interpreta / sintetiza</text>
+<text x="959" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">HTTPS se openai</text>
+</svg>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#526574"/></marker></defs>
+<rect width="1140" height="680" fill="white"/>
+<polygon points="15,30 1110,30 1110,540 15,540" fill="#f7fafc" stroke="#94a3b8" stroke-dasharray="7 5"/>
+<polyline points="260,113 430,113" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,113 830,113" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="145,161 145,390" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="260,438 430,438" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="545,390 545,270 945,270 945,161" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,438 830,438" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="30" y="65" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="93" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Rotas FastAPI</text>
+<text x="145.0" y="111" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">api/app + control_plane/api</text>
+<text x="145.0" y="125.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Submissão e consultas tipadas</text>
+<rect x="430" y="65" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="93" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">IncidentCapability</text>
+<text x="545.0" y="111" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">application.py</text>
+<text x="545.0" y="125.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Contratos públicos e producer/store</text>
+<rect x="830" y="65" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="93" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Store / CorrelatedStore</text>
+<text x="945.0" y="111" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Python / adaptador de persistência</text>
+<text x="945.0" y="125.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Acessa PostgreSQL e contexto</text>
+<rect x="30" y="390" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">CockpitService</text>
+<text x="145.0" y="436" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">cockpit/presentation.py</text>
+<text x="145.0" y="450.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Projeções pt-BR; seleção de fonte</text>
+<rect x="430" y="390" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">ControlPlane.evaluate</text>
+<text x="545.0" y="436" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">service + interpretation</text>
+<text x="545.0" y="450.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Collect, metas, SLOs e tendências</text>
+<rect x="830" y="390" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="418" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Decision Engine</text>
+<text x="945.0" y="436" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">decision_engine.py</text>
+<text x="945.0" y="450.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Primeira regra aplicável; proposta</text>
+<rect x="320.3203125" y="74" width="49.359375" height="34" rx="3" fill="white"/>
+<text x="345" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Invoca</text>
+<text x="345" y="101" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python</text>
+<rect x="667.94921875" y="74" width="154.1015625" height="34" rx="3" fill="white"/>
+<text x="745" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Lê / persiste</text>
+<text x="745" y="101" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python; SQL no adaptador</text>
+<rect x="191.9853515625" y="268" width="84.029296875" height="34" rx="3" fill="white"/>
+<text x="234" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Rotas cockpit</text>
+<text x="234" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python</text>
+<rect x="301.4794921875" y="398" width="87.041015625" height="34" rx="3" fill="white"/>
+<text x="345" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Fonte + sinais</text>
+<text x="345" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python</text>
+<rect x="677.94921875" y="238" width="154.1015625" height="34" rx="3" fill="white"/>
+<text x="755" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Histórico durável</text>
+<text x="755" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python; SQL no adaptador</text>
+<rect x="703.984375" y="398" width="82.03125" height="34" rx="3" fill="white"/>
+<text x="745" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Aplica regras</text>
+<text x="745" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Python</text>
+</svg>

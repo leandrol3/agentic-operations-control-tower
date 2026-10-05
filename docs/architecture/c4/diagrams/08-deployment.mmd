@@ -1,0 +1,33 @@
+flowchart TB
+  %% Complemento · Implantação local — Como isso roda no computador do professor?
+  %% Escopo: Docker Compose; réplicas físicas não são novos tipos de container C4
+  browser["Container lógico<br/>Navegador / Codex / Terminal<br/>Processos no host macOS<br/>UI :3000; API :8000; Jaeger :16686"]
+  cockpit["Container lógico<br/>cockpit<br/>Docker / Next.js<br/>Loopback 127.0.0.1:3000"]
+  api["Container lógico<br/>api + processo MCP opcional<br/>Docker / Python<br/>API :8000; MCP via exec -T / stdio"]
+  redis["Armazenamento<br/>redis + redis_data<br/>Docker / Redis 7.4<br/>Host 16379 -&gt; container 6379"]
+  worker["Container lógico<br/>worker-a / worker-b<br/>2 instâncias Docker / Celery<br/>Mesmo código; concorrência configurável"]
+  pg["Armazenamento<br/>postgres + postgres_data<br/>Docker / PostgreSQL 16<br/>Host 15432 -&gt; container 5432"]
+  knowledge["Armazenamento<br/>knowledge/ + fixtures/config<br/>Bind mounts + dados na imagem<br/>Memória em /app/knowledge na API"]
+  otel["Container lógico<br/>otel-collector<br/>Docker / OTLP HTTP :4318<br/>Traces -&gt; Jaeger; métricas -&gt; debug"]
+  jaeger["Container lógico<br/>jaeger<br/>Docker / Jaeger 2<br/>UI :16686; sem volume configurado"]
+  browser -->|"HTTP local"| cockpit
+  cockpit -->|"HTTP :8000"| api
+  redis -->|"Broker / task"| worker
+  worker -->|"SQL"| pg
+  worker -->|"Spans e métricas / OTLP HTTP"| otel
+  otel -->|"Traces / OTLP HTTP"| jaeger
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class browser container;
+  class cockpit container;
+  class api container;
+  class redis store;
+  class worker container;
+  class pg store;
+  class knowledge store;
+  class otel container;
+  class jaeger container;

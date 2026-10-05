@@ -1,0 +1,26 @@
+flowchart TB
+  %% Complemento · Fronteira MCP — Outra fronteira, os mesmos serviços
+  %% Escopo: Processo Python transitório; sem novo serviço Compose nem porta MCP
+  codex["Sistema externo<br/>Codex / cliente MCP<br/>Cliente externo<br/>Tool calls com contratos"]
+  mcp["Container lógico<br/>Adaptador MCP<br/>Python / FastMCP / stdio<br/>3 tools + ask_maestro opcional"]
+  services["Container lógico<br/>Capabilities locais<br/>Mesmo código Python<br/>IncidentCapability / Conversations"]
+  runtime["Container lógico<br/>Execução distribuída<br/>Redis + PostgreSQL<br/>Submeter / consultar incidente"]
+  kb["Armazenamento<br/>Memória compartilhada<br/>Mesmo volume knowledge<br/>Planos e documentos aprovados"]
+  ai["Sistema externo<br/>OpenAI API<br/>HTTPS quando openai<br/>Maestro sintetiza evidências"]
+  codex -->|"MCP JSON-RPC / stdio / docker exec"| mcp
+  mcp -->|"Invoca diretamente / Python"| services
+  services -->|"Producer / store / Redis e SQL"| runtime
+  services -->|"Maestro lê/grava / filesystem"| kb
+  services -->|"Maestro solicita síntese · HTTPS"| ai
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class codex external;
+  class mcp container;
+  class services container;
+  class runtime container;
+  class kb store;
+  class ai external;

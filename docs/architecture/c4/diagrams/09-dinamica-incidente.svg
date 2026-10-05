@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#526574"/></marker></defs>
+<rect width="1140" height="680" fill="white"/>
+<polyline points="260,98 430,98" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,98 830,98" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="945,146 945,310" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="830,358 660,358" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="430,358 260,358" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="145,406 145,550" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="30" y="50" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">1. Validar request</text>
+<text x="145.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">API ou MCP / Pydantic</text>
+<text x="145.0" y="110.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Mesmo IncidentCapability</text>
+<rect x="430" y="50" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="545.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="545.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">2. Claim no store</text>
+<text x="545.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">PostgreSQL / chave idempotente</text>
+<text x="545.0" y="110.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">incident + operation + version</text>
+<rect x="830" y="50" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">3. Publicar task</text>
+<text x="945.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Producer -&gt; Redis</text>
+<text x="945.0" y="110.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Mesmo execution_id</text>
+<rect x="830" y="310" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">4. Receber e adquirir</text>
+<text x="945.0" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Celery / advisory lock no store</text>
+<text x="945.0" y="370.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Evita trabalho concorrente duplicado</text>
+<rect x="430" y="310" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">5. Executar workflow</text>
+<text x="545.0" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Mesmo LangGraph / estado novo</text>
+<text x="545.0" y="370.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Etapas e eventos; retry limitado</text>
+<rect x="30" y="310" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="145.0" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="145.0" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">6. Persistir resultado</text>
+<text x="145.0" y="356" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">PostgreSQL / FinalResult</text>
+<text x="145.0" y="370.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">completed pode conter degradação</text>
+<rect x="30" y="550" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="565" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">7. Consultar resultado</text>
+<text x="145.0" y="596" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">HTTP ou MCP</text>
+<text x="145.0" y="610.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Approval pending; sem ação externa</text>
+<rect x="295.9775390625" y="64" width="98.044921875" height="19" rx="3" fill="white"/>
+<text x="345" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Chamada / SQL</text>
+<rect x="704.32421875" y="64" width="81.3515625" height="19" rx="3" fill="white"/>
+<text x="745" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Após commit</text>
+<rect x="972.974609375" y="212" width="116.05078125" height="19" rx="3" fill="white"/>
+<text x="1031" y="224" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Entrega / redelivery</text>
+<rect x="705.98828125" y="324" width="78.0234375" height="19" rx="3" fill="white"/>
+<text x="745" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Claim aceito</text>
+<rect x="289.142578125" y="324" width="111.71484375" height="19" rx="3" fill="white"/>
+<text x="345" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Eventos + terminal</text>
+<rect x="192.30859375" y="462" width="109.3828125" height="19" rx="3" fill="white"/>
+<text x="247" y="474" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Consulta posterior</text>
+</svg>

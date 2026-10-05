@@ -1,0 +1,2374 @@
+{
+  "baseline": "c5ede1a75f41af8a01cdb0e9fd16d9a7836d0f3f",
+  "date": "2026-10-05",
+  "canvas": [
+    1140,
+    680
+  ],
+  "diagrams": [
+    {
+      "id": "01-contexto",
+      "title": "Quem usa e de quem depende?",
+      "level": "C1 · Contexto",
+      "scope": "Sistema NovaCore: Control Tower + Control Plane",
+      "nodes": [
+        {
+          "id": "people",
+          "title": "Professor / operador",
+          "tech": "Pessoa",
+          "desc": "Alunos acompanham decisões",
+          "x": 30,
+          "y": 260,
+          "w": 230,
+          "h": 96,
+          "kind": "person"
+        },
+        {
+          "id": "system",
+          "title": "NovaCore LAB",
+          "tech": "Sistema em foco",
+          "desc": "Analisa incidentes e gere agentes",
+          "x": 430,
+          "y": 260,
+          "w": 230,
+          "h": 96,
+          "kind": "system"
+        },
+        {
+          "id": "codex",
+          "title": "Codex",
+          "tech": "Sistema externo / cliente MCP",
+          "desc": "Acessa tools configuradas",
+          "x": 430,
+          "y": 40,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        },
+        {
+          "id": "openai",
+          "title": "OpenAI API",
+          "tech": "Sistema externo",
+          "desc": "Interpretação e síntese estruturadas",
+          "x": 830,
+          "y": 260,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        }
+      ],
+      "edges": [
+        {
+          "source": "people",
+          "target": "system",
+          "label": "Opera e revisa",
+          "points": [
+            [
+              260,
+              308
+            ],
+            [
+              430,
+              308
+            ]
+          ],
+          "label_at": [
+            345,
+            290
+          ]
+        },
+        {
+          "source": "people",
+          "target": "codex",
+          "label": "Solicita consultas",
+          "points": [
+            [
+              145,
+              260
+            ],
+            [
+              145,
+              88
+            ],
+            [
+              430,
+              88
+            ]
+          ],
+          "label_at": [
+            270,
+            67
+          ]
+        },
+        {
+          "source": "codex",
+          "target": "system",
+          "label": "Consulta capabilities",
+          "points": [
+            [
+              545,
+              136
+            ],
+            [
+              545,
+              260
+            ]
+          ],
+          "label_at": [
+            635,
+            193
+          ]
+        },
+        {
+          "source": "system",
+          "target": "openai",
+          "label": "Solicita inferência\n(somente openai)",
+          "points": [
+            [
+              660,
+              308
+            ],
+            [
+              830,
+              308
+            ]
+          ],
+          "label_at": [
+            745,
+            278
+          ]
+        }
+      ],
+      "read": [
+        "Comece pelo ator: o professor opera e revisa; os alunos observam arquitetura e limites.",
+        "NovaCore reúne análise do processo industrial e gestão da workforce. Codex é um cliente externo; não é o Maestro."
+      ],
+      "notes": [
+        "Não há integração real com ERP, fornecedor, transporte ou pagamento. O case utiliza arquivos locais e dados sintéticos.",
+        "Mock dispensa chamadas ao provider. A eventual inferência própria do cliente Codex está fora do escopo do backend NovaCore."
+      ],
+      "sources": [
+        "src/control_tower/application.py",
+        "src/control_tower/mcp/server.py",
+        "src/control_tower/cockpit/api.py"
+      ],
+      "boundary": null
+    },
+    {
+      "id": "02-containers-execucao",
+      "title": "Como um incidente é executado?",
+      "level": "C2 · Containers / vista operacional",
+      "scope": "Containers lógicos do caminho HTTP; MCP detalhado na vista 04",
+      "nodes": [
+        {
+          "id": "api",
+          "title": "API de aplicação",
+          "tech": "Python / FastAPI",
+          "desc": "Contratos, submissão e consultas",
+          "x": 30,
+          "y": 100,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "redis",
+          "title": "Fila de tarefas",
+          "tech": "Redis / protocolo Redis",
+          "desc": "Broker Celery; não guarda o resultado",
+          "x": 430,
+          "y": 100,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "worker",
+          "title": "Worker do workflow",
+          "tech": "Python / Celery + LangGraph",
+          "desc": "Uma task executa o grafo inteiro",
+          "x": 830,
+          "y": 100,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "pg",
+          "title": "Store de execuções",
+          "tech": "PostgreSQL / SQL + JSONB",
+          "desc": "Identidade, estado, eventos, resultado",
+          "x": 30,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "files",
+          "title": "Dados do case",
+          "tech": "CSV / JSON no filesystem",
+          "desc": "Tools, políticas e cenários locais",
+          "x": 430,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "ai",
+          "title": "OpenAI API",
+          "tech": "HTTPS / saída Pydantic",
+          "desc": "Dependência externa opcional",
+          "x": 830,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        }
+      ],
+      "edges": [
+        {
+          "source": "api",
+          "target": "redis",
+          "label": "Publica task\nRedis / JSON",
+          "points": [
+            [
+              260,
+              148
+            ],
+            [
+              430,
+              148
+            ]
+          ],
+          "label_at": [
+            345,
+            120
+          ]
+        },
+        {
+          "source": "redis",
+          "target": "worker",
+          "label": "Entrega / redelivery\nRedis / JSON",
+          "points": [
+            [
+              660,
+              148
+            ],
+            [
+              830,
+              148
+            ]
+          ],
+          "label_at": [
+            745,
+            120
+          ]
+        },
+        {
+          "source": "api",
+          "target": "pg",
+          "label": "Claim e consultas\nSQL",
+          "points": [
+            [
+              145,
+              196
+            ],
+            [
+              145,
+              405
+            ]
+          ],
+          "label_at": [
+            237,
+            285
+          ]
+        },
+        {
+          "source": "worker",
+          "target": "pg",
+          "label": "Lock, eventos e resultado · SQL",
+          "points": [
+            [
+              945,
+              196
+            ],
+            [
+              945,
+              320
+            ],
+            [
+              55,
+              320
+            ],
+            [
+              55,
+              405
+            ]
+          ],
+          "label_at": [
+            610,
+            301
+          ]
+        },
+        {
+          "source": "worker",
+          "target": "files",
+          "label": "Lê via Tools\narquivos locais",
+          "points": [
+            [
+              830,
+              175
+            ],
+            [
+              740,
+              175
+            ],
+            [
+              740,
+              453
+            ],
+            [
+              660,
+              453
+            ]
+          ],
+          "label_at": [
+            733,
+            379
+          ]
+        },
+        {
+          "source": "worker",
+          "target": "ai",
+          "label": "Interpreta / sintetiza\nHTTPS se openai",
+          "points": [
+            [
+              1040,
+              196
+            ],
+            [
+              1040,
+              405
+            ]
+          ],
+          "label_at": [
+            959,
+            260
+          ]
+        }
+      ],
+      "read": [
+        "A API confirma a publicação e devolve execution_id. O trabalho acontece no worker, não no request de submissão.",
+        "PostgreSQL é a fonte do resultado. Redis não é result backend: task_ignore_result=True."
+      ],
+      "notes": [
+        "O claim é persistido antes da publicação: existe uma janela de falha entre banco e broker. O LAB usa reenvio explícito da mesma identidade; não implementa transactional outbox.",
+        "CLI distribuída chama o mesmo producer/store por outro processo Python. A CLI local da Aula 1 executa o grafo diretamente, sem fila."
+      ],
+      "sources": [
+        "src/control_tower/distributed/producer.py",
+        "src/control_tower/distributed/tasks.py",
+        "src/control_tower/distributed/store.py",
+        "src/control_tower/distributed/celery_app.py",
+        "src/control_tower/main.py"
+      ],
+      "boundary": [
+        [
+          15,
+          30
+        ],
+        [
+          1110,
+          30
+        ],
+        [
+          1110,
+          235
+        ],
+        [
+          790,
+          235
+        ],
+        [
+          790,
+          540
+        ],
+        [
+          15,
+          540
+        ]
+      ],
+      "inside": [
+        "api",
+        "redis",
+        "worker",
+        "pg",
+        "files"
+      ]
+    },
+    {
+      "id": "03-containers-gestao",
+      "title": "Onde ficam UI, gestão e memória?",
+      "level": "C2 · Containers / vista de gestão",
+      "scope": "Cockpit e armazenamento; API é a mesma da vista operacional",
+      "nodes": [
+        {
+          "id": "ui",
+          "title": "UI no navegador",
+          "tech": "React / TypeScript",
+          "desc": "Cadastro, metas, decisões e revisão",
+          "x": 30,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "web",
+          "title": "Servidor do cockpit",
+          "tech": "Next.js / Node.js",
+          "desc": "Assets e proxy /api/*",
+          "x": 430,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "api",
+          "title": "API de aplicação",
+          "tech": "Python / FastAPI",
+          "desc": "Control Plane, Maestro, Compiler",
+          "x": 830,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "pg",
+          "title": "Histórico durável",
+          "tech": "PostgreSQL",
+          "desc": "Execuções e eventos registrados",
+          "x": 30,
+          "y": 385,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "kb",
+          "title": "Segundo Cérebro",
+          "tech": "Markdown / YAML / JSON",
+          "desc": "Documentos, proveniência e planos",
+          "x": 430,
+          "y": 385,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "ai",
+          "title": "OpenAI API",
+          "tech": "HTTPS / respostas estruturadas",
+          "desc": "Maestro e Compiler em modo real",
+          "x": 830,
+          "y": 385,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        }
+      ],
+      "edges": [
+        {
+          "source": "ui",
+          "target": "web",
+          "label": "Consulta / revisão\nHTTP JSON",
+          "points": [
+            [
+              260,
+              113
+            ],
+            [
+              430,
+              113
+            ]
+          ],
+          "label_at": [
+            345,
+            85
+          ]
+        },
+        {
+          "source": "web",
+          "target": "api",
+          "label": "Proxy permitido\nHTTP JSON",
+          "points": [
+            [
+              660,
+              113
+            ],
+            [
+              830,
+              113
+            ]
+          ],
+          "label_at": [
+            745,
+            85
+          ]
+        },
+        {
+          "source": "api",
+          "target": "pg",
+          "label": "Lê histórico · SQL",
+          "points": [
+            [
+              905,
+              161
+            ],
+            [
+              905,
+              272
+            ],
+            [
+              145,
+              272
+            ],
+            [
+              145,
+              385
+            ]
+          ],
+          "label_at": [
+            402,
+            252
+          ]
+        },
+        {
+          "source": "api",
+          "target": "kb",
+          "label": "Lê e persiste\nfilesystem local",
+          "points": [
+            [
+              830,
+              140
+            ],
+            [
+              745,
+              140
+            ],
+            [
+              745,
+              433
+            ],
+            [
+              660,
+              433
+            ]
+          ],
+          "label_at": [
+            721,
+            361
+          ]
+        },
+        {
+          "source": "api",
+          "target": "ai",
+          "label": "Síntese síncrona\nHTTPS se openai",
+          "points": [
+            [
+              1035,
+              161
+            ],
+            [
+              1035,
+              385
+            ]
+          ],
+          "label_at": [
+            968,
+            229
+          ]
+        }
+      ],
+      "read": [
+        "A UI não calcula metas ou custos. O proxy encaminha somente cockpit, maestro e knowledge; o backend valida as operações.",
+        "Conversa e extração são chamadas síncronas no processo servidor. Não são tasks Celery nem jobs do LangGraph empresarial."
+      ],
+      "notes": [
+        "A fonte didactic lê fixtures e sinais sintéticos; durable lê o PostgreSQL. Uma não preenche silenciosamente lacunas da outra.",
+        "Sessões de chat ficam em memória do processo. Planos e conhecimento são arquivos persistidos em volume; não há vector database ou graph database."
+      ],
+      "sources": [
+        "web/app/api/[...path]/route.ts",
+        "src/control_tower/cockpit/api.py",
+        "src/control_tower/cockpit/presentation.py",
+        "src/control_tower/cockpit/knowledge.py",
+        "src/control_tower/cockpit/conversation.py"
+      ],
+      "boundary": [
+        [
+          15,
+          30
+        ],
+        [
+          1110,
+          30
+        ],
+        [
+          1110,
+          235
+        ],
+        [
+          790,
+          235
+        ],
+        [
+          790,
+          540
+        ],
+        [
+          15,
+          540
+        ]
+      ],
+      "inside": [
+        "ui",
+        "web",
+        "api",
+        "pg",
+        "kb"
+      ]
+    },
+    {
+      "id": "04-mcp",
+      "title": "Outra fronteira, os mesmos serviços",
+      "level": "Complemento · Fronteira MCP",
+      "scope": "Processo Python transitório; sem novo serviço Compose nem porta MCP",
+      "nodes": [
+        {
+          "id": "codex",
+          "title": "Codex / cliente MCP",
+          "tech": "Cliente externo",
+          "desc": "Tool calls com contratos",
+          "x": 30,
+          "y": 80,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        },
+        {
+          "id": "mcp",
+          "title": "Adaptador MCP",
+          "tech": "Python / FastMCP / stdio",
+          "desc": "3 tools + ask_maestro opcional",
+          "x": 430,
+          "y": 80,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "services",
+          "title": "Capabilities locais",
+          "tech": "Mesmo código Python",
+          "desc": "IncidentCapability / Conversations",
+          "x": 830,
+          "y": 80,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "runtime",
+          "title": "Execução distribuída",
+          "tech": "Redis + PostgreSQL",
+          "desc": "Submeter / consultar incidente",
+          "x": 830,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "kb",
+          "title": "Memória compartilhada",
+          "tech": "Mesmo volume knowledge",
+          "desc": "Planos e documentos aprovados",
+          "x": 430,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "ai",
+          "title": "OpenAI API",
+          "tech": "HTTPS quando openai",
+          "desc": "Maestro sintetiza evidências",
+          "x": 30,
+          "y": 405,
+          "w": 230,
+          "h": 96,
+          "kind": "external"
+        }
+      ],
+      "edges": [
+        {
+          "source": "codex",
+          "target": "mcp",
+          "label": "MCP JSON-RPC\nstdio / docker exec",
+          "points": [
+            [
+              260,
+              128
+            ],
+            [
+              430,
+              128
+            ]
+          ],
+          "label_at": [
+            345,
+            98
+          ]
+        },
+        {
+          "source": "mcp",
+          "target": "services",
+          "label": "Invoca diretamente\nPython",
+          "points": [
+            [
+              660,
+              128
+            ],
+            [
+              830,
+              128
+            ]
+          ],
+          "label_at": [
+            745,
+            98
+          ]
+        },
+        {
+          "source": "services",
+          "target": "runtime",
+          "label": "Producer / store\nRedis e SQL",
+          "points": [
+            [
+              945,
+              176
+            ],
+            [
+              945,
+              405
+            ]
+          ],
+          "label_at": [
+            1032,
+            288
+          ]
+        },
+        {
+          "source": "services",
+          "target": "kb",
+          "label": "Maestro lê/grava\nfilesystem",
+          "points": [
+            [
+              830,
+              150
+            ],
+            [
+              760,
+              150
+            ],
+            [
+              760,
+              453
+            ],
+            [
+              660,
+              453
+            ]
+          ],
+          "label_at": [
+            716,
+            310
+          ]
+        },
+        {
+          "source": "services",
+          "target": "ai",
+          "label": "Maestro solicita síntese · HTTPS",
+          "points": [
+            [
+              890,
+              176
+            ],
+            [
+              890,
+              260
+            ],
+            [
+              145,
+              260
+            ],
+            [
+              145,
+              405
+            ]
+          ],
+          "label_at": [
+            457,
+            242
+          ]
+        }
+      ],
+      "read": [
+        "O launcher executa python -m control_tower.mcp.server --with-maestro dentro do container api já iniciado. Isso cria outro processo, não uma chamada HTTP à API.",
+        "IncidentCapability e Conversations são reutilizados como código. O MCP possui sua própria instância de sessão; o chat do navegador não é compartilhado."
+      ],
+      "notes": [
+        "submit_incident, get_execution_status e get_execution_result permanecem disponíveis. ask_maestro é adicionada pelo launcher opcional.",
+        "MCP não oferece tool de aprovar conhecimento, mudar lifecycle ou executar plano. A memória persistida é comum; a autoridade não aumenta com a troca de cliente."
+      ],
+      "sources": [
+        "scripts/start_maestro_mcp.sh",
+        "scripts/start_lesson04_mcp.sh",
+        "src/control_tower/mcp/server.py",
+        "src/control_tower/mcp/tools.py",
+        "src/control_tower/mcp/maestro.py"
+      ],
+      "boundary": null
+    },
+    {
+      "id": "05-componentes-worker",
+      "title": "O que existe dentro de um worker?",
+      "level": "C3 · Componentes do worker",
+      "scope": "Processo Python que executa a task Celery; nós não são microserviços",
+      "nodes": [
+        {
+          "id": "task",
+          "title": "Task execute",
+          "tech": "Componente Python / Celery",
+          "desc": "Acquire, begin, observar e finalizar",
+          "x": 30,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "supervisor",
+          "title": "Supervisor",
+          "tech": "Nó LangGraph",
+          "desc": "Plano e seleção validada de papéis",
+          "x": 430,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "special",
+          "title": "Supply / Production / Logistics",
+          "tech": "3 nós LangGraph",
+          "desc": "Tools + síntese; ramos paralelos",
+          "x": 830,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "join",
+          "title": "Consolidação",
+          "tech": "Nó LangGraph / join explícito",
+          "desc": "Espera 3 ramos; valida evidências",
+          "x": 830,
+          "y": 295,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "finance",
+          "title": "Finance",
+          "tech": "Nó Python determinístico",
+          "desc": "Cenários, alocação e Decimal",
+          "x": 430,
+          "y": 295,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "challenger",
+          "title": "Challenger",
+          "tech": "Nó Python + síntese opcional",
+          "desc": "Regras; riscos e informação ausente",
+          "x": 30,
+          "y": 295,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "recommend",
+          "title": "Recommendation",
+          "tech": "Nó / Pydantic",
+          "desc": "Cenário admissível e valores validados",
+          "x": 30,
+          "y": 535,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "approval",
+          "title": "Human approval",
+          "tech": "Nó terminal / Pydantic",
+          "desc": "pending; sem executar ação",
+          "x": 430,
+          "y": 535,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "state",
+          "title": "WorkflowState",
+          "tech": "Estado Pydantic em memória",
+          "desc": "Canais por papel; não é checkpoint",
+          "x": 830,
+          "y": 535,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        }
+      ],
+      "edges": [
+        {
+          "source": "task",
+          "target": "supervisor",
+          "label": "Invoca grafo",
+          "points": [
+            [
+              260,
+              98
+            ],
+            [
+              430,
+              98
+            ]
+          ],
+          "label_at": [
+            345,
+            80
+          ]
+        },
+        {
+          "source": "supervisor",
+          "target": "special",
+          "label": "Fan-out validado",
+          "points": [
+            [
+              660,
+              98
+            ],
+            [
+              830,
+              98
+            ]
+          ],
+          "label_at": [
+            745,
+            80
+          ]
+        },
+        {
+          "source": "special",
+          "target": "join",
+          "label": "Todos os ramos\nconcluídos",
+          "points": [
+            [
+              945,
+              146
+            ],
+            [
+              945,
+              295
+            ]
+          ],
+          "label_at": [
+            1033,
+            220
+          ]
+        },
+        {
+          "source": "join",
+          "target": "finance",
+          "label": "Evidência válida",
+          "points": [
+            [
+              830,
+              343
+            ],
+            [
+              660,
+              343
+            ]
+          ],
+          "label_at": [
+            745,
+            324
+          ]
+        },
+        {
+          "source": "finance",
+          "target": "challenger",
+          "label": "Cenários calculados",
+          "points": [
+            [
+              430,
+              343
+            ],
+            [
+              260,
+              343
+            ]
+          ],
+          "label_at": [
+            345,
+            324
+          ]
+        },
+        {
+          "source": "challenger",
+          "target": "recommend",
+          "label": "Cenário admissível",
+          "points": [
+            [
+              145,
+              391
+            ],
+            [
+              145,
+              535
+            ]
+          ],
+          "label_at": [
+            246,
+            460
+          ]
+        },
+        {
+          "source": "recommend",
+          "target": "approval",
+          "label": "Contrato válido",
+          "points": [
+            [
+              260,
+              583
+            ],
+            [
+              430,
+              583
+            ]
+          ],
+          "label_at": [
+            345,
+            563
+          ]
+        }
+      ],
+      "read": [
+        "Celery distribui execuções completas entre workers. LangGraph coordena os papéis dentro de uma execução. O paralelismo local dos especialistas é outra dimensão.",
+        "O join aguarda todos os três ramos, não a primeira resposta. Cada especialista atualiza um canal próprio do estado."
+      ],
+      "notes": [
+        "Esta vista mostra o caminho de sucesso. Supervisor, consolidação, Finance, Challenger e Recommendation podem levar a blocked. Um especialista com erro é verificado no join.",
+        "OpenAI adiciona interpretação e sínteses nos mesmos nós. Finance, tools, políticas e validação permanecem determinísticos. Approval termina o grafo; não há interrupt/resume persistente."
+      ],
+      "sources": [
+        "src/control_tower/distributed/tasks.py",
+        "src/control_tower/graph/workflow.py",
+        "src/control_tower/graph/state.py",
+        "src/control_tower/agents/finance.py",
+        "src/control_tower/agents/interpretation.py"
+      ],
+      "boundary": [
+        [
+          15,
+          20
+        ],
+        [
+          1110,
+          20
+        ],
+        [
+          1110,
+          655
+        ],
+        [
+          15,
+          655
+        ]
+      ]
+    },
+    {
+      "id": "06-componentes-api",
+      "title": "Medir antes de recomendar",
+      "level": "C3 · Componentes da API / consultas",
+      "scope": "Módulos Python na API; não serviços implantáveis separados",
+      "nodes": [
+        {
+          "id": "routes",
+          "title": "Rotas FastAPI",
+          "tech": "api/app + control_plane/api",
+          "desc": "Submissão e consultas tipadas",
+          "x": 30,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "cap",
+          "title": "IncidentCapability",
+          "tech": "application.py",
+          "desc": "Contratos públicos e producer/store",
+          "x": 430,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "store",
+          "title": "Store / CorrelatedStore",
+          "tech": "Python / adaptador de persistência",
+          "desc": "Acessa PostgreSQL e contexto",
+          "x": 830,
+          "y": 65,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "cockpit",
+          "title": "CockpitService",
+          "tech": "cockpit/presentation.py",
+          "desc": "Projeções pt-BR; seleção de fonte",
+          "x": 30,
+          "y": 390,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "cp",
+          "title": "ControlPlane.evaluate",
+          "tech": "service + interpretation",
+          "desc": "Collect, metas, SLOs e tendências",
+          "x": 430,
+          "y": 390,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "decision",
+          "title": "Decision Engine",
+          "tech": "decision_engine.py",
+          "desc": "Primeira regra aplicável; proposta",
+          "x": 830,
+          "y": 390,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        }
+      ],
+      "edges": [
+        {
+          "source": "routes",
+          "target": "cap",
+          "label": "Invoca\nPython",
+          "points": [
+            [
+              260,
+              113
+            ],
+            [
+              430,
+              113
+            ]
+          ],
+          "label_at": [
+            345,
+            86
+          ]
+        },
+        {
+          "source": "cap",
+          "target": "store",
+          "label": "Lê / persiste\nPython; SQL no adaptador",
+          "points": [
+            [
+              660,
+              113
+            ],
+            [
+              830,
+              113
+            ]
+          ],
+          "label_at": [
+            745,
+            86
+          ]
+        },
+        {
+          "source": "routes",
+          "target": "cockpit",
+          "label": "Rotas cockpit\nPython",
+          "points": [
+            [
+              145,
+              161
+            ],
+            [
+              145,
+              390
+            ]
+          ],
+          "label_at": [
+            234,
+            280
+          ]
+        },
+        {
+          "source": "cockpit",
+          "target": "cp",
+          "label": "Fonte + sinais\nPython",
+          "points": [
+            [
+              260,
+              438
+            ],
+            [
+              430,
+              438
+            ]
+          ],
+          "label_at": [
+            345,
+            410
+          ]
+        },
+        {
+          "source": "cp",
+          "target": "store",
+          "label": "Histórico durável\nPython; SQL no adaptador",
+          "points": [
+            [
+              545,
+              390
+            ],
+            [
+              545,
+              270
+            ],
+            [
+              945,
+              270
+            ],
+            [
+              945,
+              161
+            ]
+          ],
+          "label_at": [
+            755,
+            250
+          ]
+        },
+        {
+          "source": "cp",
+          "target": "decision",
+          "label": "Aplica regras\nPython",
+          "points": [
+            [
+              660,
+              438
+            ],
+            [
+              830,
+              438
+            ]
+          ],
+          "label_at": [
+            745,
+            410
+          ]
+        }
+      ],
+      "read": [
+        "O Control Plane transforma sinais em métricas e limites, e então em recomendação. A chamada consulta evidências; não atua sobre workers ou modelos.",
+        "Registry, pricing e configuração de SLOs vêm de código/arquivos locais. A fixture didática usa projeções próprias e mantém a origem explícita."
+      ],
+      "notes": [
+        "A seta representa chamada/dependência, não apenas trânsito de dados: resultados retornam ao chamador. Producer/Redis estão na vista C2 operacional.",
+        "Supply 74/90 mede cobertura didática de evidências. A meta técnica do Registry tem outro significado; os 50 exemplos de cobertura não são as 6 execuções ilustrativas."
+      ],
+      "sources": [
+        "src/control_tower/api/app.py",
+        "src/control_tower/control_plane/api.py",
+        "src/control_tower/control_plane/service.py",
+        "src/control_tower/control_plane/interpretation.py",
+        "src/control_tower/control_plane/decision_engine.py",
+        "src/control_tower/cockpit/presentation.py"
+      ],
+      "boundary": [
+        [
+          15,
+          30
+        ],
+        [
+          1110,
+          30
+        ],
+        [
+          1110,
+          540
+        ],
+        [
+          15,
+          540
+        ]
+      ]
+    },
+    {
+      "id": "07-componentes-maestro",
+      "title": "Síntese, proposta e conhecimento",
+      "level": "C3 · Componentes da API / gestão",
+      "scope": "Mesmo código reutilizado no processo MCP; Compiler/revisão acessados por HTTP",
+      "nodes": [
+        {
+          "id": "conv",
+          "title": "Conversations",
+          "tech": "Python / memória do processo",
+          "desc": "Contexto e últimas mensagens",
+          "x": 30,
+          "y": 55,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "maestro",
+          "title": "Maestro + MaestroTools",
+          "tech": "Python / contexto estruturado",
+          "desc": "Lê sinais e conhecimento aprovado",
+          "x": 430,
+          "y": 55,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "provider",
+          "title": "StructuredProvider",
+          "tech": "Mock ou OpenAI / Pydantic",
+          "desc": "Síntese validada e usage opcional",
+          "x": 830,
+          "y": 55,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "compiler",
+          "title": "KnowledgeCompiler",
+          "tech": "Python / extração estruturada",
+          "desc": "Execução -> candidato pendente",
+          "x": 30,
+          "y": 400,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "kb",
+          "title": "KnowledgeStore",
+          "tech": "Componente Python / filesystem",
+          "desc": "Lê/grava Markdown e JSON",
+          "x": 430,
+          "y": 400,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "human",
+          "title": "Revisor humano",
+          "tech": "Pessoa via UI / HTTP",
+          "desc": "Nome, justificativa e confirmação",
+          "x": 830,
+          "y": 400,
+          "w": 230,
+          "h": 96,
+          "kind": "person"
+        }
+      ],
+      "edges": [
+        {
+          "source": "conv",
+          "target": "maestro",
+          "label": "Resolve contexto\ne solicita plano",
+          "points": [
+            [
+              260,
+              103
+            ],
+            [
+              430,
+              103
+            ]
+          ],
+          "label_at": [
+            345,
+            73
+          ]
+        },
+        {
+          "source": "maestro",
+          "target": "provider",
+          "label": "Solicita síntese\nContrato estruturado / Python",
+          "points": [
+            [
+              660,
+              103
+            ],
+            [
+              830,
+              103
+            ]
+          ],
+          "label_at": [
+            745,
+            73
+          ]
+        },
+        {
+          "source": "maestro",
+          "target": "kb",
+          "label": "Lê approved\nsalva plano proposto",
+          "points": [
+            [
+              545,
+              151
+            ],
+            [
+              545,
+              400
+            ]
+          ],
+          "label_at": [
+            640,
+            267
+          ]
+        },
+        {
+          "source": "compiler",
+          "target": "provider",
+          "label": "Gera draft\nmesmo provider",
+          "points": [
+            [
+              145,
+              400
+            ],
+            [
+              145,
+              275
+            ],
+            [
+              945,
+              275
+            ],
+            [
+              945,
+              151
+            ]
+          ],
+          "label_at": [
+            328,
+            252
+          ]
+        },
+        {
+          "source": "compiler",
+          "target": "kb",
+          "label": "Persiste candidato\npending_review",
+          "points": [
+            [
+              260,
+              448
+            ],
+            [
+              430,
+              448
+            ]
+          ],
+          "label_at": [
+            345,
+            417
+          ]
+        },
+        {
+          "source": "human",
+          "target": "kb",
+          "label": "Aprova / rejeita\nvia endpoint validado",
+          "points": [
+            [
+              830,
+              448
+            ],
+            [
+              660,
+              448
+            ]
+          ],
+          "label_at": [
+            745,
+            417
+          ]
+        }
+      ],
+      "read": [
+        "Maestro consulta sinais e memória aprovada, propõe plano e o persiste. Staffs são responsabilidades sugeridas; não são novos processos executados.",
+        "Compiler usa evidências de uma execução para produzir candidato. O servidor valida referências e estrutura; revisão humana avalia conteúdo."
+      ],
+      "notes": [
+        "O backend não tem autenticação/RBAC empresarial: o formulário é uma barreira didática de revisão, não comprovação inviolável de identidade.",
+        "Conhecimento aprovado melhora contexto do Maestro. Não há treinamento de pesos nem injeção automática no LangGraph do próximo incidente. Planos e candidatos não são autorização empresarial."
+      ],
+      "sources": [
+        "src/control_tower/cockpit/conversation.py",
+        "src/control_tower/cockpit/assistance.py",
+        "src/control_tower/cockpit/llm.py",
+        "src/control_tower/cockpit/knowledge.py",
+        "src/control_tower/cockpit/api.py"
+      ],
+      "boundary": [
+        [
+          15,
+          20
+        ],
+        [
+          1110,
+          20
+        ],
+        [
+          1110,
+          235
+        ],
+        [
+          765,
+          235
+        ],
+        [
+          765,
+          550
+        ],
+        [
+          15,
+          550
+        ]
+      ],
+      "inside": [
+        "conv",
+        "maestro",
+        "provider",
+        "compiler",
+        "kb"
+      ]
+    },
+    {
+      "id": "08-deployment",
+      "title": "Como isso roda no computador do professor?",
+      "level": "Complemento · Implantação local",
+      "scope": "Docker Compose; réplicas físicas não são novos tipos de container C4",
+      "nodes": [
+        {
+          "id": "browser",
+          "title": "Navegador / Codex / Terminal",
+          "tech": "Processos no host macOS",
+          "desc": "UI :3000; API :8000; Jaeger :16686",
+          "x": 30,
+          "y": 40,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "cockpit",
+          "title": "cockpit",
+          "tech": "Docker / Next.js",
+          "desc": "Loopback 127.0.0.1:3000",
+          "x": 430,
+          "y": 40,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "api",
+          "title": "api + processo MCP opcional",
+          "tech": "Docker / Python",
+          "desc": "API :8000; MCP via exec -T / stdio",
+          "x": 830,
+          "y": 40,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "redis",
+          "title": "redis + redis_data",
+          "tech": "Docker / Redis 7.4",
+          "desc": "Host 16379 -> container 6379",
+          "x": 30,
+          "y": 280,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "worker",
+          "title": "worker-a / worker-b",
+          "tech": "2 instâncias Docker / Celery",
+          "desc": "Mesmo código; concorrência configurável",
+          "x": 430,
+          "y": 280,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "pg",
+          "title": "postgres + postgres_data",
+          "tech": "Docker / PostgreSQL 16",
+          "desc": "Host 15432 -> container 5432",
+          "x": 830,
+          "y": 280,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "knowledge",
+          "title": "knowledge/ + fixtures/config",
+          "tech": "Bind mounts + dados na imagem",
+          "desc": "Memória em /app/knowledge na API",
+          "x": 30,
+          "y": 520,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "otel",
+          "title": "otel-collector",
+          "tech": "Docker / OTLP HTTP :4318",
+          "desc": "Traces -> Jaeger; métricas -> debug",
+          "x": 430,
+          "y": 520,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        },
+        {
+          "id": "jaeger",
+          "title": "jaeger",
+          "tech": "Docker / Jaeger 2",
+          "desc": "UI :16686; sem volume configurado",
+          "x": 830,
+          "y": 520,
+          "w": 230,
+          "h": 96,
+          "kind": "container"
+        }
+      ],
+      "edges": [
+        {
+          "source": "browser",
+          "target": "cockpit",
+          "label": "HTTP local",
+          "points": [
+            [
+              260,
+              88
+            ],
+            [
+              430,
+              88
+            ]
+          ],
+          "label_at": [
+            345,
+            66
+          ]
+        },
+        {
+          "source": "cockpit",
+          "target": "api",
+          "label": "HTTP :8000",
+          "points": [
+            [
+              660,
+              88
+            ],
+            [
+              830,
+              88
+            ]
+          ],
+          "label_at": [
+            745,
+            66
+          ]
+        },
+        {
+          "source": "redis",
+          "target": "worker",
+          "label": "Broker / task",
+          "points": [
+            [
+              260,
+              328
+            ],
+            [
+              430,
+              328
+            ]
+          ],
+          "label_at": [
+            345,
+            306
+          ]
+        },
+        {
+          "source": "worker",
+          "target": "pg",
+          "label": "SQL",
+          "points": [
+            [
+              660,
+              328
+            ],
+            [
+              830,
+              328
+            ]
+          ],
+          "label_at": [
+            745,
+            306
+          ]
+        },
+        {
+          "source": "worker",
+          "target": "otel",
+          "label": "Spans e métricas\nOTLP HTTP",
+          "points": [
+            [
+              545,
+              376
+            ],
+            [
+              545,
+              520
+            ]
+          ],
+          "label_at": [
+            637,
+            455
+          ]
+        },
+        {
+          "source": "otel",
+          "target": "jaeger",
+          "label": "Traces\nOTLP HTTP",
+          "points": [
+            [
+              660,
+              568
+            ],
+            [
+              830,
+              568
+            ]
+          ],
+          "label_at": [
+            745,
+            540
+          ]
+        }
+      ],
+      "read": [
+        "O desenho destaca instâncias físicas e portas. As demais dependências são as das vistas C2; aqui não repetimos todas as setas. API e MCP também exportam telemetria.",
+        "O launcher combina cinco arquivos Compose. O MCP usa a imagem, ambiente e mount de knowledge do container API; não abre um endpoint remoto."
+      ],
+      "notes": [
+        "Persistência: volumes para Redis/PostgreSQL; bind mount para conhecimento. Estado LangGraph e sessões de chat são memória de processo. Jaeger não tem volume persistente no Compose.",
+        "OpenAI é externa e acessada por HTTPS quando habilitada. Serviços do LAB ficam no localhost; não há Kubernetes, balanceador, alta disponibilidade nem autenticação empresarial nesta implantação."
+      ],
+      "sources": [
+        "compose.yaml",
+        "compose.override.yaml",
+        "compose.lesson04.yaml",
+        "compose.lesson04-complete.yaml",
+        "compose.lesson04-cockpit.yaml",
+        "scripts/cockpit.sh",
+        "scripts/start_maestro_mcp.sh",
+        "deploy/otel/collector.yaml"
+      ],
+      "boundary": null
+    },
+    {
+      "id": "09-dinamica-incidente",
+      "title": "Do pedido ao resultado durável",
+      "level": "Complemento · Fluxo dinâmico",
+      "scope": "Ordem conceitual do caminho HTTP/MCP; at-least-once e idempotência",
+      "nodes": [
+        {
+          "id": "submit",
+          "title": "1. Validar request",
+          "tech": "API ou MCP / Pydantic",
+          "desc": "Mesmo IncidentCapability",
+          "x": 30,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "claim",
+          "title": "2. Claim no store",
+          "tech": "PostgreSQL / chave idempotente",
+          "desc": "incident + operation + version",
+          "x": 430,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "publish",
+          "title": "3. Publicar task",
+          "tech": "Producer -> Redis",
+          "desc": "Mesmo execution_id",
+          "x": 830,
+          "y": 50,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "acquire",
+          "title": "4. Receber e adquirir",
+          "tech": "Celery / advisory lock no store",
+          "desc": "Evita trabalho concorrente duplicado",
+          "x": 830,
+          "y": 310,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "graph",
+          "title": "5. Executar workflow",
+          "tech": "Mesmo LangGraph / estado novo",
+          "desc": "Etapas e eventos; retry limitado",
+          "x": 430,
+          "y": 310,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "finish",
+          "title": "6. Persistir resultado",
+          "tech": "PostgreSQL / FinalResult",
+          "desc": "completed pode conter degradação",
+          "x": 30,
+          "y": 310,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "query",
+          "title": "7. Consultar resultado",
+          "tech": "HTTP ou MCP",
+          "desc": "Approval pending; sem ação externa",
+          "x": 30,
+          "y": 550,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        }
+      ],
+      "edges": [
+        {
+          "source": "submit",
+          "target": "claim",
+          "label": "Chamada / SQL",
+          "points": [
+            [
+              260,
+              98
+            ],
+            [
+              430,
+              98
+            ]
+          ],
+          "label_at": [
+            345,
+            76
+          ]
+        },
+        {
+          "source": "claim",
+          "target": "publish",
+          "label": "Após commit",
+          "points": [
+            [
+              660,
+              98
+            ],
+            [
+              830,
+              98
+            ]
+          ],
+          "label_at": [
+            745,
+            76
+          ]
+        },
+        {
+          "source": "publish",
+          "target": "acquire",
+          "label": "Entrega / redelivery",
+          "points": [
+            [
+              945,
+              146
+            ],
+            [
+              945,
+              310
+            ]
+          ],
+          "label_at": [
+            1031,
+            224
+          ]
+        },
+        {
+          "source": "acquire",
+          "target": "graph",
+          "label": "Claim aceito",
+          "points": [
+            [
+              830,
+              358
+            ],
+            [
+              660,
+              358
+            ]
+          ],
+          "label_at": [
+            745,
+            336
+          ]
+        },
+        {
+          "source": "graph",
+          "target": "finish",
+          "label": "Eventos + terminal",
+          "points": [
+            [
+              430,
+              358
+            ],
+            [
+              260,
+              358
+            ]
+          ],
+          "label_at": [
+            345,
+            336
+          ]
+        },
+        {
+          "source": "finish",
+          "target": "query",
+          "label": "Consulta posterior",
+          "points": [
+            [
+              145,
+              406
+            ],
+            [
+              145,
+              550
+            ]
+          ],
+          "label_at": [
+            247,
+            474
+          ]
+        }
+      ],
+      "read": [
+        "O cliente recebe um ID após submissão; consulta status/result separadamente. Workers podem receber a mesma identidade mais de uma vez.",
+        "Retry tenta novamente; redelivery recupera entrega após perda de worker. O advisory lock vive na sessão, sem manter uma transação aberta durante a inferência."
+      ],
+      "notes": [
+        "Idempotência no store não equivale a exactly-once para toda dependência externa. Uma falha antes de persistir conclusão pode repetir chamadas LLM e custo.",
+        "Falha transitória de LLM tem retry limitado e decisão explícita de fallback: degradação determinística apenas para reference_replay seguro, ou human_review_required. Não há fallback de produção genérico para mock."
+      ],
+      "sources": [
+        "src/control_tower/distributed/producer.py",
+        "src/control_tower/distributed/store.py",
+        "src/control_tower/distributed/tasks.py",
+        "src/control_tower/distributed/llm_runtime.py",
+        "src/control_tower/distributed/durable.py"
+      ],
+      "boundary": null
+    },
+    {
+      "id": "10-dinamica-conhecimento",
+      "title": "Da proposta ao contexto reutilizável",
+      "level": "Complemento · Fluxo dinâmico",
+      "scope": "Interação humana obrigatória; nenhum ACT empresarial",
+      "nodes": [
+        {
+          "id": "measure",
+          "title": "1. Medir e recomendar",
+          "tech": "Control Plane determinístico",
+          "desc": "Ex.: Supply 74/90; Intervir",
+          "x": 30,
+          "y": 60,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "plan",
+          "title": "2. Pedir plano ao Maestro",
+          "tech": "UI ou MCP / mesma capability",
+          "desc": "Hipótese + plano + fontes",
+          "x": 430,
+          "y": 60,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "extract",
+          "title": "3. Extrair de execução",
+          "tech": "UI / HTTP KnowledgeCompiler",
+          "desc": "Não extrair de melhoria não implantada",
+          "x": 830,
+          "y": 60,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        },
+        {
+          "id": "candidate",
+          "title": "4. Candidato pendente",
+          "tech": "KnowledgeStore / arquivos",
+          "desc": "Estrutura e referências validadas",
+          "x": 830,
+          "y": 370,
+          "w": 230,
+          "h": 96,
+          "kind": "store"
+        },
+        {
+          "id": "review",
+          "title": "5. Revisar conscientemente",
+          "tech": "Humano / UI / HTTP",
+          "desc": "Aprovar ou rejeitar, com justificativa",
+          "x": 430,
+          "y": 370,
+          "w": 230,
+          "h": 96,
+          "kind": "person"
+        },
+        {
+          "id": "reuse",
+          "title": "6. Consultar approved",
+          "tech": "Maestro / retrieval local",
+          "desc": "Somente fonte e contexto compatíveis",
+          "x": 30,
+          "y": 370,
+          "w": 230,
+          "h": 96,
+          "kind": "component"
+        }
+      ],
+      "edges": [
+        {
+          "source": "measure",
+          "target": "plan",
+          "label": "Pergunta contextual",
+          "points": [
+            [
+              260,
+              108
+            ],
+            [
+              430,
+              108
+            ]
+          ],
+          "label_at": [
+            345,
+            86
+          ]
+        },
+        {
+          "source": "plan",
+          "target": "extract",
+          "label": "Próximo gesto\nda demo; não automático",
+          "points": [
+            [
+              660,
+              108
+            ],
+            [
+              830,
+              108
+            ]
+          ],
+          "label_at": [
+            745,
+            79
+          ]
+        },
+        {
+          "source": "extract",
+          "target": "candidate",
+          "label": "Salvar pending_review",
+          "points": [
+            [
+              945,
+              156
+            ],
+            [
+              945,
+              370
+            ]
+          ],
+          "label_at": [
+            1032,
+            261
+          ]
+        },
+        {
+          "source": "candidate",
+          "target": "review",
+          "label": "Disponibilizar\npara leitura",
+          "points": [
+            [
+              830,
+              418
+            ],
+            [
+              660,
+              418
+            ]
+          ],
+          "label_at": [
+            745,
+            388
+          ]
+        },
+        {
+          "source": "review",
+          "target": "reuse",
+          "label": "Se aprovado",
+          "points": [
+            [
+              430,
+              418
+            ],
+            [
+              260,
+              418
+            ]
+          ],
+          "label_at": [
+            345,
+            396
+          ]
+        }
+      ],
+      "read": [
+        "A seta entre plano e extração é uma sequência de ações do professor, não uma automação. O plano não foi executado; a lição usa uma execução anterior disponível.",
+        "Aprovação de conhecimento altera o status do documento. Não aprova o incidente, não muda lifecycle e não executa o plano."
+      ],
+      "notes": [
+        "Retrieval usa documentos aprovados, filtrados por fonte e tags; é busca local limitada, não RAG vetorial.",
+        "Sessão HTTP e sessão MCP não são a mesma conversa. Um documento aprovado e um plano persistido podem ser lidos por ambos os processos."
+      ],
+      "sources": [
+        "src/control_tower/cockpit/api.py",
+        "src/control_tower/cockpit/assistance.py",
+        "src/control_tower/cockpit/conversation.py",
+        "src/control_tower/cockpit/knowledge.py"
+      ],
+      "boundary": null
+    },
+    {
+      "id": "11-evolucao",
+      "title": "Um sistema, quatro necessidades",
+      "level": "Complemento · Evolução pedagógica",
+      "scope": "Camadas acumuladas; branches e tags preservam os estados didáticos",
+      "nodes": [
+        {
+          "id": "a1",
+          "title": "Aula 1 · Colaborar",
+          "tech": "CLI + Pydantic + LangGraph",
+          "desc": "Tools, especialistas, join e aprovação",
+          "x": 30,
+          "y": 80,
+          "w": 460,
+          "h": 130,
+          "kind": "system"
+        },
+        {
+          "id": "a2",
+          "title": "Aula 2 · Distribuir",
+          "tech": "Celery + Redis + PostgreSQL",
+          "desc": "Concorrência, redelivery, idempotência",
+          "x": 640,
+          "y": 80,
+          "w": 460,
+          "h": 130,
+          "kind": "system"
+        },
+        {
+          "id": "a3",
+          "title": "Aula 3 · Operar o runtime",
+          "tech": "FastAPI + Docker + OTel",
+          "desc": "Health/readiness, contexto e traces",
+          "x": 640,
+          "y": 415,
+          "w": 460,
+          "h": 130,
+          "kind": "system"
+        },
+        {
+          "id": "a4",
+          "title": "Aula 4 · Gerir a workforce",
+          "tech": "MCP + Control Plane + Cockpit",
+          "desc": "Maestro, revisão e memória local",
+          "x": 30,
+          "y": 415,
+          "w": 460,
+          "h": 130,
+          "kind": "system"
+        }
+      ],
+      "edges": [
+        {
+          "source": "a1",
+          "target": "a2",
+          "label": "Mesmo grafo",
+          "points": [
+            [
+              490,
+              145
+            ],
+            [
+              640,
+              145
+            ]
+          ],
+          "label_at": [
+            565,
+            125
+          ]
+        },
+        {
+          "source": "a2",
+          "target": "a3",
+          "label": "Mesmo runtime",
+          "points": [
+            [
+              870,
+              210
+            ],
+            [
+              870,
+              415
+            ]
+          ],
+          "label_at": [
+            971,
+            305
+          ]
+        },
+        {
+          "source": "a3",
+          "target": "a4",
+          "label": "Sinais -> decisões",
+          "points": [
+            [
+              640,
+              480
+            ],
+            [
+              490,
+              480
+            ]
+          ],
+          "label_at": [
+            565,
+            460
+          ]
+        }
+      ],
+      "read": [
+        "Comece com colaboração local. A necessidade de concorrência leva à fila e aos workers; implantação e diagnóstico levam à API e à telemetria; gestão exige identidade, metas e memória.",
+        "As camadas não substituem o grafo por quatro aplicações. O caminho local continua útil para mock e demonstração conceitual."
+      ],
+      "notes": [
+        "PostgreSQL entra na Aula 2, não na Aula 3. MCP e Control Plane entram na Aula 4; OpenTelemetry já é da Aula 3.",
+        "Kubernetes, multi-provider routing, circuit breakers avançados, SLO-driven fallback e ACT autônomo não fazem parte da arquitetura implementada atual."
+      ],
+      "sources": [
+        "docs/course/lesson-01-runbook.md",
+        "docs/course/lesson-02-runbook.md",
+        "docs/course/lesson-03-runbook.md",
+        "docs/course/lesson-04-final-runbook.md"
+      ],
+      "boundary": null
+    }
+  ]
+}

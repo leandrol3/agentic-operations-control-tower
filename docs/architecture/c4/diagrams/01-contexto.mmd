@@ -1,0 +1,21 @@
+flowchart TB
+  %% C1 · Contexto — Quem usa e de quem depende?
+  %% Escopo: Sistema NovaCore: Control Tower + Control Plane
+  people["Pessoa / papel<br/>Professor / operador<br/>Pessoa<br/>Alunos acompanham decisões"]
+  system["Sistema em foco<br/>NovaCore LAB<br/>Sistema em foco<br/>Analisa incidentes e gere agentes"]
+  codex["Sistema externo<br/>Codex<br/>Sistema externo / cliente MCP<br/>Acessa tools configuradas"]
+  openai["Sistema externo<br/>OpenAI API<br/>Sistema externo<br/>Interpretação e síntese estruturadas"]
+  people -->|"Opera e revisa"| system
+  people -->|"Solicita consultas"| codex
+  codex -->|"Consulta capabilities"| system
+  system -->|"Solicita inferência / (somente openai)"| openai
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class people person;
+  class system system;
+  class codex external;
+  class openai external;
