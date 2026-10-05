@@ -34,15 +34,16 @@ Cinco perguntas que devem permanecer visíveis na fala:
 | 02:05–02:20 | 15 | Pausa; professor prepara OpenAI | Sem nova carga empresarial |
 | 02:20–02:45 | 25 | Business Value, SLO, Decision Engine | Como transformar sinais em decisões? |
 | 02:45–03:00 | 15 | Demo 4 — Collect → Interpret → Recommend | O que sustenta a proposta? |
-| 03:00–03:08 | 8 | Control Plane visual: enquadramento | Qual decisão o cockpit permite tomar? |
+| 03:00–03:08 | 8 | Síntese visual das decisões já observadas | Qual decisão o cockpit permite tomar? |
 | 03:08–03:15 | 7 | Maestro: conceito, fontes e limites | Quem coordena a melhoria? |
-| 03:15–03:33 | 18 | Demo 5 — narrativa integrada do cockpit | Da atenção ao conhecimento reutilizado |
+| 03:15–03:33 | 18 | Demo 5 — melhoria e conhecimento | Da atenção ao conhecimento reutilizado |
 | 03:33–03:40 | 7 | Demo 6 — Codex → MCP → Maestro | A mesma gestão fora do cockpit |
 | 03:40–03:50 | 10 | Segundo Cérebro: discussão e margem | Quando uma resposta vira conhecimento? |
 | 03:50–04:00 | 10 | Learning Loop, maturidade e arco final | O que significa uma empresa aprender? |
 | **Total** | **240** | **Sem instalação ou build ao vivo** | |
 
-Há **105 min explícitos de contexto/teoria antes do cockpit**, além dos seus 15 min conceituais.
+Há **105 min explícitos de contexto/teoria até a Demo 4**, além dos 15 min conceituais seguintes.
+O cockpit entra na Demo 2 e permanece como interface principal.
 Cada demo de 15 min reserva 2 min para transição/espera. A demo final tem 2 min internos de margem.
 Dos 10 min após a Demo 6, preservar 6 min de reflexão e usar no máximo 4 para recuperação.
 **Hard stop:** às 03:50 iniciar o fechamento, mesmo que alguma exploração opcional não tenha ocorrido.
@@ -54,8 +55,22 @@ Tempo de máquina não é tempo de fala: os números técnicos do relatório nã
 2. **Demo 2 — Registry, Goals e Lifecycle:** identidade, expectativa e estado administrativo.
 3. **Demo 3 — Normal vs Degraded + Economics:** conclusão, qualidade e custo.
 4. **Demo 4 — Collect → Interpret → Recommend:** sinais e decisão determinística.
-5. **Demo 5 — Cockpit integrado:** Supply, Maestro, revisão, Segundo Cérebro e Learning Loop.
+5. **Demo 5 — Da recomendação ao conhecimento:** Maestro, extração, revisão e reutilização.
 6. **Demo 6 — Codex → MCP → Maestro:** a mesma gestão e memória fora do cockpit.
+
+### Orientação de condução: a interface acompanha o conceito
+
+**Demo 1:** terminal para demonstrar a fronteira HTTP/MCP. **Demos 2–4:** cockpit para
+identidade → evidências → decisão. **Demo 5:** partir da decisão já compreendida para
+Maestro → revisão humana → memória. **Demo 6:** Codex acessa o Maestro via MCP.
+
+O terminal fica preparado para contingência, não é um segundo roteiro obrigatório.
+Mostre primeiro a evidência na tela, explique seu significado e só então abra um recorte de código,
+quando indicado. Não percorra todos os menus nem repita o cadastro na Demo 5.
+Use **Suprimentos (Supply)** como fio condutor. Mantenha **Fonte de dados → Cenário didático**
+nas Demos 2–6. Diga: “Os dados são sintéticos; as regras e a navegação são as do sistema.
+Mais adiante, o Maestro usará LLM real para interpretar esses mesmos dados.”
+O modo do serviço (mock/OpenAI) e a fonte de dados (didática/durável) são escolhas diferentes.
 
 ## 2. Preparação antes da aula (reservar 45–60 min)
 
@@ -146,7 +161,7 @@ O helper visual confirma 7 agentes, 1 em atenção, Supply 90%/74%/−16 p.p. e 
 `/ready` não prova sozinho que todos os workers funcionam: a Demo 1 completa essa verificação.
 Build fica fora da aula. Nunca projetar `docker compose config` sem `--quiet` com chave carregada.
 
-### 2.4 Preparar normal/degraded e salvar outputs de contingência
+### 2.4 Preparar execuções duráveis e outputs de contingência
 
 Este trabalho ocorre **antes da aula**. Primeiro HTTP/MCP real em mock:
 
@@ -256,6 +271,21 @@ code src/control_tower/application.py src/control_tower/mcp/tools.py src/control
 Se não estiver, use Arquivo → Abrir arquivo no VS Code; não instalar a integração durante a aula.
 Fonte de terminal 20–24; navegador 1440×900 ou 1920×1080, zoom 100%. Fechar abas de credenciais.
 
+### Preparar a navegação visual antes de projetar
+
+1. Abrir `http://localhost:3000`; usar janela ampla, preferencialmente 1440 × 900.
+2. Selecionar **Fonte de dados → Cenário didático** e confirmar o aviso de dados sintéticos.
+3. Ensaiar **Agentes → Suprimentos → Resumo / Metas / Lifecycle**.
+4. Em **Operações**, testar o filtro `63cfd5c6` (normal) e depois substituí-lo por
+   `5d04239c` (degradada). Abrir cada linha. Para voltar, clicar **Operações** no menu lateral.
+5. Conferir **Agentes → Suprimentos → Economia / SLOs / Decisões** e a proposta **Intervir**.
+6. Deixar a aba em **Visão Geral** para começar a Demo 2. Não abrir nem enviar pergunta ao Maestro ainda.
+7. Manter os outputs da seção 2.4 salvos. Eles são execuções duráveis mock e fixtures técnicas;
+   não são as seis linhas sintéticas da tela. Anunciar a troca de fonte se precisar usá-los.
+
+Não há comando de terminal obrigatório nas Demos 2–4 quando a interface está funcionando.
+Os comandos de contingência abaixo são completos e rodam no terminal preparado na seção 2.
+
 ### Checklist imediatamente antes dos alunos entrarem
 
 - [ ] Branch correta; working tree conhecido; conhecimento pessoal preservado.
@@ -333,26 +363,34 @@ Identidade nos diz quem é o agente. Metas nos dizem por que ele existe.”
 **Pergunta:** “Um agente Ativo pode participar de uma execução falha?” Sim.
 Explique alvo, observado, gap, janela, unidade e desconhecido antes de abrir o cockpit.
 
-### 01:15–01:30 · Demo 2
+### 01:15–01:30 · Demo 2 — conhecer o agente pela interface
 
-2 min pergunta, 4 min Registry, 3 min meta/lifecycle, 1 min código, 3 min discussão, 2 min margem.
+**Objetivo:** identificar responsabilidade, meta e estado administrativo sem ler um dump do cadastro.
+**Entrada:** cockpit em Visão Geral, fonte Cenário didático. **Saída:** Suprimentos / Lifecycle.
+
+| Minuto | Clique / gesto do professor | Fala e resultado esperado |
+|---|---|---|
+| 0–2 | Visão Geral: apontar 7 agentes e 1 em atenção | “Temos uma workforce registrada. Atenção é um convite para investigar.” Não abrir Maestro. |
+| 2–5 | Menu **Agentes** → **Suprimentos** → **Resumo** | Apontar papel, responsáveis, versão e tools de estoque/fornecedores. “O cadastro define responsabilidade e capacidades.” Modelo configurado não prova chamada LLM nesta tela. |
+| 5–8 | Aba **Metas** | Ler cobertura de evidências alternativas: alvo **90%**, atual **74%**, gap **−16 p.p.**, 50 observações. “37 de 50 observações têm cobertura completa.” Não apresentar como taxa de sucesso das seis execuções. |
+| 8–10 | Aba **Lifecycle** | Apontar Ativo, seis estados e transições permitidas. “Ativo é estado administrativo. Não garante estar dentro da meta.” Sugestão de revisão não foi aplicada. |
+| 10–11 | Abrir o recorte `BusinessGoal` / `AgentRecord` da seção 10 | “A tela apresenta um contrato explícito.” Mostrar campos, não implementação inteira. |
+| 11–13 | Voltar a Lifecycle; perguntar aos alunos | “Um agente ativo pode estar fora da meta? Uma recomendação deveria mudar seu estado sozinha?” |
+| 13–15 | Margem e transição | “Sabemos quem é e o que esperamos. Agora precisamos avaliar o que entregou.” |
+
+Não clicar em transição inexistente. Finance continua determinístico; cadastro de agente não implica LLM.
+A recomendação de intervenção será explicada na Demo 4; não antecipar a conversa com Maestro.
+
+**Fallback se a UI falhar:** anunciar “Vou mostrar o contrato técnico do cadastro”.
 
 ```bash
 uv run --extra lesson04 python scripts/demo_lesson04.py registry
 uv run --extra lesson04 python scripts/demo_lesson04.py registry supply
-uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture stable --agent logistics --section goals
 ```
 
-Esperado: sete papéis, Ativo, determinístico em mock; Supply usa tools de estoque/fornecedores;
-Finance continua determinístico. Registry: alvo técnico 100%. Fixture Logistics: atual 100%, gap 0.
-**Não confundir:** o cockpit Supply usa outra meta didática, **cobertura de evidência 90%**, calculada
-sobre 50 observações. O alvo técnico de concluir uma etapa sem falhar não é essa cobertura.
-Na UI abra `Lifecycle`: seis estados e 11 transições válidas. Estado atual Ativo; proposta não aplicada.
-Não clicar em ações inexistentes nem afirmar que o motor grava transições.
-**Código:** `BusinessGoal` e `AgentRecord`, no máximo 60 s.
-**Pergunta:** “Recommendation deve mudar lifecycle automaticamente?” Não: recommendation is not authorization.
-**Fallback:** Registry salvo no terminal, enum no arquivo; não alterar o cadastro para a demo.
-**Transição:** “Agora sabemos quem é e o que esperamos. Precisamos medir o que entregou.”
+O Registry técnico usa alvo de conclusão de etapa **100%**, diferente da cobertura didática **90%**
+do cockpit. Não comparar os dois como se fossem a mesma métrica. Se o serviço também falhar,
+abrir `src/control_tower/control_plane/registry.py` e mostrar os contratos já preparados.
 
 ## 5. Quality e Economics — teoria e Demo 3
 
@@ -364,10 +402,47 @@ que seja uma nota. Não disponível não significa zero. Confiança declarada n�
 **Pergunta:** “Quanto custa um agente?” Distinguir consumo LLM, infraestrutura, pessoas, workflow e decisão.
 Pricing é configuração datada; usage é medição; custo é estimativa. Não comparar USD com BRL por soma.
 
-### 01:50–02:05 · Demo 3
+### 01:50–02:05 · Demo 3 — comparar resultados visualmente
 
-2 min hipótese, 5 min comparação, 3 min economics, 3 min debate, 2 min margem.
-Os dois resultados já foram produzidos na preparação; dizer isso explicitamente.
+**Objetivo:** separar conclusão, qualidade, fallback e custo. Fonte **Cenário didático**.
+As execuções ilustrativas já existem; não submeter nova carga durante esta demo.
+
+| Minuto | Clique / gesto do professor | Fala e resultado esperado |
+|---|---|---|
+| 0–2 | Menu **Operações**, ler colunas Status e Resultado | “Concluída é uma informação operacional. Vamos investigar o resultado.” |
+| 2–4 | Em **Filtrar execuções**, digitar `63cfd5c6`; abrir a linha | Em **Resultado e revisão**, mostrar Recomendação e aprovação pendente. Em qualidade, distinguir confiança declarada de evidência validada. |
+| 4–7 | Menu **Operações**; substituir filtro por `5d04239c`; abrir a linha | Mostrar Recomendação degradada, fallback e aprovação pendente. “As duas terminaram; não são resultados equivalentes.” Não clicar Extrair aprendizado ainda. |
+| 7–10 | Menu **Agentes** → **Suprimentos** → **Economia** | Apontar estimativa **0,00056 USD** do papel no cenário e limites de cobertura. “Custo do papel, custo do workflow e valor de negócio têm escopos distintos.” |
+| 10–13 | Perguntar e comparar verbalmente | “Uma execução concluída pode exigir intervenção? Não disponível significa custo zero?” Revisão humana também é obrigatória na normal. |
+| 13–15 | Margem e transição | “Custo nos diz quanto consumimos. Valor exige evidência do que mudou no negócio.” |
+
+O filtro aceita incidente, status ou UUID; **não pesquisar por ‘degraded’**.
+Para voltar da execução, clicar **Operações** no menu lateral. Apagar/substituir o filtro anterior.
+
+| Evidência das duas execuções sintéticas | Normal `63cfd5c6` | Degradada `5d04239c` |
+|---|---|---|
+| Status | Concluída | Concluída |
+| Resultado | Recomendação | Recomendação degradada |
+| Fallback | Não | Sim |
+| Aprovação | Pendente | Pendente |
+| Tokens de entrada | 6.000 sintéticos | Não disponível |
+| Custo LLM estimado no dado da fixture | 0,00336 USD | Não disponível |
+
+Os valores não são consumo real de provider. O custo pequeno no detalhe de execução pode aparecer
+arredondado como zero; usar a aba **Economia** do agente para mostrar precisão, explicando o escopo
+menor de **0,00056 USD**. Nunca dizer “gratuito”. Não confundir confiança declarada com probabilidade
+calibrada nem campos de completude/conformidade indisponíveis com avaliação semântica positiva.
+As seis execuções são ilustrações independentes das 50 observações da meta de Supply.
+
+**Fallback preparado:** anunciar que as saídas abaixo são do ensaio durável em mock,
+no qual tokens/custo são indisponíveis inclusive na execução normal.
+
+```bash
+cat "$AULA4_DIR/quality.txt"
+cat "$AULA4_DIR/economics.txt"
+```
+
+Se precisar consultar novamente o ensaio com serviço disponível:
 
 ```bash
 uv run --extra lesson04 python scripts/demo_lesson04.py quality
@@ -376,20 +451,7 @@ DEGRADED_ID="$(uv run python -c 'import json; print(json.load(open("artifacts/le
 uv run --extra lesson04 python scripts/demo_lesson04.py economics "$DEGRADED_ID"
 ```
 
-| Campo | Normal | Degraded artificial |
-|---|---|---|
-| Status do runtime | Concluída | Concluída |
-| Resultado | Recomendação | Recomendação degradada |
-| Fallback | Não | Sim |
-| Revisão humana | Sim | Sim |
-| Aprovação | Pendente | Pendente |
-| Evidências completas / conformidade | Não disponível | Não disponível |
-| Tokens / custo LLM | Não disponível | Não disponível |
-
-Na falha artificial, tentativas registradas não são chamadas faturadas. Não usar seu contador como fatura.
-**Pergunta:** “As duas completaram. São equivalentes?” Não. Revisão humana na normal é uma regra, não defeito.
-**Fallback:** `cat "$AULA4_DIR/quality.txt"` e `cat "$AULA4_DIR/economics.txt"`.
-**Transição:** “Custo nos diz quanto consumimos. Valor nos diz se valeu a pena.”
+Tentativas na falha artificial não são chamadas faturadas. Não usar seu contador como fatura.
 
 ### 02:05–02:20 · pausa
 
@@ -415,54 +477,82 @@ Qualidade degradada é contexto do workflow, não prova de culpa individual de S
 **Perguntas:** “O que é valor: tokens baratos ou impacto de negócio?”
 “Se o agente está fora da meta, devemos trocar o modelo imediatamente?” Investigar evidências primeiro.
 
-### 02:45–03:00 · Demo 4
+### 02:45–03:00 · Demo 4 — evidências e decisão no mesmo agente
 
-2 min hipótese; 3 min custo/SLO; 4 min pipeline; 1 min código; 3 min discussão; 2 min margem.
+**Objetivo:** explicar Collect → Interpret → Recommend usando Suprimentos.
+**Entrada:** Agentes → Suprimentos, fonte Cenário didático. O serviço já pode estar OpenAI;
+a decisão exibida continua sendo produzida por regras determinísticas.
+
+| Minuto | Clique / gesto do professor | Fala e resultado esperado |
+|---|---|---|
+| 0–3 | Aba **Metas**, depois **Qualidade** | **Collect:** recuperar 90% / 74% / −16 p.p. e 28% de resultados degradados no contexto do workflow. “São sinais com fonte e escopo; não uma explicação causal.” |
+| 3–5 | Aba **SLOs** | **Interpret:** comparar cobertura 74% com mínimo 90%; degradação 28% com limite 10%. Mostrar violação e unidade. Não ler todos os SLOs. |
+| 5–7 | Aba **Decisões** | **Recommend:** apontar **Intervir**, evidências e aprovação obrigatória. “Uma regra transforma o sinal em proposta. Ainda não existe autorização para agir.” |
+| 7–9 | Aba **Lifecycle**, depois **Economia** | Ativo → Em revisão é sugestão. Na área de valor, distinguir penalidade potencial **R$ 140.000**, cenário **R$ 12.500** e valor realizado desconhecido. |
+| 9–10 | Código: `decision_engine.recommend` | Mostrar primeira regra aplicável e retorno. Não há chamada LLM nem execução da intervenção. |
+| 10–13 | Menu **Decisões** → **Suprimentos · Intervir** | Ler uma evidência no detalhe; mostrar o botão de perguntar ao Maestro, sem enviar ainda. “A regra diz que há motivo para intervir. Quem ajuda a planejar a melhoria?” |
+| 13–15 | Margem e transição | Deixar a recomendação pronta para a Demo 5. |
+
+Collect, Interpret e Recommend descrevem a lógica já calculada; não são três botões a executar.
+Degradação é contexto do workflow, não prova de culpa de Supply. A primeira regra aplicável tem
+precedência: não atribuir a intervenção exclusivamente ao gap de cobertura. Nenhuma compra,
+pausa de worker, troca de modelo ou transição de lifecycle é executada pela tela.
+
+**Fallback:** o comando abaixo usa outra fixture, de **Logistics**, para explicar o mesmo pipeline.
+Ela recomenda **Otimizar**, não Intervir. Anunciar a diferença de agente, métrica e fonte.
 
 ```bash
-uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture cost --agent logistics --section slo
 uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize --agent logistics --section pipeline
 ```
 
-Primeiro: meta 100%, custo USD 0,02016 acima de 0,01, proposta de revisão.
-Segundo: atual 66,666667%, alvo 100%, custo crescente, qualidade desconhecida, **Otimizar**, aprovação Sim.
-Ambos imprimem **FONTE: FIXTURE DIDÁTICA**. `modo=openai` no output caracteriza eventos sintéticos,
-não requests ao provider. Mostrar uma evidência, sua unidade e escopo; não ler todas as linhas.
-**Código:** primeira regra e retorno de `decision_engine.recommend`, 60 s. Primeira regra aplicável vence;
-a regra não chama LLM, não altera modelo, não pausa worker, não autoriza plano.
-**Fala:** “Control Plane não precisa controlar tudo. Ele precisa transformar sinais em decisões melhores.”
-**Fallback:** `cat "$AULA4_DIR/pipeline.txt"`; a mesma fixture também roda sem Docker.
-**Transição:** “O Control Plane identifica que devemos intervir. Mas quem coordena a melhoria?”
+Esperado: alvo técnico 100%, atual 66,666667%, custo crescente, qualidade desconhecida,
+Otimizar e aprovação necessária. Roda sem Docker. Se necessário usar a gravação:
 
-## 7. Control Plane visual e Maestro — preparar a narrativa (03:00–03:15)
+```bash
+cat "$AULA4_DIR/pipeline.txt"
+```
 
-**03:00–03:08:** explique a tela sem percorrer todos os menus. Coleção → interpretação → proposta.
-Declare as três populações: 50 observações de cobertura Supply; janelas técnicas dos outros papéis;
-6 execuções ilustrativas independentes. Não dividir as seis execuções para tentar reproduzir os 74%.
+Exploração opcional **fora dos 15 minutos**: fixture de custo acima do limite.
+
+```bash
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture cost --agent logistics --section slo
+```
+
+Esperado: meta 100%, custo USD 0,02016 acima de 0,01. `modo=openai` nos eventos sintéticos
+não significa chamada ao provider. Não trocar a narrativa principal para este segundo caso.
+
+## 7. Das decisões observadas ao Maestro (03:00–03:15)
+
+**03:00–03:08:** manter a recomendação de Suprimentos visível. Não reabrir Visão Geral nem
+repetir o cadastro. Pedir que os alunos reconstruam: identidade → meta → evidências → limite → proposta.
+Retomar as populações: 50 observações de cobertura Supply; janelas técnicas dos outros papéis;
+6 execuções ilustrativas independentes. Não dividir as seis execuções para reproduzir os 74%.
+**Pergunta:** “Qual evidência sustenta intervir? O que ainda precisamos investigar antes de mudar algo?”
+
 **03:08–03:15:** “The Maestro is the Chief of Staff of the Agentic Workforce.”
 Supervisor coordena **uma execução**. Maestro coordena **propostas de melhoria da workforce**.
 Consulta fontes, sintetiza diagnóstico, propõe plano e responsabilidades. Staffs são papéis propostos,
 não novos agentes executando. “LLMs interpretam e julgam. Código determinístico mede e valida.”
-**Pergunta:** “Quem deve melhorar um agente? Quais evidências a equipe precisaria antes de mudar seu modelo?”
-Não mostrar a conversa completa ainda; preservar a surpresa e continuidade da demo.
+Anunciar: “Até aqui medimos e aplicamos regras. Agora vamos pedir uma interpretação e um plano.”
+Não enviar a pergunta ainda; a espera do provider está prevista na Demo 5.
 
-## 8. Demo 5 — cockpit final em 18 minutos (03:15–03:33)
+## 8. Demo 5 — da recomendação ao conhecimento em 18 minutos (03:15–03:33)
 
 **Pré-condição:** OpenAI, gpt-4.1-mini, fonte Cenário didático, pasta de conhecimento isolada.
-Texto do LLM varia; medidas, fontes, estado e autorização não. Cronometrar a partir de Visão Geral.
+Texto do LLM varia; medidas, fontes, estado e autorização não. Cronometrar a partir da
+recomendação **Suprimentos · Intervir**, já explicada na Demo 4. Não repetir Overview/Agent 360.
+O LLM real interpreta dados sintéticos; isso não transforma o cenário em evidência de produção.
 
 | Tempo da demo | Gestos e tela | Fala / evidência |
 |---|---|---|
-| 00:00–01:30 | Visão Geral; apontar 1 agente requer atenção; clicar CTA e fechar drawer sem enviar | “Estou vendo uma organização agêntica sendo gerenciada. O sinal pede investigação, não culpa.” |
-| 01:30–04:00 | Abrir Suprimentos; Resumo → Metas → Qualidade → Economia → SLOs → Lifecycle | “Meta 90, atual 74, gap −16. São 37/50 observações completas. Ativo não significa dentro da meta.” |
-| 04:00–05:00 | Decisões; abrir Suprimentos · Intervir | Mostrar evidências; Ativo → Em revisão é sugestão. “Recommendation is not authorization.” |
-| 05:00–08:00 | Perguntar ao Maestro; enviar “Como posso melhorar este agente?” | Ler diagnóstico curto. Expandir Hipótese, plano de melhoria e staffs; Fontes utilizadas. Mostrar Registry, Goals, Quality, Economics, SLO, Control Plane e memória aprovada consultados. |
-| 08:00–09:00 | Abrir Operações; primeira execução concluída relacionada; Extrair aprendizado | “Melhorar uma vez não significa aprender. A experiência precisa sobreviver à execução.” |
-| 09:00–12:00 | Ler candidato, origem, observações e inferência; decidir revisão | Aprovar apenas se sustentado, com formulário abaixo. Caso contrário rejeitar e usar seed aprovado como exemplo de retrieval. |
-| 12:00–13:30 | Voltar ao Segundo Cérebro; lista, grafo e feed | “Memória organizacional validada: execuções, decisões, evidências, feedback, outcomes, lessons e patterns. Não apenas vector database.” |
-| 13:30–15:00 | Voltar ao Maestro; perguntar “O que aprendemos hoje sobre Supply? Use o conhecimento aprovado.” | Conferir título do item nas fontes. Conhecimento pendente não vira verdade. Melhora contexto do Maestro, não treina pesos. |
-| 15:00–16:00 | Learning Loop; 12 etapas e régua de maturidade | LAB entre Gerenciada e Adaptativa, níveis 3 e 4. Nível 5 é visão futura. |
-| 16:00–18:00 | Margem para provider, leitura e transições | Se não consumida, pedir ao aluno para distinguir recomendação, plano e aprovação. |
+| 00:00–01:00 | Na recomendação, clicar **Perguntar ao Maestro sobre esta recomendação** | “Já sabemos por que investigar. Vamos planejar como melhorar.” Conferir contexto Suprimentos/recomendação. |
+| 01:00–05:00 | Enviar **Como posso melhorar este agente?** | Ler diagnóstico curto, uma hipótese, um passo do plano, um staff e Fontes utilizadas. Distinguir evidência consultada de hipótese proposta. |
+| 05:00–06:00 | Menu **Operações**; filtrar `63cfd5c6`, abrir execução e clicar **Extrair aprendizado** | “O plano não foi implantado. Vamos extrair uma lição da execução existente, não um suposto resultado da melhoria.” |
+| 06:00–10:00 | Ler candidato, origem, observações e inferência; revisar usando formulário abaixo | Aprovar somente se sustentado. Caso contrário rejeitar e usar referência curada para demonstrar retrieval. |
+| 10:00–12:00 | Menu **Segundo Cérebro**; abrir item aprovado, lista, grafo e feed | Apontar origem, revisor e limites. “A experiência agora tem memória persistida e revisão explícita.” |
+| 12:00–14:00 | Voltar ao **Maestro**; perguntar **O que aprendemos hoje sobre Supply? Use o conhecimento aprovado.** | Conferir título do item nas fontes. Se não aparecer, declarar. Conhecimento pendente não vira verdade; retrieval não treina pesos. |
+| 14:00–16:00 | Mostrar **Learning Loop** brevemente e guardar título da referência usada | “Propusemos, revisamos e reutilizamos conhecimento. Não demonstramos melhoria implantada.” Preparar a mesma referência para a Demo 6; maturidade fica para o fechamento. |
+| 16:00–18:00 | Margem de provider, leitura e transições | Se disponível, perguntar: “O que foi aprovado: o conhecimento, o plano ou uma ação empresarial?” |
 
 ### Revisão humana — texto pronto, decisão consciente
 
@@ -498,12 +588,13 @@ Se uma chamada ultrapassar **15 s**, começar a explicação das fontes. O timeo
 Após falha, não fazer uma sequência de retries: mostrar plano mock/candidato preparados.
 Reiniciar em mock pode levar dezenas de segundos; preferir conteúdo persistido para não interromper a história.
 Se necessário reiniciar, usar a seção 12 e anunciar a mudança de modo. Não há fallback silencioso.
-No minuto 12, se a revisão ainda não terminou, não aprovar às pressas: usar referência curada no Segundo Cérebro.
+No minuto 10, se a revisão ainda não terminou, não aprovar às pressas: usar referência curada no Segundo Cérebro.
 Na tabela SLO, um custo muito pequeno pode aparecer arredondado como `0`; a aba Economia mostra
 `0,00056 USD` no cenário. Não interpretar o arredondamento como consumo gratuito.
 Ao abrir execução/conhecimento a partir do Agent 360, o título principal pode continuar “Suprimentos”;
 o breadcrumb e o título do documento indicam a área atual. Use o menu lateral para remover essa ambiguidade.
-No minuto 16, abrir Learning Loop. Máximo absoluto 20 min; recuperar até 2 min da discussão seguinte.
+Até o minuto 16, concluir a passagem pelo Learning Loop e preparar a Demo 6. Máximo absoluto
+20 min; recuperar até 2 min da discussão seguinte, preservando a revisão humana sem pressa.
 
 ## 9. Demo 6 — Codex → MCP → Maestro (03:33–03:40)
 

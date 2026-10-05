@@ -19,7 +19,9 @@ export OPENAI_MODEL=gpt-4.1-mini
 ```
 
 Abra **http://localhost:3000**. API: 8000; Jaeger: 16686.
-[Runbook da demonstração final — 18 minutos, comandos e fallbacks](docs/course/lesson-04-cockpit-runbook.md).
+[Runbook principal — seis demos, 240 minutos e navegação pelo cockpit](docs/course/lesson-04-final-runbook.md).
+[Roteiro slide a slide em PDF e comandos copiáveis](docs/course/lesson-04/materials/README.md).
+[Runbook histórico do cockpit](docs/course/lesson-04-cockpit-runbook.md).
 [Relatório técnico original](docs/course/lesson-04/cockpit-validation.md).
 [Refinamento final — relatório A–L e capturas](docs/course/lesson-04/cockpit-refinement-validation.md).
 
@@ -29,7 +31,7 @@ OpenAI é a experiência principal do Maestro, com Pydantic, contexto e sessão 
 Para testes/CI/fallback offline, selecione `LLM_MODE=mock` e reinicie o perfil. Nunca há fallback silencioso.
 Logo oficial L3, lifecycle visual, exposição potencial (sem savings) e maturidade entre níveis 3 e 4.
 
-Branch `codex/lesson-04-cockpit`. Checkpoints preservados. Sem push ou tag neste candidato.
+Branch `codex/lesson-04-cockpit`. Publicação autorizada em 05/10/2026; integração com `main` via PR. Checkpoints e tags anteriores preservados.
 
 ---
 

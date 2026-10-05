@@ -1,3 +1,11 @@
+# Publicação autorizada — Aula 4
+
+Em 05/10/2026, o professor autorizou atualizar o GitHub com a implementação e os materiais
+aprovados. Nesta publicação, as branches da Aula 4 são preservadas e a integração com
+main será apresentada em PR, sem merge automático.
+Preservar tags/checkpoints e excluir dados pessoais de ensaios e credenciais.
+Esta autorização substitui as restrições históricas de push abaixo; não autoriza ACT.
+
 # Escopo vigente — Demo 6: Codex → MCP → Maestro
 
 Autorizado em 04/10/2026: adaptador MCP opcional para o Maestro existente e roteiro final com

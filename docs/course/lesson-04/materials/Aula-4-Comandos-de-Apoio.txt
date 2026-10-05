@@ -1,0 +1,285 @@
+### prep
+cd '/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower'
+git branch --show-current
+git log -1 --oneline
+git status --short
+open -a Docker
+docker version
+uv --version
+uv sync --locked --extra lesson04
+
+### prep
+export AULA4_DIR="$PWD/artifacts/aula4-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$AULA4_DIR"
+printf '%s\n' "$AULA4_DIR" > artifacts/aula4-current.txt
+uv run python - <<'PY'
+import json, os, subprocess
+from pathlib import Path
+root = Path.cwd()
+out = Path(os.environ['AULA4_DIR'])
+for name in subprocess.check_output(['git', 'ls-files', 'knowledge'], text=True).splitlines():
+    target = out / name
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes((root / name).read_bytes())
+(out / 'knowledge').mkdir(exist_ok=True)
+overlay = (
+    'services:\n  api:\n    volumes:\n      - type: bind\n        source: '
+    + json.dumps(str(out / 'knowledge'))
+    + '\n        target: /app/knowledge\n'
+)
+(out / 'isolation.yaml').write_text(overlay)
+print('Memória exclusiva preparada:', out / 'knowledge')
+PY
+export KNOWLEDGE_ROOT="$AULA4_DIR/knowledge"
+export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
+export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
+export LLM_MODE=mock
+export OTEL_ENABLED=true
+export OTEL_CAPTURE_CONTENT=false
+export DEMO_AGENT_DELAY_MS=0
+export VISIBILITY_TIMEOUT=900
+unset OPENAI_API_KEY
+uv run --extra lesson04 python scripts/seed_cockpit.py
+
+### prep
+cd '/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower'
+export AULA4_DIR="$(cat artifacts/aula4-current.txt)"
+export KNOWLEDGE_ROOT="$AULA4_DIR/knowledge"
+export CONTROL_TOWER_PRICING_FILE=config/lesson04-pricing.json
+export CONTROL_PLANE_CONFIG_FILE=config/lesson04-control-plane.json
+export VISIBILITY_TIMEOUT=900
+
+### prep
+export LLM_MODE=mock
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" config --quiet
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" up -d --build --wait
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" ps
+curl --fail --silent --show-error http://localhost:8000/health
+curl --fail --silent --show-error http://localhost:8000/ready
+uv run --extra lesson04 control-tower smoke
+uv run --extra lesson04 python scripts/demo_cockpit.py
+
+### prep
+uv run --extra lesson04 python scripts/demo_lesson04.py boundary | tee "$AULA4_DIR/boundary.txt"
+uv run --extra lesson04 python scripts/demo_lesson04.py registry | tee "$AULA4_DIR/registry.txt"
+
+### prep
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" -f compose.lesson03-failure.yaml up -d --wait
+uv run --extra lesson04 python scripts/demo_lesson04.py degraded | tee "$AULA4_DIR/degraded.txt"
+uv run --extra lesson04 python scripts/demo_lesson04.py quality | tee "$AULA4_DIR/quality.txt"
+uv run --extra lesson04 python scripts/demo_lesson04.py economics | tee "$AULA4_DIR/economics.txt"
+export LLM_MODE=mock
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" up -d --wait
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize --agent \
+  logistics --section pipeline | tee "$AULA4_DIR/pipeline.txt"
+uv run --extra lesson04 python scripts/demo_cockpit.py | tee "$AULA4_DIR/cockpit.txt"
+
+### prep
+curl --fail --silent --show-error http://localhost:8000/maestro/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"Como posso melhorar o agente de Supply?","agent_id":"supply","source":"didactic"}' \
+  > "$AULA4_DIR/maestro-mock.json"
+uv run python - <<'PYMOCK'
+import json, os
+from pathlib import Path
+root = Path(os.environ['AULA4_DIR'])
+r = json.loads((root / 'maestro-mock.json').read_text())
+p = r['plan']
+assert p['generated_by'] == 'mock-deterministic', 'Volte a stack para mock antes de preparar este fallback'
+text = (
+    'FALLBACK DIDÁTICO MOCK - NÃO É INFERÊNCIA REAL\n'
+    + p['diagnosis'] + '\n\n' + p['objective']
+    + '\n' + '\n'.join(p['steps'])
+)
+(root / 'maestro-mock.txt').write_text(text + '\n')
+print(text)
+PYMOCK
+
+### prep
+export LLM_MODE=openai
+export OPENAI_MODEL=gpt-4.1-mini
+uv run --extra lesson04 python - <<'PY'
+import os, subprocess
+from pathlib import Path
+from control_tower.settings import Settings
+settings = Settings.load(Path.cwd())
+env = dict(os.environ, OPENAI_API_KEY=settings.api_key)
+overlay = str(Path(os.environ['AULA4_DIR']) / 'isolation.yaml')
+subprocess.run(
+    ['bash', 'scripts/cockpit.sh', '-f', overlay, 'up', '-d', '--wait'],
+    env=env, check=True,
+)
+print('OpenAI configurado; chave não exibida.')
+PY
+
+### prep
+export LLM_MODE=mock
+unset OPENAI_API_KEY
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" up -d --wait
+
+### prep
+open http://localhost:3000
+open http://localhost:8000/docs
+open http://localhost:16686
+
+### prep
+code src/control_tower/application.py src/control_tower/mcp/tools.py \
+  src/control_tower/control_plane/registry.py src/control_tower/control_plane/decision_engine.py \
+  src/control_tower/cockpit/assistance.py
+
+### prep
+uv run --extra lesson04 python scripts/demo_maestro_mcp.py \
+  | tee "$AULA4_DIR/maestro-mcp-mock.txt"
+
+### prep
+LLM_MODE=mock uv run --extra lesson04 pytest -q
+LLM_MODE=mock uv run --extra lesson04 control-tower smoke
+
+### d1
+uv run --extra lesson04 python scripts/demo_lesson04.py boundary
+
+### d2
+uv run --extra lesson04 python scripts/demo_lesson04.py registry
+uv run --extra lesson04 python scripts/demo_lesson04.py registry supply
+
+### d3
+cat "$AULA4_DIR/quality.txt"
+cat "$AULA4_DIR/economics.txt"
+
+### d3
+uv run --extra lesson04 python scripts/demo_lesson04.py quality
+uv run --extra lesson04 python scripts/demo_lesson04.py economics
+DEGRADED_ID="$(uv run python - <<'PYID'
+import json
+with open('artifacts/lesson04-demo.json') as f:
+    print(json.load(f)['degraded'])
+PYID
+)"
+uv run --extra lesson04 python scripts/demo_lesson04.py economics "$DEGRADED_ID"
+
+### d4
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize --agent \
+  logistics --section pipeline
+
+### d4
+cat "$AULA4_DIR/pipeline.txt"
+
+### d4
+uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture cost --agent logistics \
+  --section slo
+
+### d6
+CODEX_BIN="$(command -v codex || true)"
+if [ -z "$CODEX_BIN" ]; then
+  CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex
+fi
+"$CODEX_BIN" --version
+"$CODEX_BIN" login status
+"$CODEX_BIN" mcp add novacore-maestro -- /bin/bash "$PWD/scripts/start_maestro_mcp.sh"
+"$CODEX_BIN" mcp get novacore-maestro
+"$CODEX_BIN" mcp list
+"$CODEX_BIN"
+
+### d6
+"$CODEX_BIN" exec --ephemeral --ignore-user-config --approve-for-me \
+  -c 'mcp_servers.novacore-maestro.command="/bin/bash"' \
+  -c "mcp_servers.novacore-maestro.args=[\"$PWD/scripts/start_maestro_mcp.sh\"]" \
+  -c 'mcp_servers.novacore-maestro.startup_timeout_sec=30' \
+  -c 'mcp_servers.novacore-maestro.tool_timeout_sec=60' \
+  'Use somente ask_maestro do servidor novacore-maestro. Não use shell, não leia ou altere arquivos
+e não submeta incidentes. Faça duas chamadas: primeiro question="Como posso melhorar o agente de
+Supply?", agent_id="supply", source="didactic"; depois reutilize o session_id e envie question="Que
+conhecimento aprovado sustenta essa proposta?" com o mesmo agente e fonte. Não repita em caso de
+falha. Resuma o retorno do Maestro em até oito tópicos, com fontes, plan_ids e aprovação
+necessária. Não invente conclusões nem execute ações.'
+
+### d6
+uv run --extra lesson04 python scripts/demo_maestro_mcp.py
+
+### d6
+uv run --extra lesson04 python scripts/demo_maestro_mcp.py | tee "$AULA4_DIR/maestro-mcp-mock.txt"
+
+### codemap
+cd '/Users/leandrolopes/Documents/ChatGPT/Disciplina Mult-Agents/agentic-operations-control-tower'
+
+### codemap
+sed -n '21,60p' src/control_tower/application.py
+
+### codemap
+sed -n '1,45p' src/control_tower/mcp/tools.py
+
+### codemap
+sed -n '1,65p' src/control_tower/control_plane/registry.py
+
+### codemap
+sed -n '10,44p' src/control_tower/control_plane/decision_engine.py
+
+### codemap
+sed -n '93,136p' src/control_tower/cockpit/assistance.py
+
+### codemap
+sed -n '329,390p' src/control_tower/cockpit/assistance.py
+
+### codemap
+sed -n '1,25p' src/control_tower/mcp/maestro.py
+
+### codemap
+uv run --extra lesson04 python - <<'PYDOC'
+from control_tower.cockpit.knowledge import KnowledgeStore
+for item in KnowledgeStore().list(source='didactic')[:5]:
+    print(item.id, '|', item.validation_status, '|', item.title)
+    print('Revisor:', item.reviewer or 'pendente')
+PYDOC
+open "$AULA4_DIR/knowledge/wiki/lessons"
+
+### recovery
+export LLM_MODE=mock
+unset OPENAI_API_KEY
+./scripts/cockpit.sh -f "$AULA4_DIR/isolation.yaml" up -d --wait
+uv run --extra lesson04 python scripts/demo_cockpit.py
+
+### recovery
+uv run --extra lesson04 python scripts/demo_cockpit.py
+curl --fail --silent --show-error 'http://localhost:8000/cockpit/overview?source=didactic' > \
+  "$AULA4_DIR/overview.json"
+
+### recovery
+curl --fail --silent --show-error --max-time 55 http://localhost:8000/maestro/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"Como posso melhorar o agente de Supply?","agent_id":"supply","source":"didactic"}' \
+  > "$AULA4_DIR/maestro.json"
+uv run python - <<'PY'
+import json, os
+from pathlib import Path
+r=json.loads((Path(os.environ['AULA4_DIR'])/'maestro.json').read_text())
+print(r['plan']['diagnosis'])
+print('Status:', r['plan']['status'])
+print('Fontes:', ', '.join(r['sources_consulted']))
+PY
+
+### recovery
+EXECUTION_ID="$(uv run python - <<'PYID'
+import json, os
+from pathlib import Path
+r = json.loads((Path(os.environ['AULA4_DIR']) / 'overview.json').read_text())
+print(r['operations'][0]['execution_id'])
+PYID
+)"
+curl --fail --silent --show-error --max-time 55 -X POST \
+  "http://localhost:8000/knowledge/extract/$EXECUTION_ID?source=didactic" > "$AULA4_DIR/candidate.json"
+uv run python - <<'PY'
+import json, os
+from pathlib import Path
+r=json.loads((Path(os.environ['AULA4_DIR'])/'candidate.json').read_text())
+print(r['id'], r['validation_status'], r['title'])
+print(r['content'])
+PY
+
+### recovery
+cat "$AULA4_DIR/boundary.txt"
+cat "$AULA4_DIR/quality.txt"
+cat "$AULA4_DIR/pipeline.txt"
+LLM_MODE=mock uv run --extra lesson04 python scripts/demo_lesson04_complete.py --fixture optimize \
+  --agent logistics --section pipeline
+LLM_MODE=mock uv run --extra lesson04 python scripts/seed_cockpit.py
+open "$AULA4_DIR/knowledge/wiki/lessons"
