@@ -1,5 +1,11 @@
 # Aula 4 — Relatório do ensaio final
 
+> **Atualização posterior — Demo 6:** o professor autorizou o adaptador Codex → MCP → Maestro.
+> A agenda vigente é a do [runbook final](lesson-04-final-runbook.md), com seis demos e 240 min.
+> A validação da extensão está em [maestro-mcp-validation.md](lesson-04/maestro-mcp-validation.md).
+> O relatório abaixo preserva o ensaio original anterior à extensão; suas afirmações sobre ausência
+> de alterações no produto se referem àquele ensaio, não ao adaptador autorizado depois.
+
 **Data:** 04/10/2026 · **Parecer: APROVAR o roteiro para ensaio do professor, com ressalvas pedagógicas abaixo.**
 Nenhuma feature, regra, UI ou teste alterado. Nenhum bug impeditivo exigiu correção.
 Este é um ensaio técnico real e uma análise de agenda, **não uma aula de quatro horas ministrada a alunos**.

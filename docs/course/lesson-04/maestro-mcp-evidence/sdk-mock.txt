@@ -1,0 +1,19 @@
+MCP conectado · ask_maestro disponível
+
+Como posso melhorar o agente de Supply?
+Gerador: mock-deterministic · 0.11 s
+Suprimentos tem meta de 90.0% e resultado 74.00%. No cenário didático, 13 de 50 observações têm evidências alternativas incompletas. Isso exige investigação, não comprova a causa raiz.
+Objetivo: Melhorar a cobertura e a confiabilidade das evidências sem alterar o agente automaticamente.
+Conhecimento aprovado: knowledge-9e3eed0dbe574506bbdceabb498bace4, knowledge-38626d64945a44eca832fe33857ed488, knowledge-0e3f92ea303547249d885ce6fd700079, pattern-evidence-review, lesson-safety-stock
+Fontes consultadas: get_agent, get_agent_goals, get_goal_measurements, get_agent_quality, get_agent_economics, get_agent_slos, get_agent_business_value, get_agent_lifecycle, get_workforce, get_agent_recommendations, get_agent_executions, search_knowledge, get_knowledge_item, get_knowledge_item, get_knowledge_item, get_knowledge_item, get_knowledge_item
+Plano: plan-76e4e8ccddd74203906d44de5caf56b1 | proposed | aprovação humana obrigatória
+Nenhuma ação operacional ou aprovação de conhecimento executada.
+
+Que conhecimento aprovado sustenta essa proposta?
+Gerador: mock-deterministic · 0.10 s
+Suprimentos tem meta de 90.0% e resultado 74.00%. No cenário didático, 13 de 50 observações têm evidências alternativas incompletas. Isso exige investigação, não comprova a causa raiz.
+Objetivo: Melhorar a cobertura e a confiabilidade das evidências sem alterar o agente automaticamente.
+Conhecimento aprovado: knowledge-9e3eed0dbe574506bbdceabb498bace4, knowledge-38626d64945a44eca832fe33857ed488, knowledge-0e3f92ea303547249d885ce6fd700079, pattern-evidence-review, lesson-safety-stock
+Fontes consultadas: get_agent, get_agent_goals, get_goal_measurements, get_agent_quality, get_agent_economics, get_agent_slos, get_agent_business_value, get_agent_lifecycle, get_workforce, get_agent_recommendations, get_agent_executions, search_knowledge, get_knowledge_item, get_knowledge_item, get_knowledge_item, get_knowledge_item, get_knowledge_item
+Plano: plan-3c924729ab15411db274aca63e771c04 | proposed | aprovação humana obrigatória
+Nenhuma ação operacional ou aprovação de conhecimento executada.

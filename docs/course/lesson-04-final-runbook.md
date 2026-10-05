@@ -2,7 +2,7 @@
 ## Da observabilidade à decisão operacional
 
 **Roteiro único do professor · 240 minutos · candidato `codex/lesson-04-cockpit`.**
-Validado sobre o produto `b3823b2`. Este roteiro consolida start, complete e cockpit;
+Base pedagógica validada sobre `b3823b2`; extensão autorizada: Demo 6, Codex → MCP → Maestro. Este roteiro consolida start, complete e cockpit;
 os documentos históricos continuam preservados. Não trocar de branch entre demos.
 Alunos observam decisões, evidências e trade-offs. Não há exercício nem live coding.
 
@@ -34,18 +34,28 @@ Cinco perguntas que devem permanecer visíveis na fala:
 | 02:05–02:20 | 15 | Pausa; professor prepara OpenAI | Sem nova carga empresarial |
 | 02:20–02:45 | 25 | Business Value, SLO, Decision Engine | Como transformar sinais em decisões? |
 | 02:45–03:00 | 15 | Demo 4 — Collect → Interpret → Recommend | O que sustenta a proposta? |
-| 03:00–03:10 | 10 | Control Plane visual: enquadramento | Qual decisão o cockpit permite tomar? |
-| 03:10–03:20 | 10 | Maestro: conceito, fontes e limites | Quem coordena a melhoria? |
-| 03:20–03:38 | 18 | Demo 5 — narrativa integrada do cockpit | Da atenção ao conhecimento reutilizado |
-| 03:38–03:50 | 12 | Segundo Cérebro: discussão e margem | Quando uma resposta vira conhecimento? |
+| 03:00–03:08 | 8 | Control Plane visual: enquadramento | Qual decisão o cockpit permite tomar? |
+| 03:08–03:15 | 7 | Maestro: conceito, fontes e limites | Quem coordena a melhoria? |
+| 03:15–03:33 | 18 | Demo 5 — narrativa integrada do cockpit | Da atenção ao conhecimento reutilizado |
+| 03:33–03:40 | 7 | Demo 6 — Codex → MCP → Maestro | A mesma gestão fora do cockpit |
+| 03:40–03:50 | 10 | Segundo Cérebro: discussão e margem | Quando uma resposta vira conhecimento? |
 | 03:50–04:00 | 10 | Learning Loop, maturidade e arco final | O que significa uma empresa aprender? |
 | **Total** | **240** | **Sem instalação ou build ao vivo** | |
 
-Há **105 min explícitos de contexto/teoria antes do cockpit**, além dos seus 20 min conceituais.
+Há **105 min explícitos de contexto/teoria antes do cockpit**, além dos seus 15 min conceituais.
 Cada demo de 15 min reserva 2 min para transição/espera. A demo final tem 2 min internos de margem.
-Dos 12 min após o cockpit, preservar 6 min de reflexão e usar no máximo 6 para recuperação.
+Dos 10 min após a Demo 6, preservar 6 min de reflexão e usar no máximo 4 para recuperação.
 **Hard stop:** às 03:50 iniciar o fechamento, mesmo que alguma exploração opcional não tenha ocorrido.
 Tempo de máquina não é tempo de fala: os números técnicos do relatório não simulam uma aula ministrada.
+
+### Índice das demonstrações
+
+1. **Demo 1 — Same Capability, Different Boundary:** HTTP e MCP acessam a mesma capability.
+2. **Demo 2 — Registry, Goals e Lifecycle:** identidade, expectativa e estado administrativo.
+3. **Demo 3 — Normal vs Degraded + Economics:** conclusão, qualidade e custo.
+4. **Demo 4 — Collect → Interpret → Recommend:** sinais e decisão determinística.
+5. **Demo 5 — Cockpit integrado:** Supply, Maestro, revisão, Segundo Cérebro e Learning Loop.
+6. **Demo 6 — Codex → MCP → Maestro:** a mesma gestão e memória fora do cockpit.
 
 ## 2. Preparação antes da aula (reservar 45–60 min)
 
@@ -237,7 +247,7 @@ open http://localhost:16686
 Abra a apresentação existente em Gamma/slides manualmente. Não há slides novos nesta entrega.
 Deixe seis destinos acessíveis: slides, cockpit, Swagger, Jaeger, Terminal e VS Code.
 Jaeger fica como reserva para perguntas, não passeio obrigatório da Aula 4.
-No VS Code abra os arquivos da seção 9. Se o comando `code` já estiver instalado:
+No VS Code abra os arquivos da seção 10. Se o comando `code` já estiver instalado:
 
 ```bash
 code src/control_tower/application.py src/control_tower/mcp/tools.py src/control_tower/control_plane/registry.py src/control_tower/control_plane/decision_engine.py src/control_tower/cockpit/assistance.py
@@ -257,6 +267,7 @@ Fonte de terminal 20–24; navegador 1440×900 ou 1920×1080, zoom 100%. Fechar 
 - [ ] Supply meta 90%, atual 74%, gap −16; exatamente 1 agente requer atenção.
 - [ ] Normal/degraded persistidos; outputs de fallback salvos.
 - [ ] Navegador nas abas certas; terminal e seis trechos de código preparados; slides abertos.
+- [ ] Codex autenticado; novacore-maestro conectado; fallback MCP mock salvo; terminal Codex aberto.
 - [ ] Cronômetro e hard stop de 03:50 definidos.
 
 ## 3. Abertura e Demo 1 — Same Capability, Different Boundary
@@ -301,7 +312,7 @@ Mostre `IncidentCapability.submit_incident` e um adaptador MCP, **30 s cada**.
 **Resposta-chave:** mudou o acesso; a inteligência, a fila, a validação e a aprovação permanecem.
 **Fallback:** `cat "$AULA4_DIR/boundary.txt"`; declarar gravação do ensaio. Com runtime indisponível,
 `LLM_MODE=mock uv run --extra lesson04 pytest tests/test_lesson04.py -k mcp -q` valida o contrato,
-não prova execução distribuída atual. Não fazer também a demo Codex/MCP interativa no mesmo bloco.
+não prova execução distribuída atual. Reservar o cliente Codex para a Demo 6, quando ele consultará o Maestro e o conhecimento aprovado.
 **Transição:** “Expor uma capacidade não nos diz quem compõe a organização que a executa.”
 
 ## 4. Registry, Goals e Lifecycle — teoria e Demo 2
@@ -423,19 +434,19 @@ a regra não chama LLM, não altera modelo, não pausa worker, não autoriza pla
 **Fallback:** `cat "$AULA4_DIR/pipeline.txt"`; a mesma fixture também roda sem Docker.
 **Transição:** “O Control Plane identifica que devemos intervir. Mas quem coordena a melhoria?”
 
-## 7. Control Plane visual e Maestro — preparar a narrativa (03:00–03:20)
+## 7. Control Plane visual e Maestro — preparar a narrativa (03:00–03:15)
 
-**03:00–03:10:** explique a tela sem percorrer todos os menus. Coleção → interpretação → proposta.
+**03:00–03:08:** explique a tela sem percorrer todos os menus. Coleção → interpretação → proposta.
 Declare as três populações: 50 observações de cobertura Supply; janelas técnicas dos outros papéis;
 6 execuções ilustrativas independentes. Não dividir as seis execuções para tentar reproduzir os 74%.
-**03:10–03:20:** “The Maestro is the Chief of Staff of the Agentic Workforce.”
+**03:08–03:15:** “The Maestro is the Chief of Staff of the Agentic Workforce.”
 Supervisor coordena **uma execução**. Maestro coordena **propostas de melhoria da workforce**.
 Consulta fontes, sintetiza diagnóstico, propõe plano e responsabilidades. Staffs são papéis propostos,
 não novos agentes executando. “LLMs interpretam e julgam. Código determinístico mede e valida.”
 **Pergunta:** “Quem deve melhorar um agente? Quais evidências a equipe precisaria antes de mudar seu modelo?”
 Não mostrar a conversa completa ainda; preservar a surpresa e continuidade da demo.
 
-## 8. Demo 5 — cockpit final em 18 minutos (03:20–03:38)
+## 8. Demo 5 — cockpit final em 18 minutos (03:15–03:33)
 
 **Pré-condição:** OpenAI, gpt-4.1-mini, fonte Cenário didático, pasta de conhecimento isolada.
 Texto do LLM varia; medidas, fontes, estado e autorização não. Cronometrar a partir de Visão Geral.
@@ -486,7 +497,7 @@ o retrieval simples considera até cinco itens relevantes recentes. Não afirmar
 Se uma chamada ultrapassar **15 s**, começar a explicação das fontes. O timeout do provider é 45 s.
 Após falha, não fazer uma sequência de retries: mostrar plano mock/candidato preparados.
 Reiniciar em mock pode levar dezenas de segundos; preferir conteúdo persistido para não interromper a história.
-Se necessário reiniciar, usar a seção 11 e anunciar a mudança de modo. Não há fallback silencioso.
+Se necessário reiniciar, usar a seção 12 e anunciar a mudança de modo. Não há fallback silencioso.
 No minuto 12, se a revisão ainda não terminou, não aprovar às pressas: usar referência curada no Segundo Cérebro.
 Na tabela SLO, um custo muito pequeno pode aparecer arredondado como `0`; a aba Economia mostra
 `0,00056 USD` no cenário. Não interpretar o arredondamento como consumo gratuito.
@@ -494,7 +505,138 @@ Ao abrir execução/conhecimento a partir do Agent 360, o título principal pode
 o breadcrumb e o título do documento indicam a área atual. Use o menu lateral para remover essa ambiguidade.
 No minuto 16, abrir Learning Loop. Máximo absoluto 20 min; recuperar até 2 min da discussão seguinte.
 
-## 9. Código: somente seis recortes, 30–60 segundos cada
+## 9. Demo 6 — Codex → MCP → Maestro (03:33–03:40)
+
+**Objetivo:** demonstrar acesso à mesma gestão por outro cliente, sem duplicar inteligência.
+**Mensagem:** “A interface mudou. As capacidades, as evidências e os limites de autorização permaneceram.”
+
+```text
+Professor → Codex (cliente MCP) → ask_maestro
+→ mesmo serviço Conversations/Maestro → Control Plane + conhecimento aprovado
+→ proposta persistida na mesma memória do cockpit
+```
+
+Não afirmar “qualquer chatbox”. É um **cliente compatível com MCP e configurado para este transporte**.
+Neste LAB, conexão local stdio por Docker exec; não é endpoint remoto público nem federação empresarial.
+A tool usa o serviço Python diretamente, sem segundo grafo e sem fazer um POST HTTP interno.
+
+### Preparação do Codex — antes da aula, depois de atualizar a imagem
+
+O startup `up -d --build --wait` da seção 2.3 inclui o código novo na imagem da API.
+O launcher usa o container API já iniciado, seu modo LLM, sua chave e seu volume de conhecimento.
+**Não precisa carregar a chave OpenAI dentro do Codex.** Codex usa a autenticação própria;
+Maestro usa a configuração do container. São duas camadas de inferência, com consumos distintos.
+
+Em outro terminal, na raiz do repositório:
+
+```bash
+CODEX_BIN="$(command -v codex || true)"
+if [ -z "$CODEX_BIN" ]; then
+  CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex
+fi
+"$CODEX_BIN" --version
+"$CODEX_BIN" login status
+"$CODEX_BIN" mcp add novacore-maestro -- /bin/bash "$PWD/scripts/start_maestro_mcp.sh"
+"$CODEX_BIN" mcp get novacore-maestro
+"$CODEX_BIN" mcp list
+"$CODEX_BIN"
+```
+
+Se `login status` indicar ausência de autenticação, executar `"$CODEX_BIN" login` fora da projeção,
+concluir no navegador e repetir o status. Não instalar/atualizar o cliente durante a aula.
+O registro `novacore-maestro` é separado de `novacore`, preservando a Demo 1 histórica.
+Não cadastrar novamente a cada pergunta. `mcp list` confirma configuração, não a execução da ferramenta.
+No Codex interativo, digitar `/mcp` e conferir `novacore-maestro` conectado e `ask_maestro` disponível.
+Se aparecer revisão de permissão, conferir servidor e argumentos, mantendo as aprovações normais.
+Não desabilitar sandbox nem usar bypass. Deixar a sessão aberta antes de começar a aula.
+
+**Catálogo:** três tools de incidente existentes + `ask_maestro` neste launcher opcional.
+O launcher antigo continua expondo somente as três tools da Aula 4 start.
+Nesta demo usar **somente ask_maestro**; não submeter incidentes OpenAI adicionais.
+
+### Roteiro de sete minutos
+
+| Minuto | Ação / fala |
+|---|---|
+| 0–1 | Mostrar conexão já pronta. “Saímos do cockpit; continuamos acessando a mesma organização.” |
+| 1–3 | Enviar primeiro prompt; mostrar chamada `ask_maestro` e a síntese curta. |
+| 3–5 | Enviar segundo prompt; apontar a lição aprovada na Demo 5 e suas fontes. |
+| 5–6 | Voltar a Supply no cockpit, Atualizar dados, mostrar Última análise do Maestro. |
+| 6–7 | Pergunta aos alunos e margem: “Mudar a interface deveria mudar as permissões?” |
+
+**Prompt 1 — copiar no Codex:**
+
+> Use somente a ferramenta ask_maestro do servidor MCP novacore-maestro. Não use shell,
+> não altere arquivos e não submeta incidentes. Envie request com question="Como posso melhorar
+> o agente de Supply?", agent_id="supply" e source="didactic". Resuma em português, em até
+> cinco tópicos: diagnóstico, hipótese, proposta, fontes e aprovação necessária. Identifique
+> o que veio do Maestro; não acrescente conclusões suas. Guarde o session_id para a próxima pergunta.
+
+**Prompt 2 — copiar na mesma sessão:**
+
+> Use novamente somente ask_maestro de novacore-maestro, reutilizando o session_id retornado.
+> Envie question="Que conhecimento aprovado sustenta essa proposta?", agent_id="supply"
+> e source="didactic". Mostre os títulos dos documentos aprovados citados nas evidências,
+> incluindo a lição recém-aprovada se ela estiver presente. Se não estiver, diga isso explicitamente.
+> Não invente fonte, não aprove conhecimento e não execute o plano. Responda em até cinco tópicos.
+
+**Esperado:** gerador OpenAI/gpt-4.1-mini (ou mock explicitamente anunciado), Supply 74/90,
+plano `proposed`, `requires_human_approval=true`, fontes verificáveis e conhecimento somente aprovado.
+Copiar o `plan_id` apenas se necessário para comparar; não projetar o JSON inteiro.
+No cockpit: menu Agentes → Suprimentos → Atualizar dados → Última análise do Maestro.
+O plano MCP está no mesmo filesystem e fica visível. Histórico do chat é **local a cada processo**:
+o chat MCP não é a sessão do browser. Reiniciar a conexão perde histórico; planos e conhecimento persistem.
+As sínteses não precisam ter texto idêntico entre interfaces, porque o modelo pode variar.
+
+**Fala:** “O Codex é o cliente. O Maestro continua sendo nosso Chief of Staff. As regras permanecem
+no Control Plane. MCP não dá autorização para aprovar conhecimento, mudar lifecycle ou executar uma compra.”
+**Pergunta:** “O que precisa ser compartilhado: a tela, o histórico inteiro do chat ou capacidades e memória validada?”
+**Transição:** “A experiência aprovada pode informar outra interface. É assim que a memória começa a servir à organização.”
+
+### Validação e reprodução não interativa
+
+O ensaio desta extensão usou **Codex CLI real**, duas chamadas MCP reais e Maestro OpenAI real:
+53,28 s no total; mesma sessão; planos visíveis no snapshot HTTP do cockpit. A sessão interativa
+`/mcp` e a interface Desktop não foram operadas neste ensaio. Os comandos de registro acima são
+para preparação do professor; a configuração de teste foi temporária, sem alterar seu cadastro global.
+
+Para reproduzir a variante ensaiada, com Codex já autenticado, executar na raiz (substitui as duas
+perguntas interativas; **não rodar ambas as variantes**):
+
+```bash
+"$CODEX_BIN" exec --ephemeral --ignore-user-config --approve-for-me \
+  -c 'mcp_servers.novacore-maestro.command="/bin/bash"' \
+  -c "mcp_servers.novacore-maestro.args=[\"$PWD/scripts/start_maestro_mcp.sh\"]" \
+  -c 'mcp_servers.novacore-maestro.startup_timeout_sec=30' \
+  -c 'mcp_servers.novacore-maestro.tool_timeout_sec=60' \
+  'Use somente ask_maestro do servidor novacore-maestro. Não use shell, não leia ou altere arquivos e não submeta incidentes. Faça duas chamadas: primeiro question="Como posso melhorar o agente de Supply?", agent_id="supply", source="didactic"; depois reutilize o session_id e envie question="Que conhecimento aprovado sustenta essa proposta?" com o mesmo agente e fonte. Não repita em caso de falha. Resuma o retorno do Maestro em até oito tópicos, com fontes, plan_ids e aprovação necessária. Não invente conclusões nem execute ações.'
+```
+
+`--approve-for-me` usa revisão automática normal; não desativa sandbox ou aprovações.
+A sessão efêmera não preserva o chat do cliente depois do comando. Os planos permanecem no serviço.
+
+### Fallback da Demo 6
+
+Se Codex/auth/conexão falhar, não gastar os sete minutos configurando. No terminal da raiz:
+
+```bash
+uv run --extra lesson04 python scripts/demo_maestro_mcp.py
+```
+
+Este cliente SDK faz **duas consultas reais via MCP**, sem Codex. Usa o modo atual do container;
+em OpenAI faz duas chamadas pagas. Executar apenas se a conversa Codex não funcionou.
+Preparar saída mock **antes da aula, enquanto a stack está mock**, para contingência total:
+
+```bash
+uv run --extra lesson04 python scripts/demo_maestro_mcp.py | tee "$AULA4_DIR/maestro-mcp-mock.txt"
+```
+
+Se provider ou Docker também falhar: `cat "$AULA4_DIR/maestro-mcp-mock.txt"`.
+Anunciar gravação mock do ensaio. Não afirmar que Codex foi validado apenas porque o SDK funcionou.
+Se as duas consultas ultrapassarem o orçamento, mostrar uma resposta e o conhecimento aprovado,
+concluir a mensagem e avançar; hard stop 03:40, consumindo no máximo a margem da discussão seguinte.
+
+## 10. Código: somente seis recortes, 30–60 segundos cada
 
 Não percorrer arquivos inteiros. Abrir pela busca do VS Code (Cmd+F) nos símbolos abaixo.
 
@@ -519,13 +661,13 @@ PY
 open "$AULA4_DIR/knowledge/wiki/lessons"
 ```
 
-Os três últimos recortes podem ficar para os 12 min de discussão após a demo; não quebrar o fluxo integrado.
+Os três últimos recortes podem ficar para os 10 min de discussão após a Demo 6; não quebrar o fluxo integrado.
 **Pronto antes:** Compose, Next.js, CSS, API, SQL, fixtures, schema, SDK, pricing, testes e seeds.
 Nenhum boilerplate ao vivo. Não mostrar `.keys`, prompts extensos, dumps integrais ou código de infraestrutura.
 
-## 10. Segundo Cérebro, Learning Loop e fechamento
+## 11. Segundo Cérebro, Learning Loop e fechamento
 
-### 03:38–03:50 · reflexão (12 min; até 6 de reserva)
+### 03:40–03:50 · reflexão (10 min; até 4 de reserva)
 
 Pergunte: “Quando uma resposta de um LLM vira conhecimento corporativo?”
 Distinguir candidato, estrutura válida, evidência sustentada, autorização humana e utilidade posterior.
@@ -574,7 +716,7 @@ não a régua de maturidade organizacional. Aponte os títulos para evitar apare
 “Operar agentes é uma disciplina de lifecycle, não apenas de runtime.”
 **Pergunta de saída:** “Qual evidência precisaria existir para autorizar a próxima melhoria nesta organização?”
 
-## 11. Fallbacks copiáveis e troubleshooting
+## 12. Fallbacks copiáveis e troubleshooting
 
 ### LLM indisponível: conteúdo preparado primeiro, mock explícito depois
 
@@ -664,7 +806,7 @@ Anunciar quais outputs são gravações e quais cálculos são locais atuais. N�
 | Em fila indefinidamente | conferir `ps`, workers e `/ready`; não culpar LLM sem evidência |
 | Relógio apertado | cortar traces/tokens/configuração, nunca revisão humana e fechamento |
 
-## 12. Regressão fora do horário de aula
+## 13. Regressão fora do horário de aula
 
 Rodar em mock, com memória isolada. Playwright cria e aprova conteúdo **exclusivamente sintético**.
 

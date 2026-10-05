@@ -1,3 +1,9 @@
+# Escopo vigente — Demo 6: Codex → MCP → Maestro
+
+Autorizado em 04/10/2026: adaptador MCP opcional para o Maestro existente e roteiro final com
+seis demos em 240 minutos. Mesmas fontes/regras/contratos, sem aprovação ou ACT via MCP.
+Preservar as três tools e checkpoints anteriores; sem push ou tags.
+
 # Escopo vigente — candidato lesson-04-cockpit
 
 Autorizado em 03/10/2026: Presentation Layer pt-BR, cockpit Next.js separado, projeções backend,

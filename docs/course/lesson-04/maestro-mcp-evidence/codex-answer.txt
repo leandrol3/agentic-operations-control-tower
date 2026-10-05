@@ -1,0 +1,8 @@
+- **Consultas:** duas chamadas sequenciais a `ask_maestro`, com `source="didactic"` e reutilização da sessão `session-35244d1217694e67bfe7424c2a609cdf`.
+- **Gerador informado pelo Maestro:** `openai:gpt-4.1-mini`, em ambas.
+- **Diagnóstico do Maestro:** cobertura de evidências de 74% ante meta de 90%; degradação do workflow de 28%; ausência de indicadores claros de valor realizado. São dados didáticos.
+- **Hipótese do Maestro:** preservar estoque de segurança e comprovar a execução das transferências pode melhorar a efetividade. A segunda resposta não apresentou nova hipótese.
+- **Proposta do Maestro:** validar estoque de segurança, acompanhar execução, integrar evidências de estoque, fornecedores, lead time e transporte, reconhecer dados ausentes e monitorar indicadores.
+- **Conhecimentos citados como “Segundo Cérebro / aprovado / Didático”:** “Considerar estoque de segurança antes de propor transferências” (dois registros); “Verificar execução efetiva antes de validar propostas de transferência de estoque”; “Revisão conjunta de evidências alternativas”; “Estoque de segurança antes da transferência”.
+- **Plan_ids:** `plan-519a4d9460ec42a1aa0221dd25fb9ee4` e `plan-4a59db696d9e48fbb0cd04c6ca377ace`.
+- **Aprovação necessária:** segundo o Maestro, aprovação humana obrigatória; ambos estão como `proposed`. Nenhuma ação executada, incidente submetido ou conhecimento aprovado neste ensaio.

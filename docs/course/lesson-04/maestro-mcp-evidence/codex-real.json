@@ -1,0 +1,77 @@
+{
+  "exit": 0,
+  "seconds": 53.278,
+  "calls": [
+    {
+      "tool": "ask_maestro",
+      "status": "completed",
+      "session_id": "session-35244d1217694e67bfe7424c2a609cdf",
+      "plan_id": "plan-519a4d9460ec42a1aa0221dd25fb9ee4",
+      "generated_by": "openai:gpt-4.1-mini",
+      "plan_status": "proposed",
+      "requires_human_approval": true,
+      "knowledge_ids": [
+        "knowledge-9e3eed0dbe574506bbdceabb498bace4",
+        "knowledge-38626d64945a44eca832fe33857ed488",
+        "knowledge-0e3f92ea303547249d885ce6fd700079",
+        "pattern-evidence-review",
+        "lesson-safety-stock"
+      ],
+      "sources_consulted": [
+        "get_agent",
+        "get_agent_goals",
+        "get_goal_measurements",
+        "get_agent_quality",
+        "get_agent_economics",
+        "get_agent_slos",
+        "get_agent_business_value",
+        "get_agent_lifecycle",
+        "get_workforce",
+        "get_agent_recommendations",
+        "get_agent_executions",
+        "search_knowledge",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item"
+      ]
+    },
+    {
+      "tool": "ask_maestro",
+      "status": "completed",
+      "session_id": "session-35244d1217694e67bfe7424c2a609cdf",
+      "plan_id": "plan-4a59db696d9e48fbb0cd04c6ca377ace",
+      "generated_by": "openai:gpt-4.1-mini",
+      "plan_status": "proposed",
+      "requires_human_approval": true,
+      "knowledge_ids": [
+        "knowledge-9e3eed0dbe574506bbdceabb498bace4",
+        "knowledge-38626d64945a44eca832fe33857ed488",
+        "knowledge-0e3f92ea303547249d885ce6fd700079",
+        "pattern-evidence-review",
+        "lesson-safety-stock"
+      ],
+      "sources_consulted": [
+        "get_agent",
+        "get_agent_goals",
+        "get_goal_measurements",
+        "get_agent_quality",
+        "get_agent_economics",
+        "get_agent_slos",
+        "get_agent_business_value",
+        "get_agent_lifecycle",
+        "get_workforce",
+        "get_agent_recommendations",
+        "get_agent_executions",
+        "search_knowledge",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item",
+        "get_knowledge_item"
+      ]
+    }
+  ],
+  "plans_visible_in_http_snapshot": true
+}

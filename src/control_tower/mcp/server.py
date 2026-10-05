@@ -22,13 +22,20 @@ class PublicMCPServer(FastMCP):
             raise ToolError('Tool indisponível; confira nome e configuração do runtime') from None
 
 
-def create_server(capability):
+def create_server(capability, *, maestro_service_factory=None):
     server = PublicMCPServer('NovaCore Incident Capability')
     register_tools(server, capability)
+    if maestro_service_factory is not None:
+        from .maestro import register_maestro
+        register_maestro(server, maestro_service_factory)
     return server
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--with-maestro", action="store_true", help="Expose the approved cockpit Maestro capability")
+    args = parser.parse_args()
     from ..application import IncidentCapability
     from ..runtime.settings import RuntimeSettings
     from ..runtime.bootstrap import configure
@@ -49,7 +56,15 @@ def main():
     store.initialize()
     tracing.initialize_tracing(settings)
     try:
-        create_server(IncidentCapability(settings, store, enqueue)).run(transport='stdio')
+        factory = None
+        if args.with_maestro:
+            from ..cockpit.knowledge import KnowledgeStore
+            from ..cockpit.presentation import CockpitService
+            factory = lambda: CockpitService(store, settings, KnowledgeStore())
+        create_server(
+            IncidentCapability(settings, store, enqueue),
+            maestro_service_factory=factory,
+        ).run(transport='stdio')
     finally:
         tracing.shutdown()
 

@@ -1,0 +1,27 @@
+{
+  "status": "ok",
+  "mode": "mock",
+  "incident_id": "INCIDENT-001",
+  "related_orders": 3,
+  "impact_status": "not_assessed",
+  "checkpoint": "lesson-01-complete",
+  "orchestration": "available_via_run",
+  "checks_passed": [
+    "incident",
+    "related_orders",
+    "demand",
+    "strategic_customer",
+    "local_stock",
+    "transfer_stock",
+    "alternative_supplier",
+    "baseline_cost",
+    "express_route",
+    "standard_route",
+    "hypothetical_penalty",
+    "policies"
+  ],
+  "demand_units": 750,
+  "available_units": 300,
+  "shortfall_units": 450,
+  "hypothetical_penalty_brl_7_days": "140000.00"
+}

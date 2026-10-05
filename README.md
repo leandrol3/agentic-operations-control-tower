@@ -470,3 +470,10 @@ Após criação/publicação das tags futuras: `git fetch --tags`, `git checkout
 - Teste falha: preserve a saída completa, rode doctor e confira `git status`.
 
 Nunca comite `.env`, tokens ou chaves.
+
+### Aula 4: roteiro único e Demo 6
+
+O [runbook final](docs/course/lesson-04-final-runbook.md) organiza seis demos em 240 minutos.
+A Demo 6 usa Codex → MCP → o mesmo Maestro do cockpit, via `scripts/start_maestro_mcp.sh`.
+A tool opcional `ask_maestro` persiste propostas; não aprova conhecimento nem executa ações.
+O launcher MCP original e suas três tools permanecem inalterados.
