@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="720" height="390" preserveAspectRatio="xMinYMin meet" viewBox="0 0 720 390" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="720" height="390"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-390)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="15" y="85" width="300" height="221" rx="7" ry="7" style="stroke: rgb(6%,48%,51%); stroke-linecap: butt; stroke-width: 1; fill: rgb(94%,96%,98%); fill-rule: evenodd;"/>
+			<text x="29" y="280" style="font-family: Helvetica-Bold; font-size: 14px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,560) scale(1,-1)">ct_executions</text>
+			<text x="29" y="254" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,508) scale(1,-1)">PK execution_id : uuid</text>
+			<text x="29" y="232" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,464) scale(1,-1)">UK idempotency_key : text</text>
+			<text x="29" y="210" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,420) scale(1,-1)">document : jsonb</text>
+			<text x="29" y="188" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,376) scale(1,-1)">envelope : jsonb</text>
+			<text x="29" y="166" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,332) scale(1,-1)">options : jsonb</text>
+			<text x="29" y="144" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,288) scale(1,-1)">attempts : integer = 0</text>
+			<text x="29" y="122" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,244) scale(1,-1)">event_sequence : integer = 0</text>
+			<text x="29" y="100" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,200) scale(1,-1)">created_at : timestamptz = now()</text>
+			<rect x="420" y="228" width="285" height="111" rx="7" ry="7" style="stroke: rgb(6%,48%,51%); stroke-linecap: butt; stroke-width: 1; fill: rgb(94%,96%,98%); fill-rule: evenodd;"/>
+			<text x="434" y="313" style="font-family: Helvetica-Bold; font-size: 14px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,626) scale(1,-1)">ct_events</text>
+			<text x="434" y="287" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,574) scale(1,-1)">PK, FK execution_id : uuid</text>
+			<text x="434" y="265" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,530) scale(1,-1)">PK sequence : integer</text>
+			<text x="434" y="243" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,486) scale(1,-1)">document : jsonb</text>
+			<rect x="420" y="62" width="285" height="89" rx="7" ry="7" style="stroke: rgb(6%,48%,51%); stroke-linecap: butt; stroke-width: 1; fill: rgb(94%,96%,98%); fill-rule: evenodd;"/>
+			<text x="434" y="125" style="font-family: Helvetica-Bold; font-size: 14px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,250) scale(1,-1)">ct_execution_context</text>
+			<text x="434" y="99" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,198) scale(1,-1)">PK, FK execution_id : uuid</text>
+			<text x="434" y="77" style="font-family: Helvetica; font-size: 11px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,154) scale(1,-1)">document : jsonb</text>
+			<path d="M 315,270 L 420,270 Z" style="stroke: rgb(6%,48%,51%); stroke-linecap: butt; stroke-width: 2;"/>
+			<text x="327" y="282" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,564) scale(1,-1)">1 para 0..N</text>
+			<path d="M 315,105 L 420,105 Z" style="stroke: rgb(6%,48%,51%); stroke-linecap: butt; stroke-width: 2;"/>
+			<text x="327" y="117" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,234) scale(1,-1)">1 para 0..1</text>
+			<text x="15" y="25" style="font-family: Times-Roman; font-size: 10px;fill: rgb(9%,21%,31%); stroke:none;" transform="translate(0,50) scale(1,-1)">PK: chave primária | FK: chave estrangeira | UK: chave única</text>
+		</g>
+	</g>
+</svg>
