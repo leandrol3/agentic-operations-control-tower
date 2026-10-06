@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#526574"/></marker></defs>
+<rect width="1140" height="680" fill="white"/>
+<polyline points="260,88 430,88" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,88 830,88" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="260,328 430,328" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,328 830,328" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="545,376 545,520" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,568 830,568" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="30" y="40" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="145.0" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="145.0" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">Navegador / Codex / Terminal</text>
+<text x="145.0" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Processos no host macOS</text>
+<text x="145.0" y="100.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">UI :3000; API :8000; Jaeger :16686</text>
+<rect x="430" y="40" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="545.0" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="545.0" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">cockpit</text>
+<text x="545.0" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Docker / Next.js</text>
+<text x="545.0" y="100.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">Loopback 127.0.0.1:3000</text>
+<rect x="830" y="40" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="945.0" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="945.0" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">api + processo MCP opcional</text>
+<text x="945.0" y="86" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Docker / Python</text>
+<text x="945.0" y="100.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">API :8000; MCP via exec -T / stdio</text>
+<rect x="30" y="280" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="145.0" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="145.0" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">redis + redis_data</text>
+<text x="145.0" y="326" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">Docker / Redis 7.4</text>
+<text x="145.0" y="340.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Host 16379 -&gt; container 6379</text>
+<rect x="430" y="280" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="545.0" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="545.0" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">worker-a / worker-b</text>
+<text x="545.0" y="326" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">2 instâncias Docker / Celery</text>
+<text x="545.0" y="340.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">Mesmo código; concorrência</text>
+<text x="545.0" y="355.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">configurável</text>
+<rect x="830" y="280" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="945.0" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="945.0" y="308" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">postgres + postgres_data</text>
+<text x="945.0" y="326" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">Docker / PostgreSQL 16</text>
+<text x="945.0" y="340.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Host 15432 -&gt; container 5432</text>
+<rect x="30" y="520" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="145.0" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="145.0" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">knowledge/ + fixtures/config</text>
+<text x="145.0" y="566" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">Bind mounts + dados na imagem</text>
+<text x="145.0" y="580.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Memória em /app/knowledge na API</text>
+<rect x="430" y="520" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="545.0" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="545.0" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">otel-collector</text>
+<text x="545.0" y="566" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Docker / OTLP HTTP :4318</text>
+<text x="545.0" y="580.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">Traces -&gt; Jaeger; métricas -&gt; debug</text>
+<rect x="830" y="520" width="230" height="96" rx="8" fill="#dceef9" stroke="#12334f" stroke-width="1.1"/>
+<text x="945.0" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#12334f">Container lógico</text>
+<text x="945.0" y="548" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#12334f">jaeger</text>
+<text x="945.0" y="566" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#12334f">Docker / Jaeger 2</text>
+<text x="945.0" y="580.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#12334f">UI :16686; sem volume configurado</text>
+<rect x="309.328125" y="54" width="71.34375" height="19" rx="3" fill="white"/>
+<text x="345" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">HTTP local</text>
+<rect x="706.6533203125" y="54" width="76.693359375" height="19" rx="3" fill="white"/>
+<text x="745" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">HTTP :8000</text>
+<rect x="305.3232421875" y="294" width="79.353515625" height="19" rx="3" fill="white"/>
+<text x="345" y="306" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Broker / task</text>
+<rect x="726.994140625" y="294" width="36.01171875" height="19" rx="3" fill="white"/>
+<text x="745" y="306" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">SQL</text>
+<rect x="584.646484375" y="443" width="104.70703125" height="34" rx="3" fill="white"/>
+<text x="637" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Spans e métricas</text>
+<text x="637" y="470" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">OTLP HTTP</text>
+<rect x="705.9970703125" y="528" width="78.005859375" height="34" rx="3" fill="white"/>
+<text x="745" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Traces</text>
+<text x="745" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">OTLP HTTP</text>
+</svg>

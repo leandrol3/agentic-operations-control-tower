@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="680" viewBox="0 0 1140 680">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#526574"/></marker></defs>
+<rect width="1140" height="680" fill="white"/>
+<polygon points="15,20 1110,20 1110,655 15,655" fill="#f7fafc" stroke="#94a3b8" stroke-dasharray="7 5"/>
+<polyline points="260,98 430,98" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="660,98 830,98" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="945,146 945,295" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="830,343 660,343" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="430,343 260,343" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="145,391 145,535" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<polyline points="260,583 430,583" fill="none" stroke="#526574" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="30" y="50" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Task execute</text>
+<text x="145.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Componente Python / Celery</text>
+<text x="145.0" y="110.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Acquire, begin, observar e finalizar</text>
+<rect x="430" y="50" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Supervisor</text>
+<text x="545.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó LangGraph</text>
+<text x="545.0" y="110.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Plano e seleção validada de papéis</text>
+<rect x="830" y="50" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Supply / Production /</text>
+<text x="945.0" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Logistics</text>
+<text x="945.0" y="114" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">3 nós LangGraph</text>
+<text x="945.0" y="128.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Tools + síntese; ramos paralelos</text>
+<rect x="830" y="295" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="945.0" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="945.0" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Consolidação</text>
+<text x="945.0" y="341" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó LangGraph / join explícito</text>
+<text x="945.0" y="355.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Espera 3 ramos; valida evidências</text>
+<rect x="430" y="295" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Finance</text>
+<text x="545.0" y="341" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó Python determinístico</text>
+<text x="545.0" y="355.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Cenários, alocação e Decimal</text>
+<rect x="30" y="295" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="323" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Challenger</text>
+<text x="145.0" y="341" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó Python + síntese opcional</text>
+<text x="145.0" y="355.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Regras; riscos e informação ausente</text>
+<rect x="30" y="535" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="145.0" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="145.0" y="563" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Recommendation</text>
+<text x="145.0" y="581" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó / Pydantic</text>
+<text x="145.0" y="595.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">Cenário admissível e valores validados</text>
+<rect x="430" y="535" width="230" height="96" rx="8" fill="#ddf3ed" stroke="#16463e" stroke-width="1.1"/>
+<text x="545.0" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#16463e">Componente</text>
+<text x="545.0" y="563" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#16463e">Human approval</text>
+<text x="545.0" y="581" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#16463e">Nó terminal / Pydantic</text>
+<text x="545.0" y="595.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#16463e">pending; sem executar ação</text>
+<rect x="830" y="535" width="230" height="96" rx="8" fill="#fff0cf" stroke="#624418" stroke-width="1.1"/>
+<text x="945.0" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="#624418">Armazenamento</text>
+<text x="945.0" y="563" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="#624418">WorkflowState</text>
+<text x="945.0" y="581" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="normal" fill="#624418">Estado Pydantic em memória</text>
+<text x="945.0" y="595.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#624418">Canais por papel; não é checkpoint</text>
+<rect x="305.9794921875" y="68" width="78.041015625" height="19" rx="3" fill="white"/>
+<text x="345" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Invoca grafo</text>
+<rect x="694.3046875" y="68" width="101.390625" height="19" rx="3" fill="white"/>
+<text x="745" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Fan-out validado</text>
+<rect x="983.9833984375" y="208" width="98.033203125" height="34" rx="3" fill="white"/>
+<text x="1033" y="220" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Todos os ramos</text>
+<text x="1033" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">concluídos</text>
+<rect x="695.640625" y="312" width="98.71875" height="19" rx="3" fill="white"/>
+<text x="745" y="324" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Evidência válida</text>
+<rect x="284.970703125" y="312" width="120.05859375" height="19" rx="3" fill="white"/>
+<text x="345" y="324" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Cenários calculados</text>
+<rect x="188.9794921875" y="448" width="114.041015625" height="19" rx="3" fill="white"/>
+<text x="246" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Cenário admissível</text>
+<rect x="298.6435546875" y="551" width="92.712890625" height="19" rx="3" fill="white"/>
+<text x="345" y="563" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#334155">Contrato válido</text>
+</svg>

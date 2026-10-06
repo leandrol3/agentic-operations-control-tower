@@ -1,0 +1,20 @@
+flowchart TB
+  %% Complemento · Evolução pedagógica — Um sistema, quatro necessidades
+  %% Escopo: Camadas acumuladas; branches e tags preservam os estados didáticos
+  a1["Sistema em foco<br/>Aula 1 · Colaborar<br/>CLI + Pydantic + LangGraph<br/>Tools, especialistas, join e aprovação"]
+  a2["Sistema em foco<br/>Aula 2 · Distribuir<br/>Celery + Redis + PostgreSQL<br/>Concorrência, redelivery, idempotência"]
+  a3["Sistema em foco<br/>Aula 3 · Operar o runtime<br/>FastAPI + Docker + OTel<br/>Health/readiness, contexto e traces"]
+  a4["Sistema em foco<br/>Aula 4 · Gerir a workforce<br/>MCP + Control Plane + Cockpit<br/>Maestro, revisão e memória local"]
+  a1 -->|"Mesmo grafo"| a2
+  a2 -->|"Mesmo runtime"| a3
+  a3 -->|"Sinais -&gt; decisões"| a4
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class a1 system;
+  class a2 system;
+  class a3 system;
+  class a4 system;

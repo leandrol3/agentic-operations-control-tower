@@ -1,0 +1,36 @@
+flowchart TB
+  %% C3 · Componentes do worker — O que existe dentro de um worker?
+  %% Escopo: Processo Python que executa a task Celery; nós não são microserviços
+  subgraph scope["Escopo da vista"]
+    task["Componente<br/>Task execute<br/>Componente Python / Celery<br/>Acquire, begin, observar e finalizar"]
+    supervisor["Componente<br/>Supervisor<br/>Nó LangGraph<br/>Plano e seleção validada de papéis"]
+    special["Componente<br/>Supply / Production / Logistics<br/>3 nós LangGraph<br/>Tools + síntese; ramos paralelos"]
+    join["Componente<br/>Consolidação<br/>Nó LangGraph / join explícito<br/>Espera 3 ramos; valida evidências"]
+    finance["Componente<br/>Finance<br/>Nó Python determinístico<br/>Cenários, alocação e Decimal"]
+    challenger["Componente<br/>Challenger<br/>Nó Python + síntese opcional<br/>Regras; riscos e informação ausente"]
+    recommend["Componente<br/>Recommendation<br/>Nó / Pydantic<br/>Cenário admissível e valores validados"]
+    approval["Componente<br/>Human approval<br/>Nó terminal / Pydantic<br/>pending; sem executar ação"]
+    state["Armazenamento<br/>WorkflowState<br/>Estado Pydantic em memória<br/>Canais por papel; não é checkpoint"]
+  end
+  task -->|"Invoca grafo"| supervisor
+  supervisor -->|"Fan-out validado"| special
+  special -->|"Todos os ramos / concluídos"| join
+  join -->|"Evidência válida"| finance
+  finance -->|"Cenários calculados"| challenger
+  challenger -->|"Cenário admissível"| recommend
+  recommend -->|"Contrato válido"| approval
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class task component;
+  class supervisor component;
+  class special component;
+  class join component;
+  class finance component;
+  class challenger component;
+  class recommend component;
+  class approval component;
+  class state store;

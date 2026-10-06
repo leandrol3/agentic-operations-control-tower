@@ -1,0 +1,29 @@
+flowchart TB
+  %% C3 · Componentes da API / consultas — Medir antes de recomendar
+  %% Escopo: Módulos Python na API; não serviços implantáveis separados
+  subgraph scope["Escopo da vista"]
+    routes["Componente<br/>Rotas FastAPI<br/>api/app + control_plane/api<br/>Submissão e consultas tipadas"]
+    cap["Componente<br/>IncidentCapability<br/>application.py<br/>Contratos públicos e producer/store"]
+    store["Componente<br/>Store / CorrelatedStore<br/>Python / adaptador de persistência<br/>Acessa PostgreSQL e contexto"]
+    cockpit["Componente<br/>CockpitService<br/>cockpit/presentation.py<br/>Projeções pt-BR; seleção de fonte"]
+    cp["Componente<br/>ControlPlane.evaluate<br/>service + interpretation<br/>Collect, metas, SLOs e tendências"]
+    decision["Componente<br/>Decision Engine<br/>decision_engine.py<br/>Primeira regra aplicável; proposta"]
+  end
+  routes -->|"Invoca / Python"| cap
+  cap -->|"Lê / persiste / Python; SQL no adaptador"| store
+  routes -->|"Rotas cockpit / Python"| cockpit
+  cockpit -->|"Fonte + sinais / Python"| cp
+  cp -->|"Histórico durável / Python; SQL no adaptador"| store
+  cp -->|"Aplica regras / Python"| decision
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class routes component;
+  class cap component;
+  class store component;
+  class cockpit component;
+  class cp component;
+  class decision component;

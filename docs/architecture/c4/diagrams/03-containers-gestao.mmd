@@ -1,0 +1,28 @@
+flowchart TB
+  %% C2 · Containers / vista de gestão — Onde ficam UI, gestão e memória?
+  %% Escopo: Cockpit e armazenamento; API é a mesma da vista operacional
+  subgraph scope["Escopo da vista"]
+    ui["Container lógico<br/>UI no navegador<br/>React / TypeScript<br/>Cadastro, metas, decisões e revisão"]
+    web["Container lógico<br/>Servidor do cockpit<br/>Next.js / Node.js<br/>Assets e proxy /api/*"]
+    api["Container lógico<br/>API de aplicação<br/>Python / FastAPI<br/>Control Plane, Maestro, Compiler"]
+    pg["Armazenamento<br/>Histórico durável<br/>PostgreSQL<br/>Execuções e eventos registrados"]
+    kb["Armazenamento<br/>Segundo Cérebro<br/>Markdown / YAML / JSON<br/>Documentos, proveniência e planos"]
+  end
+  ai["Sistema externo<br/>OpenAI API<br/>HTTPS / respostas estruturadas<br/>Maestro e Compiler em modo real"]
+  ui -->|"Consulta / revisão / HTTP JSON"| web
+  web -->|"Proxy permitido / HTTP JSON"| api
+  api -->|"Lê histórico · SQL"| pg
+  api -->|"Lê e persiste / filesystem local"| kb
+  api -->|"Síntese síncrona / HTTPS se openai"| ai
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class ui container;
+  class web container;
+  class api container;
+  class pg store;
+  class kb store;
+  class ai external;

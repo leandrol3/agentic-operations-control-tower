@@ -1,0 +1,26 @@
+flowchart TB
+  %% Complemento · Fluxo dinâmico — Da proposta ao contexto reutilizável
+  %% Escopo: Interação humana obrigatória; nenhum ACT empresarial
+  measure["Componente<br/>1. Medir e recomendar<br/>Control Plane determinístico<br/>Ex.: Supply 74/90; Intervir"]
+  plan["Componente<br/>2. Pedir plano ao Maestro<br/>UI ou MCP / mesma capability<br/>Hipótese + plano + fontes"]
+  extract["Componente<br/>3. Extrair de execução<br/>UI / HTTP KnowledgeCompiler<br/>Não extrair de melhoria não implantada"]
+  candidate["Armazenamento<br/>4. Candidato pendente<br/>KnowledgeStore / arquivos<br/>Estrutura e referências validadas"]
+  review["Pessoa / papel<br/>5. Revisar conscientemente<br/>Humano / UI / HTTP<br/>Aprovar ou rejeitar, com justificativa"]
+  reuse["Componente<br/>6. Consultar approved<br/>Maestro / retrieval local<br/>Somente fonte e contexto compatíveis"]
+  measure -->|"Pergunta contextual"| plan
+  plan -->|"Próximo gesto / da demo; não automático"| extract
+  extract -->|"Salvar pending_review"| candidate
+  candidate -->|"Disponibilizar / para leitura"| review
+  review -->|"Se aprovado"| reuse
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class measure component;
+  class plan component;
+  class extract component;
+  class candidate store;
+  class review person;
+  class reuse component;

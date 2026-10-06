@@ -1,0 +1,29 @@
+flowchart TB
+  %% C3 · Componentes da API / gestão — Síntese, proposta e conhecimento
+  %% Escopo: Mesmo código reutilizado no processo MCP; Compiler/revisão acessados por HTTP
+  subgraph scope["Escopo da vista"]
+    conv["Componente<br/>Conversations<br/>Python / memória do processo<br/>Contexto e últimas mensagens"]
+    maestro["Componente<br/>Maestro + MaestroTools<br/>Python / contexto estruturado<br/>Lê sinais e conhecimento aprovado"]
+    provider["Componente<br/>StructuredProvider<br/>Mock ou OpenAI / Pydantic<br/>Síntese validada e usage opcional"]
+    compiler["Componente<br/>KnowledgeCompiler<br/>Python / extração estruturada<br/>Execução -&gt; candidato pendente"]
+    kb["Componente<br/>KnowledgeStore<br/>Componente Python / filesystem<br/>Lê/grava Markdown e JSON"]
+  end
+  human["Pessoa / papel<br/>Revisor humano<br/>Pessoa via UI / HTTP<br/>Nome, justificativa e confirmação"]
+  conv -->|"Resolve contexto / e solicita plano"| maestro
+  maestro -->|"Solicita síntese / Contrato estruturado / Python"| provider
+  maestro -->|"Lê approved / salva plano proposto"| kb
+  compiler -->|"Gera draft / mesmo provider"| provider
+  compiler -->|"Persiste candidato / pending_review"| kb
+  human -->|"Aprova / rejeita / via endpoint validado"| kb
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class conv component;
+  class maestro component;
+  class provider component;
+  class compiler component;
+  class kb component;
+  class human person;

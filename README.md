@@ -19,6 +19,7 @@ export OPENAI_MODEL=gpt-4.1-mini
 ```
 
 Abra **http://localhost:3000**. API: 8000; Jaeger: 16686.
+[Arquitetura C4 — PDF, diagramas editáveis e evolução das quatro aulas](docs/architecture/c4/README.md).
 [Runbook principal — seis demos, 240 minutos e navegação pelo cockpit](docs/course/lesson-04-final-runbook.md).
 [Roteiro slide a slide em PDF e comandos copiáveis](docs/course/lesson-04/materials/README.md).
 [Runbook histórico do cockpit](docs/course/lesson-04-cockpit-runbook.md).

@@ -1,0 +1,29 @@
+flowchart TB
+  %% C2 · Containers / vista operacional — Como um incidente é executado?
+  %% Escopo: Containers lógicos do caminho HTTP; MCP detalhado na vista 04
+  subgraph scope["Escopo da vista"]
+    api["Container lógico<br/>API de aplicação<br/>Python / FastAPI<br/>Contratos, submissão e consultas"]
+    redis["Armazenamento<br/>Fila de tarefas<br/>Redis / protocolo Redis<br/>Broker Celery; não guarda o resultado"]
+    worker["Container lógico<br/>Worker do workflow<br/>Python / Celery + LangGraph<br/>Uma task executa o grafo inteiro"]
+    pg["Armazenamento<br/>Store de execuções<br/>PostgreSQL / SQL + JSONB<br/>Identidade, estado, eventos, resultado"]
+    files["Armazenamento<br/>Dados do case<br/>CSV / JSON no filesystem<br/>Tools, políticas e cenários locais"]
+  end
+  ai["Sistema externo<br/>OpenAI API<br/>HTTPS / saída Pydantic<br/>Dependência externa opcional"]
+  api -->|"Publica task / Redis / JSON"| redis
+  redis -->|"Entrega / redelivery / Redis / JSON"| worker
+  api -->|"Claim e consultas / SQL"| pg
+  worker -->|"Lock, eventos e resultado · SQL"| pg
+  worker -->|"Lê via Tools / arquivos locais"| files
+  worker -->|"Interpreta / sintetiza / HTTPS se openai"| ai
+  classDef person fill:#17334f,stroke:#ffffff,color:#ffffff;
+  classDef system fill:#075985,stroke:#ffffff,color:#ffffff;
+  classDef container fill:#dceef9,stroke:#12334f,color:#12334f;
+  classDef component fill:#ddf3ed,stroke:#16463e,color:#16463e;
+  classDef store fill:#fff0cf,stroke:#624418,color:#624418;
+  classDef external fill:#e5e7eb,stroke:#374151,color:#374151;
+  class api container;
+  class redis store;
+  class worker container;
+  class pg store;
+  class files store;
+  class ai external;
