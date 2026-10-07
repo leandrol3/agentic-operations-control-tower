@@ -1,4 +1,44 @@
-# Aula 4 — candidato lesson-04-cockpit
+# NovaCore — Agentic Operations Control Tower
+
+## Por onde começar
+
+Use **`main` para a versão consolidada**. Para reproduzir exatamente uma etapa, use a tag indicada abaixo. As branches das aulas são preservadas para comparação; não recebem automaticamente as evoluções de `main`.
+
+| Aula / etapa | Objetivo | Branch preservada | Tag imutável | Runbook atual | PDF no repositório |
+| --- | --- | --- | --- | --- | --- |
+| 1 — start | Infraestrutura e capabilities determinísticas | — | `lesson-01-start` | [Aula 1](docs/course/lesson-01-runbook.md) | Não publicado |
+| 1 — complete | Colaboração, LangGraph, LLM e aprovação humana | `codex/lesson-01-complete` | `lesson-01-complete` | [Aula 1](docs/course/lesson-01-runbook.md) | Não publicado |
+| 2 — complete | Fila, workers, estado durável e continuidade | `codex/lesson-02-complete` | `lesson-02-complete` | [Aula 2](docs/course/lesson-02-runbook.md) | Não publicado |
+| 3 — start | API e implantação local | `codex/lesson-03-start` | `lesson-03-start` | [Aula 3](docs/course/lesson-03-runbook.md) | Não publicado |
+| 3 — complete | Observabilidade e correlação distribuída | `codex/lesson-03-complete` | `lesson-03-complete` | [Aula 3](docs/course/lesson-03-runbook.md) | Não publicado |
+| 4 — start | MCP e cadastro da workforce | `codex/lesson-04-start` | `lesson-04-start` | [Start](docs/course/lesson-04-start-runbook.md) | — |
+| 4 — complete | Medição e propostas do Control Plane | `codex/lesson-04-complete` | `lesson-04-complete` | [Complete](docs/course/lesson-04-complete-runbook.md) | — |
+| 4 — cockpit | UI, Maestro, conhecimento e revisão humana | `codex/lesson-04-cockpit` | `lesson-04-cockpit` | [Seis demos](docs/course/lesson-04-final-runbook.md) | [Roteiro do professor](docs/course/lesson-04/materials/Aula-4-Roteiro-do-Professor-Slide-a-Slide.pdf) |
+
+Os links apontam para a documentação desta revisão. Tags preservam também a documentação histórica, que pode não conter correções recentes. Para a Demo 6, use o comando de localização do Codex no runbook atual. Os PDFs das Aulas 1–3 não estão versionados neste repositório.
+
+**Aula 2 start:** ainda sem tag confirmada. A branch local com esse nome aponta para a Aula 1; não a use como checkpoint validado da Aula 2. A tag `lesson-01-start` original também é anterior à revisão guided-demo (`171c324`), preservada sem mover a tag.
+
+[Arquitetura C4](docs/architecture/c4/README.md) · [Modelo PostgreSQL](docs/architecture/data-model/README.md) · [Política de branches e checkpoints](docs/course/repository-workflow.md)
+
+### Abrir um checkpoint
+
+Com as alterações locais já salvas em commit, execute, por exemplo:
+
+```bash
+git fetch origin --tags
+git switch --detach lesson-04-cockpit
+```
+
+O modo detached serve para explorar o checkpoint sem alterar uma branch. Para iniciar trabalho novo, com o checkout limpo:
+
+```bash
+git switch main
+git pull --ff-only
+git switch -c codex/nome-da-melhoria
+```
+
+## Executar a versão atual
 
 **L3 Control Plane · LAB NovaCore**: cockpit pt-BR para identificar, medir, interpretar,
 recomendar e preservar conhecimento. Next.js separado do core Python, Maestro com fontes,

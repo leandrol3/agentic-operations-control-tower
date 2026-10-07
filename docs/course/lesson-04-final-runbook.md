@@ -623,14 +623,26 @@ Em outro terminal, na raiz do repositório:
 ```bash
 CODEX_BIN="$(command -v codex || true)"
 if [ -z "$CODEX_BIN" ]; then
-  CODEX_BIN=/Applications/ChatGPT.app/Contents/Resources/codex
+  for candidate in \
+    /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex \
+    /Applications/Codex.app/Contents/Resources/codex \
+    /Applications/ChatGPT.app/Contents/Resources/codex; do
+    if [ -x "$candidate" ]; then
+      CODEX_BIN="$candidate"
+      break
+    fi
+  done
 fi
+if [ ! -x "$CODEX_BIN" ]; then
+  printf '%s\n' 'Codex CLI não encontrado. Interrompa este bloco e confira a instalação.'
+else
 "$CODEX_BIN" --version
 "$CODEX_BIN" login status
 "$CODEX_BIN" mcp add novacore-maestro -- /bin/bash "$PWD/scripts/start_maestro_mcp.sh"
 "$CODEX_BIN" mcp get novacore-maestro
 "$CODEX_BIN" mcp list
 "$CODEX_BIN"
+fi
 ```
 
 Se `login status` indicar ausência de autenticação, executar `"$CODEX_BIN" login` fora da projeção,
