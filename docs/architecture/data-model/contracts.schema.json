@@ -1,0 +1,1035 @@
+{
+  "DurableExecution": {
+    "$defs": {
+      "Approval": {
+        "additionalProperties": false,
+        "properties": {
+          "required": {
+            "const": true,
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "status": {
+            "const": "pending",
+            "default": "pending",
+            "title": "Status",
+            "type": "string"
+          },
+          "authority": {
+            "enum": [
+              "operations_manager",
+              "manager"
+            ],
+            "title": "Authority",
+            "type": "string"
+          },
+          "actions_executed": {
+            "const": false,
+            "default": false,
+            "title": "Actions Executed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "authority"
+        ],
+        "title": "Approval",
+        "type": "object"
+      },
+      "FinalResult": {
+        "additionalProperties": false,
+        "properties": {
+          "reference_case_id": {
+            "const": "INCIDENT-001",
+            "default": "INCIDENT-001",
+            "title": "Reference Case Id",
+            "type": "string"
+          },
+          "mode": {
+            "default": "mock",
+            "enum": [
+              "mock",
+              "openai",
+              "degraded"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "outcome": {
+            "default": "recommendation",
+            "enum": [
+              "recommendation",
+              "degraded_recommendation",
+              "human_review_required"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Recommendation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "approval": {
+            "$ref": "#/$defs/Approval"
+          }
+        },
+        "required": [
+          "approval"
+        ],
+        "title": "FinalResult",
+        "type": "object"
+      },
+      "Recommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "incident_id": {
+            "title": "Incident Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "recommended_action": {
+            "minLength": 1,
+            "title": "Recommended Action",
+            "type": "string"
+          },
+          "estimated_cost_brl": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Estimated Cost Brl"
+          },
+          "avoided_penalty_brl": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Avoided Penalty Brl"
+          },
+          "customer_delay_days": {
+            "minimum": 0,
+            "title": "Customer Delay Days",
+            "type": "integer"
+          },
+          "confidence": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "approval_required": {
+            "const": true,
+            "default": true,
+            "title": "Approval Required",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "incident_id",
+          "severity",
+          "recommended_action",
+          "estimated_cost_brl",
+          "avoided_penalty_brl",
+          "customer_delay_days",
+          "confidence",
+          "risks"
+        ],
+        "title": "Recommendation",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "execution_id": {
+        "format": "uuid",
+        "title": "Execution Id",
+        "type": "string"
+      },
+      "incident_id": {
+        "minLength": 1,
+        "title": "Incident Id",
+        "type": "string"
+      },
+      "status": {
+        "default": "queued",
+        "enum": [
+          "queued",
+          "running",
+          "completed",
+          "failed"
+        ],
+        "title": "Status",
+        "type": "string"
+      },
+      "started_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Started At"
+      },
+      "completed_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Completed At"
+      },
+      "current_step": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Current Step"
+      },
+      "attempt": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Attempt",
+        "type": "integer"
+      },
+      "worker_id": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Worker Id"
+      },
+      "error": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Error"
+      },
+      "workflow_status": {
+        "anyOf": [
+          {
+            "enum": [
+              "awaiting_approval",
+              "blocked"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Workflow Status"
+      },
+      "idempotency_key": {
+        "minLength": 1,
+        "title": "Idempotency Key",
+        "type": "string"
+      },
+      "result": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/FinalResult"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "llm_mode": {
+        "default": "mock",
+        "enum": [
+          "mock",
+          "openai"
+        ],
+        "title": "Llm Mode",
+        "type": "string"
+      },
+      "duration_ms": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Duration Ms"
+      }
+    },
+    "required": [
+      "execution_id",
+      "incident_id",
+      "idempotency_key"
+    ],
+    "title": "DurableExecution",
+    "type": "object"
+  },
+  "DurableEvent": {
+    "additionalProperties": false,
+    "properties": {
+      "execution_id": {
+        "format": "uuid",
+        "title": "Execution Id",
+        "type": "string"
+      },
+      "incident_id": {
+        "minLength": 1,
+        "title": "Incident Id",
+        "type": "string"
+      },
+      "agent_id": {
+        "minLength": 1,
+        "title": "Agent Id",
+        "type": "string"
+      },
+      "event_type": {
+        "minLength": 1,
+        "title": "Event Type",
+        "type": "string"
+      },
+      "timestamp": {
+        "format": "date-time",
+        "title": "Timestamp",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "queued",
+          "running",
+          "completed",
+          "failed"
+        ],
+        "title": "Status",
+        "type": "string"
+      },
+      "duration_ms": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Duration Ms"
+      },
+      "sequence": {
+        "minimum": 1,
+        "title": "Sequence",
+        "type": "integer"
+      },
+      "attempt": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Attempt",
+        "type": "integer"
+      },
+      "input_tokens": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Input Tokens"
+      },
+      "output_tokens": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Output Tokens"
+      },
+      "estimated_cost": {
+        "anyOf": [
+          {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Estimated Cost"
+      },
+      "quality_score": {
+        "anyOf": [
+          {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Quality Score"
+      },
+      "business_outcome": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Business Outcome"
+      },
+      "detail": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Detail"
+      }
+    },
+    "required": [
+      "execution_id",
+      "incident_id",
+      "agent_id",
+      "event_type",
+      "timestamp",
+      "status",
+      "sequence"
+    ],
+    "title": "DurableEvent",
+    "type": "object"
+  },
+  "IncidentEnvelope": {
+    "additionalProperties": false,
+    "properties": {
+      "incident_id": {
+        "minLength": 1,
+        "title": "Incident Id",
+        "type": "string"
+      },
+      "incident_type": {
+        "enum": [
+          "supplier_delay",
+          "production_deviation",
+          "logistics_delay",
+          "sla_risk",
+          "inventory_shortage"
+        ],
+        "title": "Incident Type",
+        "type": "string"
+      },
+      "plant": {
+        "minLength": 1,
+        "title": "Plant",
+        "type": "string"
+      },
+      "severity": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "title": "Severity",
+        "type": "string"
+      },
+      "created_at": {
+        "format": "date-time",
+        "title": "Created At",
+        "type": "string"
+      },
+      "business_priority": {
+        "maximum": 5,
+        "minimum": 1,
+        "title": "Business Priority",
+        "type": "integer"
+      },
+      "payload": {
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "title": "Payload",
+        "type": "object"
+      }
+    },
+    "required": [
+      "incident_id",
+      "incident_type",
+      "plant",
+      "severity",
+      "created_at",
+      "business_priority",
+      "payload"
+    ],
+    "title": "IncidentEnvelope",
+    "type": "object"
+  },
+  "TaskOptions": {
+    "additionalProperties": false,
+    "properties": {
+      "demo_delay_ms": {
+        "default": 0,
+        "maximum": 30000,
+        "minimum": 0,
+        "title": "Demo Delay Ms",
+        "type": "integer"
+      },
+      "fail_specialist": {
+        "anyOf": [
+          {
+            "enum": [
+              "supply",
+              "production",
+              "logistics"
+            ],
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Fail Specialist"
+      },
+      "fail_always": {
+        "default": false,
+        "title": "Fail Always",
+        "type": "boolean"
+      },
+      "llm_mode": {
+        "default": "mock",
+        "enum": [
+          "mock",
+          "openai"
+        ],
+        "title": "Llm Mode",
+        "type": "string"
+      },
+      "llm_model": {
+        "default": "gpt-4.1-mini",
+        "minLength": 1,
+        "title": "Llm Model",
+        "type": "string"
+      },
+      "llm_failure": {
+        "default": "none",
+        "enum": [
+          "none",
+          "timeout"
+        ],
+        "title": "Llm Failure",
+        "type": "string"
+      },
+      "fallback": {
+        "default": "human",
+        "enum": [
+          "human",
+          "deterministic_reference"
+        ],
+        "title": "Fallback",
+        "type": "string"
+      }
+    },
+    "title": "TaskOptions",
+    "type": "object"
+  },
+  "ExecutionContext": {
+    "additionalProperties": false,
+    "properties": {
+      "trace_id": {
+        "pattern": "^[0-9a-f]{32}$",
+        "title": "Trace Id",
+        "type": "string"
+      },
+      "correlation_id": {
+        "pattern": "^[a-zA-Z0-9._:-]{1,64}$",
+        "title": "Correlation Id",
+        "type": "string"
+      },
+      "execution_id": {
+        "anyOf": [
+          {
+            "format": "uuid",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Execution Id"
+      },
+      "incident_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Incident Id"
+      },
+      "worker_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Worker Id"
+      }
+    },
+    "title": "ExecutionContext",
+    "type": "object"
+  },
+  "FinalResult": {
+    "$defs": {
+      "Approval": {
+        "additionalProperties": false,
+        "properties": {
+          "required": {
+            "const": true,
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "status": {
+            "const": "pending",
+            "default": "pending",
+            "title": "Status",
+            "type": "string"
+          },
+          "authority": {
+            "enum": [
+              "operations_manager",
+              "manager"
+            ],
+            "title": "Authority",
+            "type": "string"
+          },
+          "actions_executed": {
+            "const": false,
+            "default": false,
+            "title": "Actions Executed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "authority"
+        ],
+        "title": "Approval",
+        "type": "object"
+      },
+      "Recommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "incident_id": {
+            "title": "Incident Id",
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "recommended_action": {
+            "minLength": 1,
+            "title": "Recommended Action",
+            "type": "string"
+          },
+          "estimated_cost_brl": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Estimated Cost Brl"
+          },
+          "avoided_penalty_brl": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Avoided Penalty Brl"
+          },
+          "customer_delay_days": {
+            "minimum": 0,
+            "title": "Customer Delay Days",
+            "type": "integer"
+          },
+          "confidence": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "risks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Risks",
+            "type": "array"
+          },
+          "approval_required": {
+            "const": true,
+            "default": true,
+            "title": "Approval Required",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "incident_id",
+          "severity",
+          "recommended_action",
+          "estimated_cost_brl",
+          "avoided_penalty_brl",
+          "customer_delay_days",
+          "confidence",
+          "risks"
+        ],
+        "title": "Recommendation",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "reference_case_id": {
+        "const": "INCIDENT-001",
+        "default": "INCIDENT-001",
+        "title": "Reference Case Id",
+        "type": "string"
+      },
+      "mode": {
+        "default": "mock",
+        "enum": [
+          "mock",
+          "openai",
+          "degraded"
+        ],
+        "title": "Mode",
+        "type": "string"
+      },
+      "outcome": {
+        "default": "recommendation",
+        "enum": [
+          "recommendation",
+          "degraded_recommendation",
+          "human_review_required"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      },
+      "model": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Model"
+      },
+      "reason": {
+        "anyOf": [
+          {
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Reason"
+      },
+      "recommendation": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Recommendation"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "approval": {
+        "$ref": "#/$defs/Approval"
+      }
+    },
+    "required": [
+      "approval"
+    ],
+    "title": "FinalResult",
+    "type": "object"
+  },
+  "Recommendation": {
+    "additionalProperties": false,
+    "properties": {
+      "incident_id": {
+        "title": "Incident Id",
+        "type": "string"
+      },
+      "severity": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "Severity",
+        "type": "string"
+      },
+      "recommended_action": {
+        "minLength": 1,
+        "title": "Recommended Action",
+        "type": "string"
+      },
+      "estimated_cost_brl": {
+        "anyOf": [
+          {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+            "type": "string"
+          }
+        ],
+        "title": "Estimated Cost Brl"
+      },
+      "avoided_penalty_brl": {
+        "anyOf": [
+          {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+            "type": "string"
+          }
+        ],
+        "title": "Avoided Penalty Brl"
+      },
+      "customer_delay_days": {
+        "minimum": 0,
+        "title": "Customer Delay Days",
+        "type": "integer"
+      },
+      "confidence": {
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Confidence",
+        "type": "number"
+      },
+      "risks": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Risks",
+        "type": "array"
+      },
+      "approval_required": {
+        "const": true,
+        "default": true,
+        "title": "Approval Required",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "incident_id",
+      "severity",
+      "recommended_action",
+      "estimated_cost_brl",
+      "avoided_penalty_brl",
+      "customer_delay_days",
+      "confidence",
+      "risks"
+    ],
+    "title": "Recommendation",
+    "type": "object"
+  },
+  "Approval": {
+    "additionalProperties": false,
+    "properties": {
+      "required": {
+        "const": true,
+        "default": true,
+        "title": "Required",
+        "type": "boolean"
+      },
+      "status": {
+        "const": "pending",
+        "default": "pending",
+        "title": "Status",
+        "type": "string"
+      },
+      "authority": {
+        "enum": [
+          "operations_manager",
+          "manager"
+        ],
+        "title": "Authority",
+        "type": "string"
+      },
+      "actions_executed": {
+        "const": false,
+        "default": false,
+        "title": "Actions Executed",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "authority"
+    ],
+    "title": "Approval",
+    "type": "object"
+  }
+}

@@ -1,0 +1,22 @@
+erDiagram
+    ct_executions ||--o{ ct_events : "registra"
+    ct_executions ||--o| ct_execution_context : "possui contexto opcional"
+    ct_executions {
+        uuid execution_id PK
+        text idempotency_key UK
+        jsonb document
+        jsonb envelope
+        jsonb options
+        integer attempts
+        integer event_sequence
+        timestamptz created_at
+    }
+    ct_events {
+        uuid execution_id PK,FK
+        integer sequence PK
+        jsonb document
+    }
+    ct_execution_context {
+        uuid execution_id PK,FK
+        jsonb document
+    }
